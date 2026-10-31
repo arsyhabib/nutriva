@@ -24,6 +24,8 @@ Satu baris per permintaan audit. Eksekutor mengisi kolom REQ dan Tanggapan; audi
 | 2026-10-28 | Auditor tetap di Claude Desktop (bukan VS Code) | K-02 |
 | 2026-10-28 | Etik diurus setelah aplikasi siap dan lulus PjBL; dosen verifikator memverifikasi setelah PjBL; TKPI diurus saat kompetisi | K-04, K-05, K-06; menyentuh S0 R02/R06 |
 | 2026-10-28 | "tentukan keputusan untuk saya tanpa mengurangi kualitas dan cakupan kebermanfaatan aplikasi yang akan kita buat, pakai opsi b, etik akan diurus dengan dosen nanti, sekarang kita kerjakan saja aplikasinya dulu" (kutipan pemilik) | `KEPUTUSAN_DAN_JALUR_RILIS.md` v3 §0; ADR-0001. Data nyata hanya melalui profil `lapangan` yang terkunci otorisasi; belum ada penerimaan risiko S0 |
+| 2026-10-31 | Desain: paket **NUTRIVA Rona** dipilih sebagai basis desain. Tinjauan eksekutor: `docs/desain/TINJAUAN_RONA.md` (RN-01…RN-13; perbaikan wajib RN-01, RN-02, RN-03, RN-05 belum dikerjakan) | `TASKLIST.md` §4; batas mutlak `DESIGN_PACKAGE/05` |
+| 2026-10-31 | Commit baseline `50f0c40` di `main` atas permintaan pemilik ("Ya, commit"). Desain HTML dan `DESIGN_PACKAGE/` tidak di-commit | AUD-0006-07 |
 
 ## Catatan perubahan paket auditor
 | Tanggal | Versi | Perubahan |

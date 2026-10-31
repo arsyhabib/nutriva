@@ -46,7 +46,7 @@ Diperbarui: 2026-10-28. Status: `[x]` selesai · `[~]` berjalan · `[ ]` belum.
 - [x] REQ-0006 → RPT-0006 **DITOLAK** (AUD-0006-01 S0: gerbang `lapangan` tidak ada). RSP-0006 menanggapi semua temuan.
 - [~] REQ-0007 (verifikasi ulang M0) **menunggu RPT-0007**. **M1a belum boleh dimulai.**
 - [~] REQ-0008 (celah `{} as TokenData` ditutup; ADR-0004 dan ADR-0005 diperbaiki) **menunggu audit**. Belum ada commit git (menunggu permintaan pemilik)
-- [ ] Berkas HTML desain di root (`NUTRIVA Lumen.html`, `NUTRIVA Sistem Desain.html`) belum ditinjau eksekutor
+- [x] Berkas HTML desain di root ditinjau untuk arah Rona saja (`docs/desain/TINJAUAN_RONA.md`). `NUTRIVA Lumen.html`, `NUTRIVA Sistem Desain.html`, dan arah lain (Mutiara, Bening) belum ditinjau dan tidak dipakai
 - [ ] Menunggu pemilik: kalimat konfirmasi Opsi A; berkas sumber primer di `sumber/` (Buku KIA 2024, pedoman TTD ibu hamil); izin mengunduh tabel WHO yang dapat diproses mesin; pertanyaan persetujuan pembimbing untuk umpan balik kader
 - [x] Keputusan pemilik dicatat di `KEPUTUSAN_DAN_JALUR_RILIS.md`: D1–D6 disetujui; etik, dosen, TKPI setelah PjBL/kompetisi; dua jalur rilis V-PJBL dan V-KOMPETISI
 - [ ] **Keputusan pemilik D1–D6** (RSP-0002): pemangkasan P0 untuk M1, penundaan K/radar/kader, slot dulu (LP ditunda), bbox/PDF.js ke P2, fokus skripsi pada A03+B01–B03, menu sebagai inti
@@ -59,7 +59,9 @@ Diperbarui: 2026-10-28. Status: `[x]` selesai · `[~]` berjalan · `[ ]` belum.
 
 ## 4a. Paket brief untuk Claude Design (2026-10-28)
 - [x] `DESIGN_PACKAGE/` (BRIEF_RINGKAS + 00–07 + NUTRIVA_BRIEF_LENGKAP) dan `DESIGN_PACKAGE.zip` dibuat: kebebasan penuh (tiga tingkat: mutlak/arah pemilik/bebas), pengguna, alur sebagai tugas bukan tata letak, data contoh sintetis, 23 batas mutlak, proyeksi pertumbuhan, kriteria evaluasi
-- [ ] Pemilik memakai paket di Claude Design; hasil desain dibawa kembali untuk ditimbang di sesi desain (tinjauan A-UX oleh auditor setelah ada tampilan)
+- [x] Pemilik memilih paket **NUTRIVA Rona** sebagai basis desain (2026-10-31). Tinjauan eksekutor: `docs/desain/TINJAUAN_RONA.md`.
+- [ ] Perbaikan Rona sebelum dipakai: RN-01 (label prototipe persis), RN-02 (catatan internal di UI), RN-03 (LMS salah atribusi), RN-05 (status "DIVERIFIKASI"). Dikerjakan di sesi desain, belum dimulai
+- [ ] Keputusan pemilik atas Rona: RN-07 (nama anak contoh), RN-08 (istilah status), RN-10 (tafsiran kontras dan tema Terik), RN-11 (Lab Fisika)
 - Catatan: paket **tidak memuat** palet/gaya; arahan pemilik (modern, minimalis, kontras semi-kuat konsisten, interaktif, gerak relevan, baru) dicantumkan sebagai aspirasi, bukan resep
 
 ## 4. Jalur DESAIN dan ESTETIKA (T7) — sesi khusus penyempurnaan dijadwalkan nanti
