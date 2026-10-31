@@ -1,0 +1,31 @@
+# Dependensi dan hasil build
+node_modules/
+dist/
+coverage/
+*.log
+
+# Rahasia dan konfigurasi lokal
+.env
+.env.*
+otorisasi.lokal.json
+
+# Sumber berhak cipta atau berisi data pribadi (diisi pemilik, tidak untuk repositori)
+sumber/*
+!sumber/README.md
+
+# Berkas sumber berhak cipta dalam bentuk apa pun tidak boleh masuk repositori (AUD-0006-06)
+*.pdf
+*.docx
+*.xlsx
+**/sumber2*/
+
+# Artefak turunan
+DESIGN_PACKAGE.zip
+
+# Arsip aplikasi lama (tidak dipakai, tidak diimpor)
+NUTRIVA_V8_Source_Lengkap.zip
+audit/evidence/legacy_v8/
+
+# Berkas sistem
+.DS_Store
+Thumbs.db

@@ -1,0 +1,17 @@
+{
+  "sintetis": true,
+  "asal": "dibuat-pengembang",
+  "keterangan": "Contoh rekaan: alergi telur dan anggaran kecil",
+  "usia_bulan": 18,
+  "jenis_kelamin": "laki-laki",
+  "berat_kg": 10.2,
+  "panjang_cm": 80.0,
+  "posisi_ukur": "berbaring",
+  "status_asi": "tidak_menyusu",
+  "prematur": false,
+  "bengkak_bilateral": false,
+  "kondisi_khusus": false,
+  "usia_pasti": true,
+  "alergi": ["telur"],
+  "anggaran_harian_rp": 8000
+}

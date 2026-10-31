@@ -1,0 +1,21 @@
+{
+  "versi": "0.0.1",
+  "klaim": [
+    {
+      "id": "KL-TTD-DOSIS",
+      "tipe": "nilai",
+      "pernyataan": "Kandungan dan dosis tablet tambah darah (besi elemental dan asam folat). DIKARANTINA: aplikasi tidak memuat angka dosis (keputusan T-10; AUD-0003-02).",
+      "status": "dikarantina",
+      "tingkat": "A",
+      "sumber": []
+    },
+    {
+      "id": "KL-TTD-JUMLAH-HAMIL",
+      "tipe": "nilai",
+      "pernyataan": "Jumlah minimal tablet tambah darah selama kehamilan. DIKARANTINA: belum terbaca dari sumber primer (AUD-0003-02).",
+      "status": "dikarantina",
+      "tingkat": "A",
+      "sumber": []
+    }
+  ]
+}
