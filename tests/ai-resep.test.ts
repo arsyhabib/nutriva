@@ -85,12 +85,19 @@ describe("mintaResepBergambar", () => {
     expect(g["model"]).toBe("openai/gpt-image-2");
     expect(g["aspect_ratio"]).toBe("3:2");
   });
-  it("teks ditolak validator: resep cadangan tampil, gambar tetap ada", async () => {
-    const { f } = pasangan({ teks: () => new Response(JSON.stringify({ choices: [{ message: { content: BAIK + "\nTambahkan madu." }, finish_reason: "stop" }] })) });
+  it("tanpa penyaring: teks AI tampil apa adanya, gambar tetap ada", async () => {
+    const aneh = BAIK + "\nBoleh ditambah bawang putih sedikit.";
+    const { f } = pasangan({ teks: () => new Response(JSON.stringify({ choices: [{ message: { content: aneh }, finish_reason: "stop" }] })) });
+    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
+    expect(h.resep.sumber).toBe("ai");
+    expect(h.resep.teks).toContain("bawang putih");
+    expect(h.gambar.ok).toBe(true);
+  });
+  it("keluaran kosong dari model jatuh ke resep cadangan", async () => {
+    const { f } = pasangan({ teks: () => new Response(JSON.stringify({ choices: [{ message: { content: "" }, finish_reason: "stop" }] })) });
     const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
     expect(h.resep.sumber).toBe("templat");
-    expect(h.resep.alasan).toMatch(/^ditolak_/);
-    expect(h.gambar.ok).toBe(true);
+    expect(h.resep.alasan).toBe("keluaran_kosong");
   });
   it("gambar gagal: resep AI tetap tampil", async () => {
     const { f } = pasangan({ gambar: () => new Response("{}", { status: 402 }) });

@@ -13,6 +13,12 @@ export interface HasilPenjelasan {
 /** Model bawaan dan alamat penyedia. Penyedia selalu OpenRouter. */
 export const MODEL_AI_BAWAAN = "anthropic/claude-haiku-5.5";
 export const URL_OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
+/**
+ * Penyaring keluaran AI (validator) pada jalur kunci sendiri/bawaan. Dimatikan atas keputusan pemilik: teks AI
+ * ditampilkan apa adanya (tetap dirender aman oleh mesin markdown) dengan tanda "dibuat AI, bisa keliru".
+ * Mutu dijaga lewat prompt sistem. Ubah ke true untuk menghidupkan kembali penyaring.
+ */
+export const FILTER_KELUARAN_AI = false;
 export const URL_OPENROUTER_KUNCI = "https://openrouter.ai/api/v1/key";
 
 export interface KunciSendiri {
@@ -29,6 +35,8 @@ export interface OpsiKlien {
   fetchFn?: typeof fetch;
   /** Batas waktu klien (ms). Harus sedikit di atas batas Worker agar Worker yang memutus lebih dulu. */
   batasMs?: number;
+  /** Paksa menyaring keluaran (default: FILTER_KELUARAN_AI). */
+  saring?: boolean;
 }
 
 // klaim: n/a — batas waktu jaringan klien (milidetik), keputusan rekayasa K-08, bukan konstanta ilmiah
@@ -59,8 +67,8 @@ export async function mintaPenjelasan(muatan: MuatanAi, opsi: OpsiKlien = {}): P
             { role: "system", content: PROMPT_SISTEM },
             { role: "user", content: susunPesan(sah.data) },
           ],
-          max_tokens: 350,
-          temperature: 0.2,
+          max_tokens: 800,
+          temperature: 0.3,
           provider: { data_collection: "deny" },
         }),
         signal: kendali.signal,
@@ -83,10 +91,14 @@ export async function mintaPenjelasan(muatan: MuatanAi, opsi: OpsiKlien = {}): P
     let teks: unknown;
     if (kunci) {
       const h = badan as { choices?: { message?: { content?: unknown }; finish_reason?: unknown }[] };
-      if (h?.choices?.[0]?.finish_reason === "length") return templat("keluaran_terpotong");
+      if (h?.choices?.[0]?.finish_reason === "length" && (opsi.saring ?? FILTER_KELUARAN_AI)) return templat("keluaran_terpotong");
       teks = h?.choices?.[0]?.message?.content;
     } else {
       teks = typeof badan === "object" && badan !== null ? (badan as { teks?: unknown }).teks : undefined;
+    }
+    if (kunci && !(opsi.saring ?? FILTER_KELUARAN_AI)) {
+      if (typeof teks !== "string" || teks.trim().length < 5) return templat("keluaran_kosong");
+      return { sumber: "ai", teks: teks.replace(/\p{Cf}/gu, "").trim().slice(0, 6000) };
     }
     const v = validasiKeluaranAi(teks, sah.data);
     if (!v.ok) return templat("ditolak_" + v.alasan.join("+"));

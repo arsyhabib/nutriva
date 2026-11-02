@@ -1000,7 +1000,14 @@ export class LayarRona {
         if (sheetOpen) lm.setAttribute("data-detent", sheetDetent);
         else lm.removeAttribute("data-detent");
         if (sheetOpen) {
+          // Lembar yang tetap terbuka (mis. mencentang bagian ekspor) harus mempertahankan posisi gulirnya.
+          const gulirLama = this.lembarSebelumnya ? lm.querySelector<HTMLElement>(".lembar__isi") : null;
+          const posisiLembar = gulirLama ? gulirLama.scrollTop : 0;
           lm.innerHTML = lembarHtml;
+          if (posisiLembar > 0) {
+            const gulirBaru = lm.querySelector<HTMLElement>(".lembar__isi");
+            if (gulirBaru) gulirBaru.scrollTop = posisiLembar;
+          }
           this.htmlLembarTerakhir = lembarHtml;
           if (this.waktuBersihLembar) { clearTimeout(this.waktuBersihLembar); this.waktuBersihLembar = null; }
         } else if (lm.innerHTML !== "" && this.waktuBersihLembar === null) {
