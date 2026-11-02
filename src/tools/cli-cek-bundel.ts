@@ -3,6 +3,13 @@ import { join } from "node:path";
 
 const BATAS_BYTE = 1.5 * 1024 * 1024;
 const DIR = "dist";
+const TERLARANG = [
+  'id="rona-physics"',
+  'id="rona-app"',
+  'id="rona-exhibition"',
+  'id="rona-export"',
+  'id="rona-verify"',
+];
 
 function semua(d: string): string[] {
   return readdirSync(d).flatMap((n) => {
@@ -24,5 +31,15 @@ console.log(`Ukuran ${DIR}/: ${total} byte (${(total / 1024).toFixed(1)} KiB) da
 if (total > BATAS_BYTE) {
   console.error("cek:bundel GAGAL — melebihi 1,5 MB (sebelum gzip).");
   process.exit(1);
+}
+for (const p of berkas) {
+  if (!/\.(html|js|css|mjs)$/i.test(p)) continue;
+  const isi = readFileSync(p, "utf8");
+  for (const t of TERLARANG) {
+    if (isi.includes(t)) {
+      console.error(`cek:bundel GAGAL — penanda terlarang ${t} ditemukan di ${p}`);
+      process.exit(1);
+    }
+  }
 }
 console.log("cek:bundel OK");

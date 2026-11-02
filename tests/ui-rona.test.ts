@@ -170,6 +170,44 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
     );
   });
 
+  it("memuat arsitektur visual autentik Rona (.hp, .sutra-bg, .bejana__kanvas, .lembar 3-detent, .z-meter__pin, inspeksi bahan & strata ASI/MPASI)", () => {
+    const akar = buatAkarPalsu();
+    const app = new LayarRona(akar, { presetAwal: "A", layarAwal: "kolam" });
+    app.pasang();
+
+    const htmlKolam = app.ambilHtml();
+    expect(htmlKolam).toContain('class="hp"');
+    expect(htmlKolam).toContain('class="sutra-bg"');
+    expect(htmlKolam).toContain('class="tetes-layer"');
+    expect(htmlKolam).toContain('class="bejana__kanvas"');
+    expect(htmlKolam).toContain('data-bejana-canvas="besi_mg"');
+
+    // Toggle Strata ASI vs MPASI
+    expect(app.ambilState().showStrata).toBe(true);
+    app.toggleStrata();
+    expect(app.ambilState().showStrata).toBe(false);
+
+    // Buka lembar rincian Bejana Nektar
+    app.bukaLembarBejana("besi_mg");
+    expect(app.ambilHtml()).toContain('data-detent="half"');
+    expect(app.ambilHtml()).toContain("Urutan Kontribusi Bahan pada Menu Hari Ini");
+
+    // Buka lembar inspeksi bahan makanan
+    app.bukaLembarBahan("hati", 10);
+    expect(app.ambilHtml()).toContain("Inspeksi Bahan Pangan");
+    expect(app.ambilHtml()).toContain("Hati ayam rebus");
+
+    // Tutup lembar
+    app.tutupLembar();
+    expect(app.ambilHtml()).not.toContain('data-detent="half"');
+
+    // Mode layar penuh mobile
+    expect(app.ambilState().layoutPenuh).toBe(false);
+    app.toggleLayoutPenuh();
+    expect(app.ambilState().layoutPenuh).toBe(true);
+    expect(app.ambilHtml()).toContain('data-layout="penuh"');
+  });
+
   it("memiliki berkas PWA (manifest.webmanifest & sw.js) dan index.html yang patuh CSP script-src 'self'", () => {
     const rootDir = resolve(__dirname, "..");
     const manifestPath = resolve(rootDir, "public/manifest.webmanifest");

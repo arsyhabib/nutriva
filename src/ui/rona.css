@@ -2280,224 +2280,322 @@ button {
 
 
 /* ==========================================================================
-   TAMBAHAN INTEGRASI MESIN DETERMINISTIK & AI EXPLAINER (V-PJBL 2026)
+   09. CANGKANG APLIKASI MOBILE MATANG & DOCK PENGUJI (ADAPTASI RONA V-PJBL)
+   Menggunakan 100% token asli Rona (--permukaan, --aksen, --t-1, --kaca, dll.)
    ========================================================================== */
 
-.pita-prototipe {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 14px;
-  background: var(--warn-bg);
-  color: var(--warn);
-  border-bottom: 1px solid var(--warn-line);
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  line-height: 1.35;
-}
-
-.kartu-ai {
-  background: var(--surface-elev);
-  border: 1px solid var(--hairline-strong);
-  border-radius: var(--r-lg);
-  padding: var(--s-4);
+.rona-app-shell {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  box-shadow: var(--shadow-1);
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 1.8vw, 22px);
+  z-index: 1;
 }
 
-.kartu-ai__kepala {
+.rona-app-stage {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
 }
 
-.kartu-ai__judul {
+/* Bingkai Ponsel Matang (.hp) di Desktop & Full-Screen Native di Ponsel */
+.rona-app-stage > .hp {
+  width: 416px;
+  height: min(868px, calc(100dvh - 32px));
+  min-height: 620px;
+  transition:
+    width 280ms var(--ease-sutra),
+    height 280ms var(--ease-sutra),
+    border-radius 280ms var(--ease-sutra);
+}
+
+/* Mode Layar Penuh (ketika pengguna mengaktifkan Mode App Penuh atau di layar ponsel) */
+.rona-app-shell[data-layout="penuh"] {
+  padding: 0;
+}
+
+.rona-app-shell[data-layout="penuh"] .rona-app-stage {
+  max-width: 540px;
+  gap: 0;
+}
+
+.rona-app-shell[data-layout="penuh"] .rona-app-stage > .hp {
+  width: 100% !important;
+  max-width: 540px !important;
+  height: 100dvh !important;
+  border-radius: 0 !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 1px solid var(--garis-kuat) !important;
+  border-right: 1px solid var(--garis-kuat) !important;
+}
+
+.rona-app-shell[data-layout="penuh"] .dock-panel {
+  display: none !important;
+}
+
+@media (max-width: 860px) {
+  .dock-panel {
+    display: none !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .rona-app-shell {
+    padding: 0 !important;
+    justify-content: stretch;
+  }
+  .rona-app-stage {
+    max-width: none;
+    height: 100dvh;
+  }
+  .rona-app-stage > .hp {
+    width: 100vw !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .hp__status {
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+  .hp__nav {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Tombol Interaktif di Bilah Status Ponsel (.hp__status-btn) */
+.hp__status-actions {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.hp__status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--r-pil);
+  border: 1px solid var(--garis-kuat);
+  background: var(--permukaan-solid);
+  color: var(--t-1);
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  transition: background-color 160ms, border-color 160ms, transform 120ms;
+}
+
+.hp__status-btn:hover {
+  border-color: var(--aksen);
+  background: var(--aksen-lembut);
+  color: var(--aksen);
+}
+
+.hp__status-btn:active {
+  transform: scale(0.96);
+}
+
+/* Panel Dock Penguji di Desktop (.dock-panel) */
+.dock-panel {
+  width: 348px;
+  max-height: min(868px, calc(100dvh - 32px));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 18px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      115% 95% at var(--lx, var(--cahaya-x, 24%)) var(--ly, var(--cahaya-y, 14%)),
+      var(--kaca-tepi) 0%,
+      transparent 58%
+    ),
+    var(--permukaan);
+  border: 1px solid var(--garis-kuat);
+  box-shadow: var(--bayangan-lembut);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.dock-panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.dock-panel__brand {
   font-family: var(--f-display);
-  font-size: var(--fs-sm);
+  font-size: 1.35rem;
+  line-height: 1.1;
+  color: var(--t-1);
+}
+
+.dock-panel__brand em {
+  color: var(--aksen);
+  font-style: italic;
+}
+
+.dock-panel__sub {
+  font-size: 0.76rem;
+  color: var(--t-2);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.dock-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dock-section__label {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--t-3);
+}
+
+.dock-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.dock-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.dock-btn {
+  min-height: 36px;
+  padding: 6px 9px;
+  border-radius: 11px;
+  border: 1.5px solid var(--garis);
+  background: var(--permukaan-solid);
+  color: var(--t-1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  transition: all 150ms var(--ease-sutra);
+}
+
+.dock-btn small {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  color: var(--t-3);
   font-weight: 600;
-  color: var(--ink);
+}
+
+.dock-btn:hover {
+  border-color: var(--aksen);
+}
+
+.dock-btn.is-active {
+  background: var(--aksen);
+  color: var(--aksen-teks);
+  border-color: var(--aksen);
+}
+
+.dock-btn.is-active small {
+  color: var(--aksen-teks);
+  opacity: 0.9;
+}
+
+/* Kartu Penjelas Bahasa Sederhana (AI & Templat Deterministik) */
+.kartu-ai {
+  position: relative;
+  padding: 13px 14px;
+  border-radius: 18px;
+  background: var(--permukaan-sorot);
+  border: 1.5px solid var(--garis-kuat);
+  box-shadow: inset 0 1px 0 var(--kaca-tepi), 0 4px 14px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .kartu-ai__isi {
-  font-size: var(--fs-sm);
-  line-height: 1.6;
-  color: var(--ink-2);
   padding: 10px 12px;
-  background: var(--bg-2);
-  border-radius: var(--r-md);
-  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: var(--permukaan-solid);
+  border-left: 3.5px solid var(--aksen);
+  font-size: 0.83rem;
+  line-height: 1.54;
+  color: var(--t-1);
+  margin: 0;
 }
 
 .kartu-ai__peringatan {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--warn);
-  background: var(--warn-bg);
-  border: 1px solid var(--warn-line);
-  border-radius: var(--r-sm);
   padding: 8px 10px;
-}
-
-.kartu-ai__aksi {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tab-hari {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.tab-hari__item {
-  flex: 1;
-  min-width: 72px;
-  min-height: 38px;
-  padding: 6px 10px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--hairline-strong);
-  background: var(--surface);
-  color: var(--ink-2);
+  border-radius: 10px;
+  background: var(--s-perhatian-bg);
+  color: var(--s-perhatian-t);
+  border: 1px solid var(--s-perhatian-b);
   font-family: var(--f-mono);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  transition: all var(--dur-1) var(--ease-out);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.42;
 }
 
-.tab-hari__item[aria-selected="true"] {
-  background: var(--accent);
-  color: var(--ink-on-accent);
-  border-color: var(--accent);
-}
-
-.belanja-daftar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.belanja-baris {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  align-items: center;
-  padding: 10px 12px;
-  background: var(--bg-2);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-}
-
-.belanja-baris__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.belanja-baris__nama {
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--ink);
-}
-
-.belanja-baris__meta {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  color: var(--ink-3);
-}
-
-.belanja-baris__kanan {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.input-angka-baris {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.input-angka-kotak {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: var(--bg-2);
-  border: 1px solid var(--hairline-strong);
-  border-radius: var(--r-md);
-  padding: 8px 10px;
-}
-
-.input-angka-kotak label {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-3);
-}
-
-.input-angka-kotak input {
+/* Tabel Ambang SD 7-Kolom (Permenkes 2/2020) di Panel Mode Ahli */
+.tabel-sd-mini {
   width: 100%;
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-sm);
-  background: var(--surface-elev);
-  color: var(--ink);
+  border-collapse: collapse;
   font-family: var(--f-mono);
-  font-size: var(--fs-md);
-  font-weight: 600;
-  padding: 6px 8px;
+  font-size: 9.5px;
+  margin-top: 4px;
+  background: var(--permukaan-solid);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.input-angka-kotak input:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.tabel-sd-mini th,
+.tabel-sd-mini td {
+  padding: 4px 3px;
+  text-align: center;
+  border: 1px solid var(--garis);
 }
 
-.daftar-cek-bahaya {
+.tabel-sd-mini th {
+  background: var(--permukaan-2);
+  color: var(--t-2);
+  font-weight: 700;
+}
+
+.tabel-sd-mini td.is-median {
+  font-weight: 700;
+  color: var(--s-cukup-t);
+  background: var(--s-cukup-bg);
+}
+
+/* Baris Daftar Belanja Kelas Harga */
+.belanja-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: 4px;
 }
 
-.item-cek-bahaya {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--hairline);
-  background: var(--bg-2);
-  cursor: pointer;
-  font-size: var(--fs-xs);
-  color: var(--ink-2);
-}
-
-.item-cek-bahaya[data-aktif="true"] {
-  background: var(--danger-bg);
-  border-color: var(--danger-line);
-  color: var(--danger);
-  font-weight: 600;
-}
-
-.item-cek-bahaya input[type="checkbox"] {
-  accent-color: var(--danger);
-  width: 16px;
-  height: 16px;
-}

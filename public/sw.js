@@ -4,12 +4,12 @@
  * dapat berjalan secara luring (offline-capable). Permintaan ke proxy AI
  * (/v1/jelaskan) tidak pernah disimpan di cache (ADR-0003 & K-08).
  */
-const NAMA_CACHE = "nutriva-inti-v0.1.0";
+const NAMA_CACHE = "nutriva-inti-v0.2.0";
 const ASET_INTI = [
-  "/",
-  "/index.html",
-  "/manifest.webmanifest",
-  "/icon.svg",
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./icon.svg",
 ];
 
 self.addEventListener("install", (event) => {
@@ -56,11 +56,11 @@ self.addEventListener("fetch", (event) => {
       fetch(req)
         .then((res) => {
           const salinan = res.clone();
-          caches.open(NAMA_CACHE).then((c) => c.put("/index.html", salinan));
+          caches.open(NAMA_CACHE).then((c) => c.put("./index.html", salinan));
           return res;
         })
         .catch(() =>
-          caches.match("/index.html").then((r) => r || caches.match("/")),
+          caches.match("./index.html").then((r) => r || caches.match("./")),
         ),
     );
     return;

@@ -6,7 +6,7 @@
     "description": "NUTRIVA: mesin gizi 1000 HPK yang deterministik dan dapat diperiksa (fondasi M0)",
     "scripts": {
         "dev": "vite",
-        "build": "vite build && tsx src/tools/paketkan-single-file.ts",
+        "build": "vite build",
         "preview": "vite preview",
         "typecheck": "tsc --noEmit",
         "test": "vitest run",

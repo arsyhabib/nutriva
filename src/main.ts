@@ -13,7 +13,7 @@ function daftarkanServiceWorker(): void {
   if (typeof window === "undefined" || typeof navigator === "undefined") return;
   if (!("serviceWorker" in navigator)) return;
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
       // Abaikan secara senyap pada lingkungan pratinjau/pengujian tanpa HTTPS
     });
   });

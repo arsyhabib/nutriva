@@ -5,8 +5,8 @@
   "description": "Alat bantu edukasi dan perencanaan MPASI deterministik berbasis Kemenkes 2020 & WHO 2006 (Prototipe Akademik V-PJBL 2026 — bukan alat medis).",
   "lang": "id",
   "dir": "ltr",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#FAF4EE",
@@ -14,7 +14,7 @@
   "categories": ["education", "health"],
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "./icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
