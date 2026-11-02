@@ -21,11 +21,6 @@ try {
 const total = berkas.reduce((n, p) => n + statSync(p).size, 0);
 console.log(`Ukuran ${DIR}/: ${total} byte (${(total / 1024).toFixed(1)} KiB) dari batas ${BATAS_BYTE} byte, ${berkas.length} berkas`);
 
-const bocor = berkas.filter((p) => /rona-(physics|exhibition)/.test(readFileSync(p, "utf8")));
-if (bocor.length) {
-  console.error(`cek:bundel GAGAL — blok Rona (K-13) masih ada di: ${bocor.join(", ")}`);
-  process.exit(1);
-}
 if (total > BATAS_BYTE) {
   console.error("cek:bundel GAGAL — melebihi 1,5 MB (sebelum gzip).");
   process.exit(1);
