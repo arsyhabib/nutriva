@@ -213,6 +213,9 @@ const ZAT_BEJANA_UTAMA: readonly {
   },
 ];
 
+/** Kata aksi mengikuti masukan terakhir: Ketuk (sentuh) atau Klik (kursor), diatur CSS lewat html[data-masukan]. */
+const TAP = '<span class="tap" data-t="Ketuk" data-k="Klik"></span>';
+
 function fmtId(num: number | null | undefined, desimal = 1): string {
   if (num === null || num === undefined || !Number.isFinite(num)) return "—";
   return num.toFixed(desimal).replace(".", ",");
@@ -254,6 +257,13 @@ function namaSlotWaktu(kode: string): { judul: string; sub: string } {
   return { judul: kode, sub: "" };
 }
 
+/** Kelas ruang berdasar lebar WADAH (bukan perangkat): ringkas <640, sedang <1024, lega ≥1024. Harus sama dengan @container di rona.css. */
+export type RuangTata = "ringkas" | "sedang" | "lega";
+export const BATAS_RUANG = { sedang: 640, lega: 1024 } as const;
+export function ruangDariLebar(lebar: number): RuangTata {
+  return lebar >= BATAS_RUANG.lega ? "lega" : lebar >= BATAS_RUANG.sedang ? "sedang" : "ringkas";
+}
+
 export interface StateLayarRona {
   presetAktif: KodePreset;
   peran: PeranRona;
@@ -264,7 +274,6 @@ export interface StateLayarRona {
   showStrata: boolean;
   modeAhli: boolean;
   tampilkanSemuaZat: boolean;
-  layoutPenuh: boolean;
   teksBesar: boolean;
   daring: boolean;
   aiStatus: HasilPenjelasan | null;
@@ -286,7 +295,8 @@ export class LayarRona {
   private urlWorkerAi: string | undefined;
   private htmlTerakhir = "";
   private sutraAtelier: SutraField | null = null;
-  private sutraHp: SutraField | null = null;
+  private ruang: RuangTata = "ringkas";
+  private pengamat: ResizeObserver | null = null;
   private bejanaInstances: BejanaNektar[] = [];
   private kerangkaSiap = false;
   private lembarSebelumnya = false;
@@ -314,7 +324,6 @@ export class LayarRona {
       showStrata: true,
       modeAhli: peran === "ahli" || opsi.layarAwal === "ahli",
       tampilkanSemuaZat: false,
-      layoutPenuh: false,
       teksBesar: false,
       daring: typeof navigator === "undefined" || navigator.onLine !== false,
       aiStatus: null,
@@ -336,6 +345,84 @@ export class LayarRona {
       window.addEventListener("offline", () => ubah(false));
     }
     this.render();
+    this.pasangAdaptif();
+  }
+
+  /**
+   * Tata letak adaptif tanpa mengendus perangkat:
+   *  1. Ruang  : lebar WADAH nyata (ResizeObserver) menentukan ringkas/sedang/lega; CSS memakai @container dengan
+   *              ambang yang sama, jadi layar terlipat, jendela setengah layar, dan iframe ikut benar.
+   *  2. Masukan: sentuh vs kursor dibaca dari pointerType kejadian terakhir (perangkat hibrida berpindah mulus).
+   *  3. Papan  : pintasan 1–5 dan Esc, hanya berguna untuk kursor/papan ketik.
+   */
+  private pasangAdaptif(): void {
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+    const html = document.documentElement;
+    if (!html) return;
+    let sentuh = false;
+    try {
+      sentuh = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(any-pointer: fine)").matches;
+    } catch {
+      sentuh = false;
+    }
+    html.setAttribute("data-masukan", sentuh ? "sentuh" : "kursor");
+    const tandai = (e: PointerEvent): void => {
+      const nilai = e.pointerType === "mouse" ? "kursor" : "sentuh";
+      if (html.getAttribute("data-masukan") !== nilai) html.setAttribute("data-masukan", nilai);
+    };
+    window.addEventListener("pointerdown", tandai, { passive: true });
+    window.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") tandai(e); }, { passive: true });
+
+    window.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return;
+      if (e.key === "Escape" && this.lembarTerbuka) {
+        this.tutupLembar();
+        return;
+      }
+      const urut: IdLayar[] = ["gerbang", "profil", "status", "piring", "kolam"];
+      const i = "12345".indexOf(e.key);
+      if (e.key.length === 1 && i >= 0) this.bukaLayar(urut[i]!);
+    });
+
+    const shell = this.akar.querySelector?.<HTMLElement>(".rona-app-shell");
+    if (shell && typeof ResizeObserver !== "undefined") {
+      this.aturRuang(ruangDariLebar(shell.clientWidth || window.innerWidth));
+      this.pengamat = new ResizeObserver((daftar) => {
+        const lebar = daftar[0]?.contentRect.width ?? window.innerWidth;
+        this.aturRuang(ruangDariLebar(lebar));
+      });
+      this.pengamat.observe(shell);
+    }
+  }
+
+  /** Dipakai pengamat ukuran dan pengujian. Tidak merender ulang isi: hanya atribut yang bergantung ruang. */
+  public aturRuang(ruang: RuangTata): void {
+    if (ruang === this.ruang) return;
+    this.ruang = ruang;
+    this.htmlTerakhir = this.htmlTerakhir.replace(/data-ruang="[a-z]+"/, `data-ruang="${ruang}"`);
+    if (typeof this.akar.querySelector !== "function") {
+      this.akar.innerHTML = this.akar.innerHTML.replace(/data-ruang="[a-z]+"/, `data-ruang="${ruang}"`);
+      return;
+    }
+    this.akar.querySelector(".rona-app-shell")?.setAttribute("data-ruang", ruang);
+    this.akar.querySelector(".lembar")?.setAttribute("aria-modal", ruang === "lega" ? "false" : "true");
+    this.kuncilatar();
+  }
+
+  /** Lembar modal (ringkas/sedang) membuat latar inert agar fokus & pembaca layar tidak keluar dari dialog. */
+  private kuncilatar(): void {
+    if (typeof this.akar.querySelectorAll !== "function") return;
+    const modal = this.ruang !== "lega" && this.akar.querySelector(".lembar")?.hasAttribute("data-detent") === true;
+    this.akar.querySelectorAll<HTMLElement>(".hp__status, .pita-kejujuran, .hp__scroll, .hp__nav").forEach((e) => {
+      if (modal) e.setAttribute("inert", "");
+      else e.removeAttribute("inert");
+    });
+  }
+
+  ambilRuang(): RuangTata {
+    return this.ruang;
   }
 
   ambilState(): Readonly<StateLayarRona> {
@@ -498,10 +585,6 @@ export class LayarRona {
 
   private bersihkanKanvas(): void {
     this.bersihkanBejana();
-    if (this.sutraHp) {
-      this.sutraHp.destroy();
-      this.sutraHp = null;
-    }
     if (this.sutraAtelier) {
       this.sutraAtelier.destroy();
       this.sutraAtelier = null;
@@ -556,49 +639,42 @@ export class LayarRona {
     const isiLayar = this.bangunIsiLayar(r).replace(/(<div class="layar__kicker">)\s*[A-K]\d{1,2} · /g, "$1");
     const navHtml = this.bangunNavBawah();
     const statusHtml = this.bangunStatusHtml();
-    const dockHtml = this.bangunDockDesktop(r);
     const sheetOpen = this.lembarTerbuka !== null;
     const sheetDetent = this.lembarTerbuka?.detent ?? "half";
     const lembarHtml = this.bangunLembarHtml();
-    const layout = this.state.layoutPenuh ? "penuh" : "bingkai";
     const layarBerganti = this.layarTerakhir !== this.state.layar;
     this.layarTerakhir = this.state.layar;
 
     const html = `
-      <div class="rona-app-shell" data-theme="${this.state.tema}" data-peran="${this.state.peran}" data-layout="${layout}">
+      <div class="rona-app-shell" data-theme="${this.state.tema}" data-peran="${this.state.peran}" data-ruang="${this.ruang}">
         <canvas class="atelier-bg" id="rona-atelier-canvas" aria-hidden="true"></canvas>
-        <div class="rona-app-stage">
-          <main id="konten-utama" class="hp" data-theme="${this.state.tema}" aria-label="Aplikasi NUTRIVA">
-            <canvas class="sutra-bg" id="rona-hp-sutra" aria-hidden="true"></canvas>
-            <div class="tetes-layer" id="rona-tetes-layer" aria-hidden="true"></div>
+        <div class="hp" data-theme="${this.state.tema}" data-lembar="${sheetOpen ? "buka" : "tutup"}">
+          <header class="hp__status">${statusHtml}</header>
 
-            <header class="hp__status">${statusHtml}</header>
+          <nav class="hp__nav" aria-label="Navigasi utama">
+            ${navHtml}
+          </nav>
 
-            <div class="pita-kejujuran" role="note">
-              <strong>${escHtml(LABEL_PROTOTIPE)}</strong>
-            </div>
+          <div class="pita-kejujuran" role="note">
+            <strong>${escHtml(LABEL_PROTOTIPE)}</strong>
+          </div>
 
-            <div class="hp__scroll" id="rona-hp-scroll">
-              ${isiLayar}
-            </div>
-
-            <div class="lembar-backdrop ${sheetOpen ? "is-open" : ""}" data-close-sheet="true"></div>
-            <section
-              class="lembar"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Lembar rincian dan kontrol"
-              ${sheetOpen ? `data-detent="${sheetDetent}"` : ""}
-            >
-              ${lembarHtml}
-            </section>
-
-            <nav class="hp__nav" aria-label="Navigasi utama">
-              ${navHtml}
-            </nav>
+          <main id="konten-utama" class="hp__scroll" aria-label="Isi aplikasi NUTRIVA" tabindex="-1">
+            <div id="rona-hp-scroll" class="hp__isi">${isiLayar}</div>
           </main>
 
-          ${dockHtml}
+          <div class="lembar-backdrop ${sheetOpen ? "is-open" : ""}" data-close-sheet="true"></div>
+          <aside
+            class="lembar"
+            role="dialog"
+            aria-modal="${this.ruang === "lega" ? "false" : "true"}"
+            aria-label="Lembar rincian dan pengaturan"
+            ${sheetOpen ? `data-detent="${sheetDetent}"` : ""}
+          >
+            ${lembarHtml}
+          </aside>
+
+          <div class="tetes-layer" id="rona-tetes-layer" aria-hidden="true"></div>
         </div>
       </div>
     `;
@@ -617,26 +693,28 @@ export class LayarRona {
       const hp = q(".hp");
       shell?.setAttribute("data-theme", this.state.tema);
       shell?.setAttribute("data-peran", this.state.peran);
-      shell?.setAttribute("data-layout", layout);
+      shell?.setAttribute("data-ruang", this.ruang);
       hp?.setAttribute("data-theme", this.state.tema);
+      hp?.setAttribute("data-lembar", sheetOpen ? "buka" : "tutup");
       const st = q(".hp__status");
       if (st) st.innerHTML = statusHtml;
       const sc = q(".hp__scroll");
+      const isi = q(".hp__isi");
       const posisi = sc ? sc.scrollTop : 0;
-      if (sc) sc.innerHTML = isiLayar;
-      if (sc && !layarBerganti) sc.scrollTop = posisi;
+      if (isi) isi.innerHTML = isiLayar;
+      if (sc) sc.scrollTop = layarBerganti ? 0 : posisi;
       const nv = q(".hp__nav");
       if (nv) nv.innerHTML = navHtml;
-      const dock = q(".dock-panel");
-      if (dock) dock.outerHTML = dockHtml;
       const lb = q(".lembar-backdrop");
       lb?.classList.toggle("is-open", sheetOpen);
       const lm = q(".lembar");
       if (lm) {
+        lm.setAttribute("aria-modal", this.ruang === "lega" ? "false" : "true");
         if (sheetOpen) lm.setAttribute("data-detent", sheetDetent);
         else lm.removeAttribute("data-detent");
         lm.innerHTML = lembarHtml;
       }
+      this.kuncilatar();
     } else {
       this.bersihkanKanvas();
       this.akar.innerHTML = html;
@@ -660,7 +738,7 @@ export class LayarRona {
     detent: "peek" | "half" | "full",
   ): string {
     return `
-      <div class="lembar__pegangan" data-cycle-detent="true" title="Ketuk untuk ubah tinggi lembar"></div>
+      <div class="lembar__pegangan" data-cycle-detent="true" title="Ubah tinggi lembar"></div>
       <div class="lembar__kontrol">
         <div class="lembar__detents" role="group" aria-label="Tinggi lembar">
           <button type="button" class="lembar__detent-btn ${detent === "peek" ? "is-active" : ""}" data-set-detent="peek">Kecil</button>
@@ -706,11 +784,6 @@ export class LayarRona {
     this.render();
   }
 
-  public toggleLayoutPenuh(): void {
-    this.state.layoutPenuh = !this.state.layoutPenuh;
-    this.render();
-  }
-
   private bangunNavBawah(): string {
     const tabUtama: readonly { id: IdLayar; label: string; ic: string }[] = [
       { id: "gerbang", label: "Masuk", ic: "nav-gerbang" },
@@ -720,7 +793,7 @@ export class LayarRona {
       { id: "kolam", label: "Bejana", ic: "nav-kolam" },
     ];
 
-    return tabUtama
+    const tombol = tabUtama
       .map((t) => {
         const aktif =
           this.state.layar === t.id ||
@@ -743,11 +816,15 @@ export class LayarRona {
         `;
       })
       .join("");
-  }
 
-  /** Dock 18 layar adalah alat pengembang Rona; produk tidak menampilkannya. */
-  private bangunDockDesktop(_r: Ringkasan): string {
-    return "";
+    return `
+      <div class="nav__merek" aria-hidden="true">
+        <span class="nav__logo">${ikon("nav-kolam")}</span>
+        <span class="nav__nama">NUTRIVA<small>Gizi 1000 HPK</small></span>
+      </div>
+      <div class="nav__tombol">${tombol}</div>
+      <p class="nav__pintasan" aria-hidden="true">Pintasan: <kbd>1</kbd>–<kbd>5</kbd> pindah layar, <kbd>Esc</kbd> tutup panel</p>
+    `;
   }
 
   private bangunLembarKontrolMobile(): string {
@@ -792,7 +869,6 @@ export class LayarRona {
           </div>
           <div class="baris-aksi">
             ${chip(this.state.teksBesar, 'data-toggle-teks="true"', "Teks besar")}
-            ${chip(this.state.layoutPenuh, 'data-toggle-layout="true"', "Layar penuh")}
           </div>
         </div>
 
@@ -821,6 +897,10 @@ export class LayarRona {
   }
 
   private bangunIsiLayar(r: Ringkasan): string {
+    return this.bangunIsiMentah(r).replace(/<div class="layar"(?=[ >])/, `<div class="layar" data-layar="${this.state.layar}"`);
+  }
+
+  private bangunIsiMentah(r: Ringkasan): string {
     switch (this.state.layar) {
       case "gerbang":
         return this.layarGerbang();
@@ -1402,7 +1482,7 @@ export class LayarRona {
         <div>
           <div class="layar__kicker">A4 · Contoh Pola Makan dari Aturan · Pita ${escHtml(LABEL_PITA[pola.pita])}</div>
           <h2 class="layar__judul">Racikan dapur <em>Hari ke-${hariAktif.hari_ke}</em></h2>
-          <p class="layar__sub">Ketuk tombol <strong>Rincian / Ganti</strong> pada bahan makanan untuk melihat kandungan gizinya di Lembar Bawah atau menyaring bahan yang tidak tersedia di rumah.</p>
+          <p class="layar__sub">${TAP} tombol <strong>Rincian / Ganti</strong> pada bahan makanan untuk melihat kandungan gizinya di lembar rincian atau menyaring bahan yang tidak tersedia di rumah.</p>
         </div>
 
         <div class="kartu">
@@ -1569,7 +1649,7 @@ export class LayarRona {
         <div>
           <div class="layar__kicker">A5 · Bejana kecukupan gizi · Permenkes 28/2019</div>
           <h2 class="layar__judul">Kecukupan &amp; <em>celah jujur</em> nutrisi</h2>
-          <p class="layar__sub">Bejana menunjukkan seberapa jauh menu hari ini memenuhi AKG. Hanya makanan dalam menu yang dihitung; ASI dan makanan lain tidak dihitung. Ketuk kartu untuk melihat bahan penyumbang.</p>
+          <p class="layar__sub">Bejana menunjukkan seberapa jauh menu hari ini memenuhi AKG. Hanya makanan dalam menu yang dihitung; ASI dan makanan lain tidak dihitung. ${TAP} kartu untuk melihat bahan penyumbang.</p>
         </div>
 
         <div class="baris-aksi">
@@ -1614,7 +1694,7 @@ export class LayarRona {
               : "Dihitung dari bahan dalam menu hari ini.";
 
             return `
-              <div class="bejana" data-inspect-zat="${cfg.zat}" role="button" tabindex="0" style="cursor:pointer;" title="Ketuk untuk rincian penyumbang ${escHtml(cfg.label)}">
+              <div class="bejana" data-inspect-zat="${cfg.zat}" role="button" tabindex="0" style="cursor:pointer;" title="Rincian penyumbang ${escHtml(cfg.label)}">
                 <div class="bejana__kepala">
                   <div>
                     <div class="bejana__nama">${escHtml(cfg.label)}</div>
@@ -1683,7 +1763,7 @@ export class LayarRona {
                 .join("")}
             </div>
           `
-              : `<p class="kartu__isi">Menampilkan 6 bejana nutrisi utama di atas. Ketuk tombol di kanan atas kartu ini untuk memeriksa seluruh 23 makro &amp; mikronutrien.</p>`
+              : `<p class="kartu__isi">Menampilkan 6 bejana nutrisi utama di atas. ${TAP} tombol di kanan atas kartu ini untuk memeriksa seluruh 23 makro &amp; mikronutrien.</p>`
           }
         </div>
 
@@ -2215,7 +2295,7 @@ export class LayarRona {
     `;
   }
 
-  /* ---------- Lembar Bawah Inspeksi Bahan & Substitusi ---------- */
+  /* ---------- lembar rincian Inspeksi Bahan & Substitusi ---------- */
   private bangunLembarInspeksiBahan(bahanId: string, gram: number): string {
     const atr = PETA_ATRIBUT.get(bahanId);
     const gz = PETA_GIZI_BAHAN.get(bahanId);
@@ -2270,7 +2350,7 @@ export class LayarRona {
 
         <div class="kartu">
           <span class="kartu__label">Ingin Mengganti Bahan Ini di Dapur?</span>
-          <p class="kartu__isi">Ketuk tombol di bawah untuk memutar variasi benih menu atau menandai <strong>${escHtml(atr.nama)}</strong> sebagai bahan yang sedang tidak tersedia hari ini (otomatis diganti dengan ${bahanSejenis.slice(0, 3).map((b) => b.nama).join(" / ") || "bahan sejenis"}):</p>
+          <p class="kartu__isi">${TAP} tombol di bawah untuk memutar variasi benih menu atau menandai <strong>${escHtml(atr.nama)}</strong> sebagai bahan yang sedang tidak tersedia hari ini (otomatis diganti dengan ${bahanSejenis.slice(0, 3).map((b) => b.nama).join(" / ") || "bahan sejenis"}):</p>
           <div class="baris-aksi" style="margin-top:6px;">
             <button type="button" class="btn btn--utama" data-cycle-benih="true">
               ${ikon("aksi-tukar")}
@@ -2285,7 +2365,7 @@ export class LayarRona {
     `;
   }
 
-  /* ---------- Lembar Bawah Inspeksi Penyumbang Zat Gizi Bejana ---------- */
+  /* ---------- lembar rincian Inspeksi Penyumbang Zat Gizi Bejana ---------- */
   private bangunLembarInspeksiZat(zat: KunciZat, r: Ringkasan): string {
     if (r.hasil !== "ok" || !r.pola) {
       return `<p class="kartu__isi">Menu belum tersedia.</p>`;
@@ -2363,17 +2443,6 @@ export class LayarRona {
     }
     this.sutraAtelier?.setBeku(darurat);
 
-    const cvHp = this.akar.querySelector<HTMLCanvasElement>("#rona-hp-sutra");
-    if (cvHp && !this.sutraHp) {
-      this.sutraHp = new SutraField(cvHp, {
-        cols: 32,
-        rows: 20,
-        ribbons: 5,
-        motes: 14,
-        interactive: true,
-      });
-    }
-    this.sutraHp?.setBeku(darurat);
 
     this.qa<HTMLCanvasElement>("[data-bejana-canvas]").forEach((cv) => {
       const fill = parseFloat(cv.getAttribute("data-fill") || "0.75");
@@ -2505,13 +2574,6 @@ export class LayarRona {
     });
 
     // Toggle Layout Penuh / Bingkai Ponsel
-    this.qa<HTMLElement>("[data-toggle-layout]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        this.state.layoutPenuh = !this.state.layoutPenuh;
-        this.render();
-      });
-    });
-
     this.qa<HTMLElement>("[data-toggle-teks]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.state.teksBesar = !this.state.teksBesar;
@@ -2527,7 +2589,7 @@ export class LayarRona {
       });
     });
 
-    // Kontrol Detent & Tutup Lembar Bawah
+    // Kontrol Detent & Tutup lembar rincian
     this.qa<HTMLElement>("[data-close-sheet]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.tutupLembar();
@@ -2659,7 +2721,7 @@ export class LayarRona {
       });
     });
 
-    // Inspeksi Bahan Pangan di Lembar Bawah
+    // Inspeksi Bahan Pangan di lembar rincian
     this.qa<HTMLElement>("[data-inspect-bahan]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-inspect-bahan");

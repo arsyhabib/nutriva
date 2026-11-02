@@ -751,54 +751,12 @@ button {
   color: var(--aksen-teks);
 }
 
-/* ---------- Bingkai Ponsel Prototipe (.hp) 392 × 848 px ---------- */
+/* ---------- Akar aplikasi (.hp): grid adaptif, lihat bagian 11 ---------- */
 .hp {
   position: relative;
-  width: 392px;
-  height: 848px;
-  border-radius: 48px;
-  border: 10px solid #2A1820;
-  background: var(--bg-0);
   color: var(--t-1);
-  box-shadow: var(--bayangan-hp);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: grid;
   isolation: isolate;
-  contain: layout style paint;
-  flex-shrink: 0;
-}
-
-.hp--mini {
-  width: 364px;
-  height: 760px;
-  border-radius: 42px;
-  border-width: 8px;
-}
-
-.hp--sempit,
-.hp.hp--sempit {
-  width: 320px !important;
-  height: 680px !important;
-  border-radius: 36px;
-}
-
-@media (max-width: 430px) {
-  .hp,
-  .hp--mini {
-    width: 100%;
-    max-width: 380px;
-  }
-}
-
-.sutra-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
 }
 
 .tetes-layer {
@@ -2227,14 +2185,6 @@ button {
   opacity: 1;
 }
 
-/* Bingkai Ponsel Keramik-Kaca dengan Refleksi Tepi Optik */
-.hp {
-  background: var(--bg-0);
-  box-shadow:
-    inset 0 0 0 1.5px rgba(255, 240, 244, 0.35),
-    0 0 0 1px rgba(255, 230, 236, 0.22),
-    var(--bayangan-x, 0px) var(--bayangan-y, 24px) 64px -14px rgba(32, 12, 20, 0.32);
-}
 
 /* Halo Pendaran Lembut pada Pin Z-Score (A3) */
 @keyframes rona-pin-napas {
@@ -2294,84 +2244,6 @@ button {
   z-index: 1;
 }
 
-.rona-app-stage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  width: 100%;
-  max-width: 920px;
-  margin: 0 auto;
-}
-
-/* Bingkai Ponsel Matang (.hp) di Desktop & Full-Screen Native di Ponsel */
-.rona-app-stage > .hp {
-  width: 416px;
-  height: min(868px, calc(100dvh - 32px));
-  min-height: 620px;
-  transition:
-    width 280ms var(--ease-sutra),
-    height 280ms var(--ease-sutra),
-    border-radius 280ms var(--ease-sutra);
-}
-
-/* Mode Layar Penuh (ketika pengguna mengaktifkan Mode App Penuh atau di layar ponsel) */
-.rona-app-shell[data-layout="penuh"] {
-  padding: 0;
-}
-
-.rona-app-shell[data-layout="penuh"] .rona-app-stage {
-  max-width: 540px;
-  gap: 0;
-}
-
-.rona-app-shell[data-layout="penuh"] .rona-app-stage > .hp {
-  width: 100% !important;
-  max-width: 540px !important;
-  height: 100dvh !important;
-  border-radius: 0 !important;
-  border-top: 0 !important;
-  border-bottom: 0 !important;
-  border-left: 1px solid var(--garis-kuat) !important;
-  border-right: 1px solid var(--garis-kuat) !important;
-}
-
-.rona-app-shell[data-layout="penuh"] .dock-panel {
-  display: none !important;
-}
-
-@media (max-width: 860px) {
-  .dock-panel {
-    display: none !important;
-  }
-}
-
-@media (max-width: 540px) {
-  .rona-app-shell {
-    padding: 0 !important;
-    justify-content: stretch;
-  }
-  .rona-app-stage {
-    max-width: none;
-    height: 100dvh;
-  }
-  .rona-app-stage > .hp {
-    width: 100vw !important;
-    max-width: none !important;
-    height: 100dvh !important;
-    min-height: 100dvh !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-  }
-  .hp__status {
-    padding-top: max(10px, env(safe-area-inset-top));
-  }
-  .hp__nav {
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-  }
-}
-
 /* Tombol Interaktif di Bilah Status Ponsel (.hp__status-btn) */
 .hp__status-actions {
   display: inline-flex;
@@ -2405,120 +2277,10 @@ button {
 }
 
 /* Panel Dock Penguji di Desktop (.dock-panel) */
-.dock-panel {
-  width: 348px;
-  max-height: min(868px, calc(100dvh - 32px));
-  overflow-y: auto;
-  scrollbar-width: thin;
-  padding: 18px;
-  border-radius: 28px;
-  background:
-    radial-gradient(
-      115% 95% at var(--lx, var(--cahaya-x, 24%)) var(--ly, var(--cahaya-y, 14%)),
-      var(--kaca-tepi) 0%,
-      transparent 58%
-    ),
-    var(--permukaan);
-  border: 1px solid var(--garis-kuat);
-  box-shadow: var(--bayangan-lembut);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  flex-shrink: 0;
-}
-
-.dock-panel__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.dock-panel__brand {
-  font-family: var(--f-display);
-  font-size: 1.35rem;
-  line-height: 1.1;
-  color: var(--t-1);
-}
-
-.dock-panel__brand em {
-  color: var(--aksen);
-  font-style: italic;
-}
-
-.dock-panel__sub {
-  font-size: 0.76rem;
-  color: var(--t-2);
-  margin-top: 3px;
-  line-height: 1.4;
-}
-
-.dock-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.dock-section__label {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--t-3);
-}
-
 .dock-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
-}
-
-.dock-grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-}
-
-.dock-btn {
-  min-height: 36px;
-  padding: 6px 9px;
-  border-radius: 11px;
-  border: 1.5px solid var(--garis);
-  background: var(--permukaan-solid);
-  color: var(--t-1);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
-  transition: all 150ms var(--ease-sutra);
-}
-
-.dock-btn small {
-  font-family: var(--f-mono);
-  font-size: 0.66rem;
-  color: var(--t-3);
-  font-weight: 600;
-}
-
-.dock-btn:hover {
-  border-color: var(--aksen);
-}
-
-.dock-btn.is-active {
-  background: var(--aksen);
-  color: var(--aksen-teks);
-  border-color: var(--aksen);
-}
-
-.dock-btn.is-active small {
-  color: var(--aksen-teks);
-  opacity: 0.9;
 }
 
 /* Kartu Penjelas Bahasa Sederhana (AI & Templat Deterministik) */
@@ -2691,7 +2453,6 @@ code { font-family: var(--f-sans); font-size: 0.92em; padding: 1px 6px; border-r
 .hp__nav-btn.is-active { background: var(--aksen-lembut); color: var(--aksen); }
 
 /* --- Latar: orb tidak boleh mengganggu bacaan --- */
-.sutra-bg { opacity: 0.5; }
 .hp__scroll { isolation: isolate; }
 
 /* --- Hierarki kartu --- */
@@ -2804,3 +2565,199 @@ code { font-family: var(--f-sans); font-size: 0.92em; padding: 1px 6px; border-r
 .lembar__isi :focus-visible, .lembar :focus-visible { outline: 3px solid var(--aksen); outline-offset: 2px; }
 .bejana[role="button"]:focus-visible { outline: 3px solid var(--aksen); outline-offset: 3px; }
 .lencana, .verif, .z-meter__skala { font-size: max(0.72rem, 11.5px); }
+
+/* ============================================================================
+ * 11. TATA LETAK ADAPTIF (tanpa bingkai ponsel)
+ * Satu DOM untuk semua perangkat. Keputusan tata letak = LEBAR WADAH NYATA
+ * lewat @container (bukan mengendus perangkat), ambang sama dengan RuangTata
+ * di layar.ts: ringkas <640, sedang 640–1023, lega ≥1024.
+ *   ringkas: satu kolom, navigasi bawah, lembar naik dari bawah.
+ *   sedang : rel navigasi di kiri, lembar menjadi laci kanan.
+ *   lega   : sidebar penuh, isi memakai grid intrinsik, lembar jadi panel
+ *            inspektur yang menempel di kanan (tidak menutupi isi).
+ * ============================================================================ */
+html, body { height: 100%; }
+body { overflow: hidden; min-height: 0; background-color: var(--bg-0); }
+
+.rona-app-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  z-index: 1;
+  container: app / inline-size;
+}
+
+.atelier-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.6; pointer-events: none; }
+
+.rona-app-shell > .hp {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas: "status" "pita" "isi" "nav";
+  overflow: hidden;
+  isolation: isolate;
+  contain: layout style;
+}
+
+.hp__status { grid-area: status; position: relative; z-index: 6; }
+.pita-kejujuran { grid-area: pita; }
+.hp__scroll {
+  grid-area: isi;
+  min-height: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 16px;
+  container: isi / inline-size;
+  outline: none;
+}
+.hp__isi {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 18px clamp(16px, 4cqi, 44px) 40px;
+}
+.hp__nav { grid-area: nav; position: relative; z-index: 6; display: block; padding: 6px 8px calc(env(safe-area-inset-bottom, 0px) + 8px); }
+.nav__tombol { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.nav__merek, .nav__pintasan { display: none; }
+.hp__nav-btn { width: 100%; }
+
+/* Lembar (ringkas): naik dari bawah, tiga tinggi */
+.lembar-backdrop { position: absolute; inset: 0; z-index: 18; }
+.lembar { position: absolute; z-index: 20; }
+.tetes-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+
+/* Isi layar: grid intrinsik (kolom bertambah sendiri sesuai lebar ISI, bukan layar) */
+.layar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--jeda);
+  align-items: start;
+}
+.layar > :first-child,
+.layar > .baris-aksi,
+.layar > .bejana-grid,
+.layar > [role="tablist"],
+.layar > .kartu--sorot,
+.layar > .kartu--bahaya,
+.layar > .kartu:has(.belanja-list),
+.layar > .kartu-ai { grid-column: 1 / -1; }
+.layar__judul { font-size: clamp(1.6rem, 1.15rem + 2.2cqi, 2.7rem); }
+.layar__sub { max-width: 62ch; }
+.layar > * { min-width: 0; max-width: none; }
+.bejana-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: var(--jeda); }
+.pilihan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 8px; }
+.belanja-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 6px; }
+
+/* Kata aksi mengikuti masukan terakhir */
+.tap::before { content: attr(data-t); }
+html[data-masukan="kursor"] .tap::before { content: attr(data-k); }
+kbd { font: inherit; font-weight: 800; padding: 1px 7px; border-radius: 6px; border: 1px solid var(--garis-kuat); background: var(--permukaan-2); }
+
+/* ---------- sedang: rel kiri + laci kanan ---------- */
+@container app (min-width: 640px) {
+  .rona-app-shell > .hp {
+    grid-template-columns: calc(88px + env(safe-area-inset-left, 0px)) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "nav status" "nav pita" "nav isi";
+  }
+  .hp__nav {
+    display: flex; flex-direction: column; align-items: stretch; gap: 14px;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) 8px 14px calc(8px + env(safe-area-inset-left, 0px));
+    border-top: 0; border-right: 1px solid var(--garis);
+    overflow-y: auto;
+  }
+  .nav__merek { display: flex; justify-content: center; }
+  .nav__nama { display: none; }
+  .nav__logo { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--aksen-lembut); color: var(--aksen); }
+  .nav__logo .ikon { width: 24px; height: 24px; }
+  .nav__tombol { display: flex; flex-direction: column; gap: 6px; }
+  .hp__nav-btn { min-height: 64px; }
+  .lembar {
+    top: 0; right: 0; bottom: 0; left: auto; height: auto;
+    width: min(440px, 92%);
+    border-radius: 26px 0 0 26px; border-top: 0; border-left: 2px solid var(--garis-kuat);
+    box-shadow: -18px 0 48px rgba(0, 0, 0, 0.22);
+    transform: translate3d(108%, 0, 0);
+  }
+  .lembar[data-detent] { transform: none; }
+  .lembar__detents, .lembar__pegangan { display: none; }
+  .lembar__kontrol { justify-content: flex-end; }
+}
+
+/* ---------- lega: sidebar penuh + panel inspektur ---------- */
+@container app (min-width: 1024px) {
+  .rona-app-shell > .hp {
+    grid-template-columns: calc(268px + env(safe-area-inset-left, 0px)) minmax(0, 1fr) 0px;
+    grid-template-areas: "nav status lembar" "nav pita lembar" "nav isi lembar";
+    transition: grid-template-columns 340ms var(--ease-nektar);
+  }
+  .rona-app-shell > .hp[data-lembar="buka"] { grid-template-columns: calc(268px + env(safe-area-inset-left, 0px)) minmax(0, 1fr) clamp(360px, 30cqi, 480px); }
+  .hp__nav { padding: calc(env(safe-area-inset-top, 0px) + 22px) 16px 18px calc(16px + env(safe-area-inset-left, 0px)); gap: 22px; }
+  .nav__merek { justify-content: flex-start; align-items: center; gap: 12px; padding: 0 8px; }
+  .nav__nama { display: block; font-family: var(--f-heading); font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--t-1); }
+  .nav__nama small { display: block; font-size: 0.74rem; font-weight: 600; letter-spacing: 0; color: var(--t-2); }
+  .hp__nav-btn { flex-direction: row; justify-content: flex-start; gap: 14px; min-height: 52px; padding: 0 16px; font-size: 0.95rem; }
+  .hp__nav-btn .ikon { width: 22px; height: 22px; }
+  .nav__pintasan { margin-top: auto; font-size: 0.78rem; line-height: 1.8; color: var(--t-2); padding: 0 8px; }
+  html[data-masukan="kursor"] .nav__pintasan { display: block; }
+  .hp__status { justify-content: flex-end; padding: 14px clamp(16px, 3cqi, 36px) 6px; }
+  .hp__status-pill { display: none; }
+  .lembar {
+    position: static; grid-area: lembar; width: auto; height: auto; min-width: 0;
+    border-radius: 0; border-top: 0; border-left: 1px solid var(--garis-kuat); box-shadow: none;
+    transform: none; visibility: hidden; overflow: hidden;
+    transition: visibility 0s linear 340ms;
+  }
+  .hp[data-lembar="buka"] .lembar { visibility: visible; transition-delay: 0s; }
+  .lembar-backdrop { display: none; }
+}
+
+/* Layar sangat lebar: sidebar sedikit lebih lega */
+@container app (min-width: 1600px) {
+  .hp__isi { max-width: 1560px; }
+}
+/* Layar sangat lebar: skala rem ikut membesar agar tidak terlihat seperti ponsel yang dilebarkan */
+@media (min-width: 1600px) {
+  html:not([data-zoom]) { font-size: clamp(16px, 0.5vw + 8px, 22px); }
+}
+
+/* Ponsel landscape / layar pendek: rapatkan tinggi, pita tetap tampil */
+@media (max-height: 520px) {
+  .hp__status { padding-top: 6px; padding-bottom: 4px; }
+  .hp__status-pill { display: none; }
+  .pita-kejujuran { padding-block: 3px; font-size: 0.68rem; }
+  .hp__isi { padding-top: 12px; }
+}
+@container app (min-width: 640px) {
+  @media (max-height: 520px) {
+    .nav__merek { display: none; }
+    .hp__nav { padding-top: 8px; gap: 6px; }
+    .hp__nav-btn { min-height: 52px; }
+  }
+}
+
+/* Pointer halus (kursor): hover halus hanya bila perangkat mendukung */
+@media (hover: none) {
+  .kartu:hover, .bejana:hover { transform: none; }
+}
+
+.bejana__kepala .lencana { white-space: nowrap; flex-shrink: 0; }
+.bejana__kepala > div:first-child { min-width: 0; }
+
+/* Lembar tertutup tidak masuk pohon aksesibilitas (ringkas & sedang) */
+.lembar:not([data-detent]) { visibility: hidden; transition: transform 360ms var(--ease-nektar), visibility 0s linear 360ms; }
+.lembar[data-detent] { visibility: visible; transition-delay: 0s; }

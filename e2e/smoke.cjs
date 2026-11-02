@@ -109,10 +109,10 @@ const ke = async (p, id) => {
   {
     const { ctx, p } = await buka(browser, [390, 844]);
     await ke(p, "piring");
-    await p.evaluate(() => { window.__s = document.querySelector("#rona-hp-sutra"); window.__h = document.querySelector(".hp"); });
+    await p.evaluate(() => { window.__s = document.querySelector(".rona-app-shell"); window.__h = document.querySelector(".hp"); });
     await p.evaluate(() => document.querySelector("[data-pick-hari='1']").click()); await p.waitForTimeout(150);
     await p.evaluate(() => document.querySelector("[data-pick-hari='2']").click()); await p.waitForTimeout(150);
-    const sama = await p.evaluate(() => window.__s === document.querySelector("#rona-hp-sutra") && window.__h === document.querySelector(".hp"));
+    const sama = await p.evaluate(() => window.__s === document.querySelector(".rona-app-shell") && window.__h === document.querySelector(".hp"));
     cek("kanvas latar & kerangka tidak dibuat ulang", sama);
     await p.evaluate(() => { const s = document.querySelector(".hp__scroll"); s.scrollTop = 300; });
     await p.evaluate(() => document.querySelector("[data-pick-hari='0']").click()); await p.waitForTimeout(150);

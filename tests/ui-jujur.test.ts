@@ -170,3 +170,29 @@ describe("render parsial", () => {
     expect(app.ambilHtml()).toContain(LABEL_PROTOTIPE);
   });
 });
+
+import { BATAS_RUANG, ruangDariLebar } from "../src/ui/layar";
+
+describe("kelas ruang adaptif", () => {
+  it("ambang ruang tepat dan monoton", () => {
+    expect(ruangDariLebar(0)).toBe("ringkas");
+    expect(ruangDariLebar(320)).toBe("ringkas");
+    expect(ruangDariLebar(639)).toBe("ringkas");
+    expect(ruangDariLebar(640)).toBe("sedang");
+    expect(ruangDariLebar(1023)).toBe("sedang");
+    expect(ruangDariLebar(1024)).toBe("lega");
+    expect(ruangDariLebar(7680)).toBe("lega");
+    expect(ruangDariLebar(Number.NaN)).toBe("ringkas");
+  });
+  it("ambang di CSS (@container) sama dengan di kode", () => {
+    const css = readFileSync(resolve(__dirname, "../src/ui/rona.css"), "utf8");
+    expect(css).toContain(`@container app (min-width: ${BATAS_RUANG.sedang}px)`);
+    expect(css).toContain(`@container app (min-width: ${BATAS_RUANG.lega}px)`);
+  });
+  it("tidak ada bingkai ponsel tersisa di CSS maupun markup", () => {
+    const css = readFileSync(resolve(__dirname, "../src/ui/rona.css"), "utf8");
+    expect(css).not.toMatch(/border:\s*10px solid #2A1820/);
+    expect(css).not.toMatch(/width:\s*392px|height:\s*848px|416px;\s*\n\s*height: min\(868px/);
+    for (const x of SEMUA.slice(0, 20)) expect(x.html).not.toMatch(/data-layout|dock-panel|rona-app-stage/);
+  });
+});
