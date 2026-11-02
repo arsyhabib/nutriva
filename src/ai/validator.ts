@@ -259,3 +259,81 @@ export function validasiKeluaranAi(teks: unknown, m: MuatanAi): HasilValidasi {
   }
   return alasan.length === 0 ? { ok: true, teks: asli.replace(/[\p{Cf}]/gu, "") } : { ok: false, alasan: [...new Set(alasan)] };
 }
+
+/* ------------------------------------------------------------------ */
+/* Validator resep (fitur resep AI). Bahan dan takaran gram berasal dari mesin; AI hanya merangkai cara masak. */
+
+export interface BahanResepValid {
+  nama: string;
+  gram: number;
+}
+
+// klaim: n/a — batas rekayasa panjang resep
+const RESEP_MIN = 200;
+// klaim: n/a — batas rekayasa panjang resep
+const RESEP_MAKS = 3200;
+// klaim: n/a — batas rekayasa jumlah baris resep
+const RESEP_BARIS_MAKS = 70;
+// klaim: n/a — rentang waktu masak yang masuk akal untuk MPASI rumahan (menit); bukan konstanta ilmiah
+const MENIT_MIN = 5;
+const MENIT_MAKS = 45;
+
+/** Kosakata pangan dan bumbu umum. Kata ini hanya boleh muncul bila termasuk bahan resep ini. */
+const PANGAN_UMUM = [
+  "garam", "gula", "penyedap", "msg", "kecap", "saus", "cabai", "cabe", "lada", "merica", "terasi", "santan", "mentega", "margarin", "keju",
+  "susu", "kopi", "teh", "mayones", "kaldu", "bawang", "jahe", "kunyit", "ketumbar", "kemiri", "salam", "serai", "lengkuas", "pewarna", "pengawet",
+  "minyak", "vetsin", "royco", "masako", "cuka", "sirup", "coklat", "cokelat", "vanili", "madu", "telur", "kacang", "udang", "kepiting", "cumi", "kerang",
+  "yogurt", "yoghurt", "anggur", "stroberi", "kiwi", "nanas", "durian", "wijen", "almond", "kenari", "gandum", "terigu", "tepung", "roti", "mie", "mi", "bihun",
+  "ayam", "bebek", "sapi", "kambing", "babi", "ikan", "daging", "hati", "tahu", "tempe", "nasi", "beras", "jagung", "kentang", "ubi", "singkong", "wortel", "bayam",
+  "brokoli", "tomat", "labu", "buncis", "kangkung", "pisang", "pepaya", "apel", "jeruk", "mangga", "alpukat", "oat", "keju", "krim", "kelapa", "parutan",
+];
+const AWALAN_PANGAN = ["bawang", "garam", "gula", "minyak", "cabai", "kecap", "saus"];
+
+const KLAIM_MANFAAT = /(?:bagus|baik|bermanfaat|berguna)\s+untuk\s+(?:\w+\s+){0,2}(?:otak|tubuh|tulang|mata|kulit|daya|kecerdasan|imun|pertumbuhan|tumbuh|kesehatan)|menyehatkan|meningkatkan|daya tahan|kecerdasan|cerdas|menguatkan|memperkuat|menambah nafsu|kaya (?:akan )?(?:zat|vitamin|protein|nutrisi|gizi)|mencegah|mengatasi|bergizi tinggi|superfood|nutrisi lengkap|tumbuh (?:kembang|optimal)|mendukung (?:tumbuh|pertumbuhan|kesehatan|otak)/;
+
+const KATA_ANGKA = /(?:^|[^a-z])(?:nol|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|seratus|ratus|puluh|belas|setengah|separuh|seperempat|sepertiga)\s+(?:gram|gr|g|menit|jam)(?![a-z])/;
+
+function tokenBahan(nama: string): string[] {
+  return normalisasi(nama).replace(/\([^)]*\)/g, " ").match(/[a-z]{3,}/g) ?? [];
+}
+
+/** Negasi ketat: hanya "tanpa X" atau "tidak perlu/usah (menambah) X", boleh berantai dengan dan/atau. */
+function negasiKetat(n: string, i: number): boolean {
+  const jendela = n.slice(Math.max(0, i - 70), i);
+  return /(?:^|[^a-z])(?:tanpa|(?:tidak|tak) (?:perlu|usah)(?: (?:menambah(?:kan)?|memakai|menggunakan|diberi|ditambah(?:kan)?))?)\s+(?:[a-z]+\s*(?:,|\bdan\b|\batau\b)\s*(?:tanpa\s+)?)*$/.test(jendela);
+}
+
+/**
+ * Validator resep versi longgar: resep selalu tampil bersama tanda "ditulis AI, bisa keliru", jadi pagar dibatasi pada
+ * hal yang berbahaya atau merusak tampilan: markup/tautan, karakter tipuan, obat/suplemen/dosis/penyakit, madu
+ * (berisiko bagi bayi), serta panjang. Bahan dan gram resmi selalu ditampilkan mesin terpisah dari teks AI.
+ */
+export function validasiResep(teks: unknown, _bahan: readonly BahanResepValid[] = [], _leksikon: ReadonlySet<string> = new Set()): HasilValidasi {
+  if (typeof teks !== "string") return { ok: false, alasan: ["bukan_teks"] };
+  const asli = teks.replace(/\r\n/g, "\n").trim();
+  const alasan: AlasanTolak[] = [];
+  if (asli.length < 80) alasan.push("terlalu_pendek");
+  if (asli.length > RESEP_MAKS) return { ok: false, alasan: ["terlalu_panjang"] };
+  if (asli.split("\n").filter((x) => x.trim() !== "").length > RESEP_BARIS_MAKS) alasan.push("terlalu_banyak_baris");
+  if (/[\p{Nd}]/u.test(asli.normalize("NFKC").replace(/[0-9]/g, "")) || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(asli)) alasan.push("karakter_aneh");
+  if (/[a-z][а-яёα-ω]|[а-яёα-ω][a-z]/i.test(asli)) alasan.push("karakter_aneh");
+
+  const n = normalisasi(teksPolos(asli)).replace(/hati[- ]hati/g, "waspada");
+  if (adaMarkupTerlarang(asli) || POLA_TAUTAN.test(n)) alasan.push("ada_tautan_atau_markup");
+
+  let terlarang = false;
+  for (const { re, negasiOk } of POLA_KATA) {
+    for (const mm of n.matchAll(re)) {
+      if (negasiOk && negasiSebelum(n, (mm.index ?? 0) + (mm[0].startsWith(" ") ? 1 : 0))) continue;
+      terlarang = true;
+    }
+  }
+  const r = rapat(n);
+  if (KATA_RAPAT.some((k) => r.includes(k) && !n.includes(k))) terlarang = true;
+  if (terlarang) alasan.push("kata_terlarang");
+
+  const kataInggris = new Set((n.match(/[a-z]+/g) ?? []).filter((k) => KATA_INGGRIS.includes(k)));
+  if (kataInggris.size >= 4) alasan.push("bukan_bahasa_indonesia");
+
+  return alasan.length === 0 ? { ok: true, teks: asli.replace(/[\p{Cf}]/gu, "") } : { ok: false, alasan: [...new Set(alasan)] };
+}

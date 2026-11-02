@@ -39,3 +39,11 @@ describe("keluaran model sungguhan (Haiku 5.5, dengan prompt Worker) harus lolos
     });
   }
 });
+
+describe("bahasa wajar bergaya markdown tidak ditolak karena kosakata", () => {
+  it("menyapa 'Bunda' dan 'si kecil', menyebut 'proporsi'", () => {
+    const m = MuatanAiSchema.parse(JSON.parse(readFileSync("tests/fixtures/ai_contoh_haiku.json", "utf8")).contoh[0].muatan);
+    const v = validasiKeluaranAi("Bunda, ini gambaran umum menu untuk si kecil. Proporsi bahan hari ini sudah seimbang.", m);
+    if (!v.ok) expect(v.alasan).not.toContain("kata_di_luar_daftar");
+  });
+});

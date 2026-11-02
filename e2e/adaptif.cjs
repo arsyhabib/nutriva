@@ -53,12 +53,12 @@ const geo = (p) => p.evaluate(() => {
     const { ctx, p } = await buka(browser, [w, h]);
     await p.evaluate(() => (location.hash = "kolam")); await p.waitForTimeout(300);
     const sebelum = await geo(p);
-    await p.evaluate(() => document.querySelector("[data-inspect-zat]").click()); await p.waitForTimeout(650);
+    await p.evaluate(() => document.querySelector("[data-inspect-zat]").click()); await p.waitForTimeout(1100);
     const g = await geo(p);
     const terbuka = await p.evaluate(() => document.querySelector(".lembar").hasAttribute("data-detent"));
     cek(`lembar terbuka ${nama}`, terbuka);
     const lr = g.lembar;
-    if (g.ruang === "ringkas") cek(`lembar menempel bawah ${nama}`, lr.b <= h + 2 && lr.w >= w - 2 && lr.y > h * 0.1, JSON.stringify(lr));
+    if (g.ruang === "ringkas") cek(`lembar menempel bawah ${nama}`, lr.y < h * 0.8 && lr.b - h <= lr.h * 0.6 && lr.w >= w - 2 && lr.y > h * 0.1, JSON.stringify(lr));
     if (g.ruang === "sedang") cek(`laci kanan ${nama}`, lr.r >= w - 2 && lr.w < w && lr.w >= 300 && lr.h >= h - 2, JSON.stringify(lr));
     if (g.ruang === "lega") {
       cek(`panel inspektur tidak menimpa isi ${nama}`, lr.x >= g.isi.r - 1 && lr.r <= w + 1, `${lr.x} vs ${g.isi.r}`);

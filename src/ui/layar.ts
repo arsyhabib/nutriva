@@ -11,13 +11,17 @@ import {
   PERNYATAAN_PRIVASI_AI,
 } from "../ai/glosarium";
 import { mintaPenjelasan, MODEL_AI_BAWAAN, pesanAlasan, ujiKunci, type HasilPenjelasan } from "../ai/klien";
+import { mintaResepBergambar, MODEL_GAMBAR_BAWAAN, pesanGalatGambar, pesanGalatResep, type HasilResepBergambar, type MasukanResep } from "../ai/resep";
 import type { MuatanAi } from "../ai/kontrak";
 import { jelaskanTemplat } from "../ai/templat";
 import { DATA } from "../engine/data";
 import { daftarTandaBahaya } from "../engine/rujukan";
 import type { KunciZat } from "../engine/schema/bahan";
 import { renderMarkdown } from "../ai/markdown";
-import { bangunDokumen, cetakDokumen, DAFTAR_EKSPOR, judulBerkas, type JenisEkspor } from "./ekspor";
+import { KUNCI_BAWAAN } from "../ai/kunci-bawaan";
+import { bukaTamar } from "../ai/tamar";
+import { DAFTAR_BAGIAN, OPSI_BAWAAN, PILIHAN_CEPAT, bagianUntukLayar, judulBerkas, ketersediaan, susunBlok, type BagianId, type Kertas, type KonteksEkspor, type OpsiEkspor, type ResepEkspor } from "./ekspor";
+import { bukaPratinjau, type PratinjauHandle } from "./pratinjau";
 import klaimData from "../../data/claims.json";
 import sumberData from "../../data/sources.json";
 import {
@@ -30,7 +34,7 @@ import {
   Pegas,
   SutraField,
   Ticker,
-  type ModeGerak,
+  type PilihanGerak,
   type StatusVisualRona,
   type TemaRona,
 } from "./fisika";
@@ -122,7 +126,21 @@ export function ringkasKlaim(teks: string): string {
   return hasil.replace(/\s+/g, " ");
 }
 
-const KUNCI_SIMPAN = { kunci: "nutriva.kunci-ai", model: "nutriva.model-ai", ingat: "nutriva.ingat-kunci" } as const;
+const KUNCI_SIMPAN = { kunci: "nutriva.kunci-ai", model: "nutriva.model-ai", modelGambar: "nutriva.model-gambar", ingat: "nutriva.ingat-kunci" } as const;
+
+interface EntriResep {
+  id: string;
+  hari: number;
+  slotKode: string;
+  masukan: MasukanResep;
+  memuat: boolean;
+  generasi: number;
+  /** Data URL gambar yang sudah lolos pemeriksaan bentuk (dihitung sekali). */
+  gambarSah?: string;
+  hasil?: HasilResepBergambar;
+}
+// klaim: n/a — batas rekayasa jumlah resep bergambar yang disimpan di memori sesi (gambar besar)
+const BATAS_RESEP_SESI = 8;
 
 const PETA_ATRIBUT = new Map(
   DATA.bahanAtribut.bahan.map((b) => [b.id, b] as const),
@@ -291,6 +309,10 @@ export function ruangDariLebar(lebar: number): RuangTata {
 
 export interface StateLayarRona {
   presetAktif: KodePreset;
+  /** true bila ukuran berasal dari pengguna (bukan contoh). */
+  sendiri: boolean;
+  /** true sejak 'isi data sendiri' dipilih sampai usia/berat/panjang diubah: nilai awal masih milik contoh. */
+  belumDiisi: boolean;
   peran: PeranRona;
   tema: TemaRona;
   layar: IdLayar;
@@ -329,9 +351,20 @@ export class LayarRona {
   private nilaiBejanaTerakhir = new Map<string, { fill: number; lo: number; hi: number; asiFrac: number }>();
   private lembarTerbuka: { html: string; bangun?: () => string; detent: "peek" | "half" | "full" } | null = null;
   private lembarDiRiwayat = false;
+  private eksporOpsi: OpsiEkspor = this.muatPrefEkspor();
+  private pratinjau: PratinjauHandle | null = null;
+  private pratinjauDiRiwayat = false;
+  private htmlLembarTerakhir = "";
+  private waktuBersihLembar: ReturnType<typeof setTimeout> | null = null;
   private kunciApi = "";
+  /** Kunci bawaan tersamar milik pemilik aplikasi; dipakai hanya bila pengguna belum mengisi kunci sendiri. */
+  private readonly kunciBawaan = bukaTamar(KUNCI_BAWAAN);
+  private pesanBatasBawaan = "";
   private draftKunci = "";
   private modelAi = MODEL_AI_BAWAAN;
+  private modelGambar = MODEL_GAMBAR_BAWAAN;
+  private resepSesi = new Map<string, EntriResep>();
+  private generasiResep = 0;
   private ingatKunci = false;
   private statusKunci: { jenis: "sah" | "ditolak" | "gagal" | "menguji" | "info"; teks: string } | null = null;
 
@@ -348,6 +381,8 @@ export class LayarRona {
     this.muatKunci();
     this.state = {
       presetAktif: presetKode,
+      sendiri: false,
+      belumDiisi: false,
       peran,
       tema,
       layar: opsi.layarAwal ?? (typeof window !== "undefined" && window.location ? idLayarDariHash(window.location.hash) : null) ?? "gerbang",
@@ -482,6 +517,7 @@ export class LayarRona {
       this.ingatKunci = localStorage.getItem(KUNCI_SIMPAN.ingat) === "1";
       this.kunciApi = (this.ingatKunci ? localStorage.getItem(KUNCI_SIMPAN.kunci) : sessionStorage.getItem(KUNCI_SIMPAN.kunci)) ?? "";
       this.modelAi = localStorage.getItem(KUNCI_SIMPAN.model) || MODEL_AI_BAWAAN;
+      this.modelGambar = localStorage.getItem(KUNCI_SIMPAN.modelGambar) || MODEL_GAMBAR_BAWAAN;
     } catch {
       /* penyimpanan diblokir: kunci hanya hidup di memori */
     }
@@ -497,6 +533,8 @@ export class LayarRona {
       else localStorage.removeItem(KUNCI_SIMPAN.ingat);
       if (this.modelAi && this.modelAi !== MODEL_AI_BAWAAN) localStorage.setItem(KUNCI_SIMPAN.model, this.modelAi);
       else localStorage.removeItem(KUNCI_SIMPAN.model);
+      if (this.modelGambar && this.modelGambar !== MODEL_GAMBAR_BAWAAN) localStorage.setItem(KUNCI_SIMPAN.modelGambar, this.modelGambar);
+      else localStorage.removeItem(KUNCI_SIMPAN.modelGambar);
     } catch {
       /* diabaikan */
     }
@@ -513,8 +551,37 @@ export class LayarRona {
     this.render();
   }
 
+  private kunciEfektif(): string {
+    return this.kunciApi || this.kunciBawaan;
+  }
+
+  private get pakaiBawaan(): boolean {
+    return this.kunciApi === "" && this.kunciBawaan !== "";
+  }
+
+  /**
+   * Pembatas pemakaian per tab untuk kunci bawaan (pagar lunak, bukan keamanan): mengurangi pemborosan saldo
+   * bila tautan aplikasi dibagikan luas. Kunci milik pengguna sendiri tidak dibatasi.
+   */
+  private izinBawaan(bobot: number): boolean {
+    if (!this.pakaiBawaan) return true;
+    // klaim: n/a — batas rekayasa pemakaian AI bawaan per tab (poin), bukan konstanta ilmiah
+    const BATAS = 30;
+    try {
+      const sekarang = Number(sessionStorage.getItem("nutriva.pakai-bawaan") ?? "0") || 0;
+      if (sekarang + bobot > BATAS) {
+        this.pesanBatasBawaan = "Jatah AI bawaan untuk sesi ini sudah habis. Isi kunci OpenRouter Anda sendiri di Pengaturan untuk melanjutkan.";
+        return false;
+      }
+      sessionStorage.setItem("nutriva.pakai-bawaan", String(sekarang + bobot));
+    } catch { /* penyimpanan tak tersedia: izinkan */ }
+    this.pesanBatasBawaan = "";
+    return true;
+  }
+
   private opsiAi(): { urlWorker: string | undefined; kunciSendiri?: { kunci: string; model: string } } {
-    return this.kunciApi ? { urlWorker: this.urlWorkerAi, kunciSendiri: { kunci: this.kunciApi, model: this.modelAi } } : { urlWorker: this.urlWorkerAi };
+    const k = this.kunciEfektif();
+    return k ? { urlWorker: this.urlWorkerAi, kunciSendiri: { kunci: k, model: this.modelAi } } : { urlWorker: this.urlWorkerAi };
   }
 
   private simpanDraftKunci(senyap = false): void {
@@ -546,7 +613,11 @@ export class LayarRona {
 
   pilihPreset(kode: KodePreset): void {
     const p = PRESET_SINTETIS[kode] ?? PRESET_SINTETIS.A;
+    this.resepSesi.clear();
+    this.generasiResep++;
     this.state.presetAktif = p.id;
+    this.state.sendiri = false;
+    this.state.belumDiisi = false;
     this.state.masukan = klonMasukan(p.masukan);
     this.state.hariMenuIdx = 0;
     this.state.aiStatus = null;
@@ -619,6 +690,12 @@ export class LayarRona {
       return;
     }
     window.addEventListener("popstate", () => {
+      if (this.pratinjau) {
+        // Tombol kembali menutup pratinjau lebih dulu; entri riwayatnya sudah terambil.
+        this.pratinjauDiRiwayat = false;
+        this.tutupPratinjau();
+        return;
+      }
       const st = (window.history.state ?? null) as { nutriva?: IdLayar; lembar?: boolean } | null;
       const id = st?.nutriva && DAFTAR_LAYAR.some((l) => l.id === st.nutriva) ? st.nutriva : (idLayarDariHash(window.location.hash) ?? "gerbang");
       if (st?.lembar) {
@@ -650,15 +727,53 @@ export class LayarRona {
     this.picuTetesan(triggerEl ?? null, `Benih ${nextVar.kode} Diterapkan`);
   }
 
-  aturMasukanKustom(pengubah: (m: MasukanRingkasan) => void): void {
-    pengubah(this.state.masukan);
+  /** Nama kasus untuk tampilan: contoh bernama, atau 'Data Anda'. */
+  private namaKasus(): string {
+    return this.state.sendiri ? "Data Anda" : PRESET_SINTETIS[this.state.presetAktif].kode;
+  }
+
+  /** Mulai dari ukuran milik pengguna. Nilai awal dipinjam dari contoh dan ditandai belum diisi. */
+  mulaiDataSendiri(): void {
+    this.resepSesi.clear();
+    this.generasiResep++;
+    this.state.sendiri = true;
+    this.state.belumDiisi = true;
+    this.ukuranDisentuh.clear();
+    // Pantangan dan tanda bahaya milik contoh tidak boleh terbawa ke data sendiri.
+    this.state.masukan.pola.hindari = [];
+    this.state.masukan.tanda_bahaya = [];
+    this.state.aiStatus = null;
+    this.state.aiMenuPerHari = {};
+    this.state.hariMenuIdx = 0;
+    this.bukaLayar("profil");
+  }
+
+  private ukuranDisentuh = new Set<string>();
+
+  aturMasukanKustom(pengubah: (m: MasukanRingkasan) => boolean | void, ukuran = ""): void {
+    // Mengubah apa pun pada sebuah contoh menjadikannya data sendiri; ukuran contoh baru lepas dari tanda
+    // "belum diisi" setelah usia, berat, dan panjang masing-masing diganti dengan nilai yang sah.
+    if (!this.state.sendiri) {
+      this.state.sendiri = true;
+      this.state.belumDiisi = true;
+      this.ukuranDisentuh.clear();
+    }
+    const diterima = pengubah(this.state.masukan);
+    if (ukuran && ukuran !== "hari_umur" && diterima !== false) {
+      this.ukuranDisentuh.add(ukuran);
+      if (this.ukuranDisentuh.size >= 3) this.state.belumDiisi = false;
+    }
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
     this.render();
   }
 
   resetSesiKeAwal(): void {
+    this.resepSesi.clear();
+    this.generasiResep++;
     this.state.presetAktif = "A";
+    this.state.sendiri = false;
+    this.state.belumDiisi = false;
     this.state.masukan = klonMasukan(PRESET_SINTETIS.A.masukan);
     this.state.hariMenuIdx = 0;
     this.state.layar = "gerbang";
@@ -675,7 +790,7 @@ export class LayarRona {
     if (r.hasil !== "ok" || !r.muatan_ai_status) return;
     this.state.sedangMemuatAi = true;
     this.render();
-    const hasil = await mintaPenjelasan(r.muatan_ai_status, this.opsiAi());
+    const hasil = await mintaPenjelasan(r.muatan_ai_status, this.izinBawaan(1) ? this.opsiAi() : { urlWorker: undefined });
     this.state.aiStatus = hasil;
     this.state.sedangMemuatAi = false;
     this.render();
@@ -688,7 +803,7 @@ export class LayarRona {
     if (!muatan) return;
     this.state.sedangMemuatAi = true;
     this.render();
-    const hasil = await mintaPenjelasan(muatan, this.opsiAi());
+    const hasil = await mintaPenjelasan(muatan, this.izinBawaan(1) ? this.opsiAi() : { urlWorker: undefined });
     this.state.aiMenuPerHari[hariIdx] = hasil;
     this.state.sedangMemuatAi = false;
     this.render();
@@ -807,7 +922,7 @@ export class LayarRona {
     const isiLayar =
       this.bangunIsiLayar(r).replace(/(<div class="layar__kicker">)\s*[A-K]\d{1,2} · /g, "$1") +
       this.barisEksporLayar() +
-      `<footer class="cap-penulis cap-penulis--isi" aria-label="Karya E.13.1"><span class="cap-penulis__garis" aria-hidden="true"></span><span>E.13.1</span></footer>`;
+      `<footer class="cap-penulis cap-penulis--isi" aria-label="Karya E.13.1 feat H.A.te"><span class="cap-penulis__garis" aria-hidden="true"></span><span>E.13.1 feat H.A.te</span></footer>`;
     if (typeof document !== "undefined" && document.title !== undefined) {
       const nama = NAMA_ARAH[this.state.layar] ?? DAFTAR_LAYAR.find((l) => l.id === this.state.layar)?.label;
       document.title = nama && this.state.layar !== "gerbang" ? `${nama} · NUTRIVA` : "NUTRIVA · Gizi 1000 HPK";
@@ -884,7 +999,18 @@ export class LayarRona {
         lm.setAttribute("aria-modal", this.ruang === "lega" ? "false" : "true");
         if (sheetOpen) lm.setAttribute("data-detent", sheetDetent);
         else lm.removeAttribute("data-detent");
-        lm.innerHTML = lembarHtml;
+        if (sheetOpen) {
+          lm.innerHTML = lembarHtml;
+          this.htmlLembarTerakhir = lembarHtml;
+          if (this.waktuBersihLembar) { clearTimeout(this.waktuBersihLembar); this.waktuBersihLembar = null; }
+        } else if (lm.innerHTML !== "" && this.waktuBersihLembar === null) {
+          // isi dipertahankan selama lembar meluncur keluar, baru dikosongkan setelah transisi
+          this.waktuBersihLembar = setTimeout(() => {
+            this.waktuBersihLembar = null;
+            const el = this.akar.querySelector<HTMLElement>(".lembar");
+            if (el && !el.hasAttribute("data-detent")) el.innerHTML = "";
+          }, 700);
+        }
       }
       this.kuncilatar();
       this.pulihFokus(fokusSebelum, layarBerganti);
@@ -901,7 +1027,9 @@ export class LayarRona {
       const t = sheetOpen
         ? this.akar.querySelector<HTMLElement>(".lembar [data-close-sheet]")
         : this.akar.querySelector<HTMLElement>("[data-open-kontrol]");
-      t?.focus?.();
+      t?.focus?.({ preventScroll: true });
+      const hpEl = this.akar.querySelector<HTMLElement>(".hp");
+      if (hpEl) { hpEl.scrollTop = 0; hpEl.scrollLeft = 0; }
     }
     this.lembarSebelumnya = sheetOpen;
   }
@@ -1035,64 +1163,268 @@ export class LayarRona {
       </div>
       <div class="nav__tombol">${tombol}</div>
       <p class="nav__pintasan" aria-hidden="true"><kbd>1</kbd>–<kbd>5</kbd> pindah layar<br><kbd>←</kbd> <kbd>→</kbd> berurutan<br><kbd>Esc</kbd> tutup panel</p>
-      <p class="cap-penulis cap-penulis--nav" aria-label="Karya E.13.1">E.13.1</p>
+      <p class="cap-penulis cap-penulis--nav" aria-label="Karya E.13.1 feat H.A.te">E.13.1 feat H.A.te</p>
     `;
   }
 
   private barisEksporLayar(): string {
-    const nama: Partial<Record<IdLayar, string>> = { status: "status pertumbuhan", piring: "menu dan belanja", kolam: "kecukupan gizi", kartuBagi: "kartu ringkasan", ahli: "jejak klaim dan sumber" };
-    const n = nama[this.state.layar];
-    if (!n) return "";
-    return `<div class="baris-ekspor"><button type="button" class="btn btn--sekunder" data-ekspor-jenis="${this.jenisEksporLayar()}">${ikon("pdf")}<span>Ekspor ${n} ke PDF</span></button></div>`;
+    const adaIsi: IdLayar[] = ["profil", "status", "piring", "kolam", "kenapa", "ahli", "bahaya", "tentang", "kartuBagi"];
+    if (!adaIsi.includes(this.state.layar)) return "";
+    return `<div class="baris-ekspor"><button type="button" class="btn btn--sekunder" data-buka-ekspor="halaman">${ikon("pdf")}<span>Ekspor halaman ini ke PDF</span></button></div>`;
   }
 
-  /** Jenis ekspor yang paling cocok dengan layar yang sedang dibuka. */
-  private jenisEksporLayar(): JenisEkspor {
-    const peta: Partial<Record<IdLayar, JenisEkspor>> = { status: "status", piring: "menu", kolam: "gizi", kartuBagi: "kartu", ahli: "jejak" };
-    return peta[this.state.layar] ?? "lengkap";
+
+  /* ---------- Resep AI + ilustrasi ---------- */
+  private idResep(r: Extract<Ringkasan, { hasil: "ok" }>, hariIdx: number, slotKode: string): string | null {
+    const sl = r.pola?.hari[hariIdx]?.slot.find((x) => x.kode === slotKode);
+    if (!r.pola || !sl) return null;
+    return `${hariIdx}|${slotKode}|${r.pola.pita}|${sl.item.map((i) => `${i.bahan_id}:${i.gram}`).join(",")}`;
+  }
+
+  private masukanResep(r: Extract<Ringkasan, { hasil: "ok" }>, hariIdx: number, slotKode: string): MasukanResep | null {
+    const sl = r.pola?.hari[hariIdx]?.slot.find((x) => x.kode === slotKode);
+    if (!r.pola || !sl) return null;
+    return { judulSlot: namaSlotWaktu(sl.kode).judul, pita: r.pola.pita, bahan: sl.item.map((it) => ({ nama: PETA_ATRIBUT.get(it.bahan_id)?.nama ?? it.bahan_id, gram: it.gram })) };
+  }
+
+  /** Satu klik: resep dan gambar diminta bersamaan dan muncul bersamaan. */
+  public async buatResep(hariIdx: number, slotKode: string): Promise<void> {
+    const r = this.hitungRingkasan();
+    if (r.hasil !== "ok" || !r.pola || !this.kunciEfektif() || this.state.belumDiisi) return;
+    const id = this.idResep(r, hariIdx, slotKode);
+    const m = this.masukanResep(r, hariIdx, slotKode);
+    if (!id || !m || this.resepSesi.get(id)?.memuat) return;
+    if (!this.izinBawaan(5)) { this.render(); return; }
+    this.resepSesi.delete(id);
+    const generasi = this.generasiResep;
+    this.resepSesi.set(id, { id, hari: r.pola.hari[hariIdx]!.hari_ke, slotKode, masukan: m, memuat: true, generasi });
+    for (const k of [...this.resepSesi.keys()]) {
+      if (this.resepSesi.size <= BATAS_RESEP_SESI) break;
+      if (!this.resepSesi.get(k)?.memuat) this.resepSesi.delete(k);
+    }
+    this.render();
+    const hasil = await mintaResepBergambar(m, { kunciSendiri: { kunci: this.kunciEfektif(), model: this.modelAi }, modelGambar: this.modelGambar });
+    const en = this.resepSesi.get(id);
+    if (!en || en.generasi !== generasi || generasi !== this.generasiResep) return; // sesi sudah direset: hasil lama dibuang
+    en.memuat = false;
+    en.hasil = hasil;
+    if (hasil.gambar.ok && /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(hasil.gambar.src)) en.gambarSah = hasil.gambar.src;
+    this.render();
+  }
+
+  public unduhResepPdf(id: string): void {
+    if (!this.resepSesi.get(id)?.hasil) return;
+    void this.bukaPratinjauEkspor({ ...this.eksporOpsi, bagian: ["resep"], resepIds: [id], sampul: false });
+  }
+
+  private kartuResep(r: Extract<Ringkasan, { hasil: "ok" }>, hariIdx: number, slotKode: string): string {
+    const id = this.idResep(r, hariIdx, slotKode);
+    if (!id) return "";
+    const en = this.resepSesi.get(id);
+    if (!en) {
+      if (!this.kunciEfektif()) {
+        return `<div class="resep-ajak"><span>Resep masakan + gambar dari AI</span><button type="button" class="chip" data-open-kontrol="true">${ikon("kunci")}<span>Isi kunci OpenRouter</span></button></div>`;
+      }
+      return `${this.pesanBatasBawaan ? `<p class="ai-status ai-status--ditolak" role="status">${escHtml(this.pesanBatasBawaan)}</p>` : ""}<button type="button" class="btn btn--sekunder btn--penuh resep-buat" data-resep-buat="${escHtml(slotKode)}" data-hari-idx="${hariIdx}">${ikon("spark")}<span>Buat resep + gambar (AI)</span></button>`;
+    }
+    if (en.memuat) {
+      return `<div class="resep-kartu resep-kartu--memuat" role="status" aria-live="polite"><div class="resep-kartu__gambar resep-skeleton" aria-hidden="true"></div><p class="resep-kartu__tunggu"><strong>Menulis resep dan menggambar hidangan…</strong><br />Biasanya 15 sampai 60 detik. Resep dan gambar akan muncul bersamaan.</p></div>`;
+    }
+    const h = en.hasil!;
+    const g = h.gambar;
+    const gambarAman = en.gambarSah !== undefined;
+    const galat = [pesanGalatResep(h), pesanGalatGambar(g)].filter(Boolean) as string[];
+    return `<div class="resep-kartu" data-resep-id="${escHtml(id)}">
+      <figure class="resep-kartu__gambar">
+        ${gambarAman ? `<img src="${en.gambarSah}" alt="Ilustrasi AI untuk ${escHtml(en.masukan.judulSlot)}" decoding="async" />` : `<div class="resep-kartu__tanpa">Gambar tidak tersedia</div>`}
+        <figcaption>${gambarAman ? "Ilustrasi dibuat AI dari daftar bahan, bukan foto hasil masak." : "Resep tetap bisa dipakai tanpa gambar."}</figcaption>
+      </figure>
+      <div class="resep-kartu__isi md">${renderMarkdown(h.resep.teks)}</div>
+      ${h.resep.sumber === "ai" ? `<div class="kartu-ai__peringatan" role="note">Resep ditulis AI dan bisa keliru. Bahan dan gram dihitung mesin NUTRIVA. Periksa kebersihan dan kematangan makanan sebelum disajikan.</div>` : `<div class="kartu-ai__peringatan" role="note">Resep cadangan disusun otomatis tanpa AI.</div>`}
+      ${galat.length ? `<p class="ai-status ai-status--ditolak" role="status">${escHtml(galat.join(" "))}</p>` : ""}
+      <div class="baris-aksi">
+        <button type="button" class="btn btn--utama" data-resep-pdf="${escHtml(id)}">${ikon("pdf")}<span>Unduh PDF resep</span></button>
+        <button type="button" class="chip" data-resep-buat="${escHtml(en.slotKode)}" data-hari-idx="${hariIdx}">${ikon("spark")}<span>Buat ulang</span></button>
+      </div>
+    </div>`;
+  }
+
+  private daftarResepEkspor(r: Extract<Ringkasan, { hasil: "ok" }>): { resep: ResepEkspor[]; lama: number } {
+    const hasil: ResepEkspor[] = [];
+    const cocok = new Set<string>();
+    r.pola?.hari.forEach((h, hi) => {
+      for (const sl of h.slot) {
+        const id = this.idResep(r, hi, sl.kode);
+        const en = id ? this.resepSesi.get(id) : undefined;
+        if (!id || !en || en.memuat || !en.hasil) continue;
+        cocok.add(id);
+        hasil.push({
+          id,
+          hari: h.hari_ke,
+          slotJudul: en.masukan.judulSlot,
+          pita: LABEL_PITA[r.pola!.pita].replace(" bulan", ""),
+          bahan: sl.item.map((it) => ({ nama: PETA_ATRIBUT.get(it.bahan_id)?.nama ?? it.bahan_id, gram: it.gram, peran: it.peran })),
+          teks: en.hasil.resep.teks,
+          ai: en.hasil.resep.sumber === "ai",
+          gambar: en.gambarSah,
+          modelGambar: en.hasil.gambar.ok ? en.hasil.gambar.model : undefined,
+        });
+      }
+    });
+    const lama = [...this.resepSesi.values()].filter((x) => !x.memuat && x.hasil && !cocok.has(x.id)).length;
+    return { resep: hasil, lama };
+  }
+
+  private konteksEkspor(): KonteksEkspor | null {
+    const r = this.hitungRingkasan();
+    if (r.hasil !== "ok" || this.state.belumDiisi) return null;
+    const p = PRESET_SINTETIS[this.state.presetAktif];
+    const pj = this.ambilPenjelasanStatus(r.muatan_ai_status);
+    return {
+      r,
+      masukan: this.state.masukan,
+      labelContoh: this.state.sendiri ? `Data Anda · ${this.state.masukan.status.umur.bulan} bln` : p.label,
+      hariIdx: this.state.hariMenuIdx,
+      penjelasan: pj ? { teks: pj.teks, ai: pj.sumber === "ai" } : undefined,
+      ...(() => {
+        const { resep, lama } = this.daftarResepEkspor(r);
+        const penjelasMenu = r.muatan_ai_menu.flatMap((mu, idx) => {
+          const x = this.ambilPenjelasanMenu(idx, mu);
+          return x ? [{ hari: r.pola?.hari[idx]?.hari_ke ?? idx + 1, teks: x.teks, ai: x.sumber === "ai" }] : [];
+        });
+        return { resep, resepLama: lama, penjelasMenu };
+      })(),
+      tanggal: new Date(),
+      labelAlasan,
+      labelAlergen: (k) => DAFTAR_ALERGEN_UI.find((a) => a.kode === k)?.label ?? k,
+      labelMdd: (k) => LABEL_KELOMPOK_MDD[k] ?? k,
+    };
+  }
+
+  /** Buka lembar ekspor; pilihan bagian diawali dari halaman yang sedang dibuka. */
+  private bukaLembarEkspor(): void {
+    this.eksporOpsi = { ...this.eksporOpsi, bagian: bagianUntukLayar(this.state.layar) };
+    this.bukaLembar(() => this.bangunLembarEkspor(), "full");
+  }
+
+  private kartuUltimate(c: KonteksEkspor, ada: Record<BagianId, true | string>): string {
+    const bagian = PILIHAN_CEPAT.find((q) => q.id === "ultimate")!.bagian.filter((b) => ada[b] === true);
+    const resep = c.resep ?? [];
+    const gambar = resep.filter((x) => x.gambar).length;
+    const butir = [
+      c.r.pola ? `${c.r.pola.hari.length} hari menu` : "",
+      resep.length ? `${resep.length} resep${gambar ? `, ${gambar} bergambar` : ""}` : "",
+      c.r.belanja ? "daftar belanja" : "",
+      "status, gizi, penjelasan, sumber",
+      "kartu dan poster",
+    ].filter(Boolean);
+    return `<div class="kartu kartu--sorot ultimate">
+      <div class="kartu__baris"><span class="kartu__label">Ultimate</span><span class="lencana lencana--cukup">${bagian.length} bagian</span></div>
+      <p class="kartu__judul">Semua data sesi ini dalam satu PDF</p>
+      <p class="kartu__isi">${escHtml(butir.join(" · "))}. Sampul, daftar isi bernomor halaman, dan ringkasan satu halaman otomatis disertakan.${resep.length ? "" : " Belum ada resep AI: buat dulu di halaman Sajian bila ingin ikut tercetak."}</p>
+      <div class="baris-aksi"><button type="button" class="btn btn--utama btn--penuh" data-eks-ultimate="true">${ikon("pdf")}<span>Buat PDF Ultimate</span></button></div>
+    </div>`;
   }
 
   private bangunLembarEkspor(): string {
-    const r = this.hitungRingkasan();
-    const bisa = r.hasil === "ok";
-    const saran = this.jenisEksporLayar();
+    const c = this.konteksEkspor();
+    const ada = ketersediaan(c);
+    const o = this.eksporOpsi;
+    const chip = (aktif: boolean, attr: string, teks: string): string =>
+      `<button type="button" class="chip ${aktif ? "is-active" : ""}" aria-pressed="${aktif ? "true" : "false"}" ${attr}>${escHtml(teks)}</button>`;
+    const terpilih = o.bagian.filter((b) => ada[b] === true);
+    const cepat = PILIHAN_CEPAT.map((x) => {
+      const sama = x.bagian.filter((b) => ada[b] === true).every((b) => o.bagian.includes(b)) && terpilih.every((b) => x.bagian.includes(b));
+      return chip(sama, `data-eks-cepat="${x.id}"`, x.nama);
+    }).join("");
+    const daftar = DAFTAR_BAGIAN.map((b) => {
+      const status = ada[b.id];
+      const bisa = status === true;
+      const on = bisa && o.bagian.includes(b.id);
+      return `<button type="button" class="pilihan-item ${on ? "is-selected" : ""}" data-eks-bagian="${b.id}" aria-pressed="${on ? "true" : "false"}" ${bisa ? "" : "disabled"}>
+        <div><div class="pilihan-item__nama">${escHtml(b.nama)}</div><div class="pilihan-item__sub">${escHtml(bisa ? `${b.sub} · ${b.asal}` : String(status))}</div></div>
+        <span class="pilihan-item__indikator">${on ? "✓" : ""}</span>
+      </button>`;
+    }).join("");
     return `
       <div class="layar" style="gap:12px;">
         <div>
           <h2 class="layar__judul">Ekspor <em>PDF</em></h2>
-          <p class="layar__sub">Dokumen A4 siap cetak dari contoh yang sedang dipakai. Di dialog cetak, pilih &ldquo;Simpan sebagai PDF&rdquo;.</p>
+          <p class="layar__sub">Pilih bagian yang ingin dimuat. Tata letak disusun otomatis dan sama di semua ukuran layar.</p>
         </div>
         ${
-          bisa
-            ? `<div class="pilihan-grid">
-          ${DAFTAR_EKSPOR.map(
-            (x) => `<button type="button" class="pilihan-item ${x.jenis === saran ? "is-selected" : ""}" data-ekspor-jenis="${x.jenis}">
-              <div><div class="pilihan-item__nama">${escHtml(x.nama)}${x.jenis === saran ? " · halaman ini" : ""}</div><div class="pilihan-item__sub">${escHtml(x.sub)}</div></div>
-              <span class="pilihan-item__indikator">${ikon("pdf")}</span>
-            </button>`,
-          ).join("")}
-        </div>`
+          c
+            ? `${this.kartuUltimate(c, ada)}
+        <div class="kartu"><span class="kartu__label">Pilihan cepat</span><div class="baris-aksi" style="margin-top:6px;">${cepat}</div></div>
+        <div class="kartu"><span class="kartu__label">Bagian dokumen</span><div class="pilihan-grid" style="margin-top:6px;">${daftar}</div></div>
+        <div class="kartu">
+          <span class="kartu__label">Kertas dan tampilan</span>
+          <div class="baris-aksi" style="margin-top:6px;">${(["A4", "F4"] as Kertas[]).map((k) => chip(o.kertas === k, `data-eks-kertas="${k}"`, k)).join("")}</div>
+          <div class="baris-aksi" style="margin-top:6px;">
+            ${chip(o.hemat, 'data-eks-opsi="hemat"', "Hemat tinta")}
+            ${chip(o.padat, 'data-eks-opsi="padat"', "Padat")}
+            ${chip(o.sampul, 'data-eks-opsi="sampul"', "Sampul dan daftar isi")}
+          </div>
+        </div>
+        <div class="baris-aksi"><button type="button" class="btn btn--utama btn--penuh" data-eks-buka="true" ${terpilih.length ? "" : "disabled"}>${ikon("pdf")}<span>Pratinjau dan unduh PDF${terpilih.length ? ` (${terpilih.length} bagian)` : ""}</span></button></div>`
             : `<div class="kartu"><p class="kartu__isi">Isi ukuran anak yang valid lebih dulu agar dokumen dapat dibuat.</p></div>`
         }
       </div>`;
   }
 
-  public ekspor(jenis: JenisEkspor): void {
-    const r = this.hitungRingkasan();
-    if (r.hasil !== "ok") return;
-    const p = PRESET_SINTETIS[this.state.presetAktif];
-    const muatan = r.muatan_ai_status;
-    const pj = this.ambilPenjelasanStatus(muatan);
-    const konteks = {
-      r,
-      masukan: this.state.masukan,
-      labelContoh: p.label,
-      hariIdx: this.state.hariMenuIdx,
-      penjelasan: pj ? { teks: pj.teks, ai: pj.sumber === "ai" } : undefined,
-      tanggal: new Date(),
-      labelAlasan,
-    };
-    cetakDokumen(bangunDokumen(jenis, konteks), judulBerkas(jenis, konteks));
+  /** Susun, ukur, dan tampilkan pratinjau dokumen. */
+  public async bukaPratinjauEkspor(opsiEkspor: OpsiEkspor = this.eksporOpsi): Promise<void> {
+    const c = this.konteksEkspor();
+    if (!c || typeof document === "undefined") return;
+    const dok = susunBlok(opsiEkspor, c);
+    if (!dok.isi.length) return;
+    this.tutupPratinjau();
+    const tgl = c.tanggal.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    this.pratinjauDiRiwayat = false;
+    try {
+      window.history.pushState({ nutriva: this.state.layar, pratinjau: true }, "", `#${this.state.layar}`);
+      this.pratinjauDiRiwayat = true;
+    } catch { /* riwayat tak tersedia */ }
+    const latar = this.akar;
+    latar.setAttribute?.("inert", "");
+    this.pratinjau = await bukaPratinjau({
+      blok: dok.blok,
+      opsi: opsiEkspor,
+      meta: { judul: dok.judul, label: c.labelContoh.split(" · ")[0] ?? "", tanggal: tgl },
+      judulBerkas: judulBerkas(opsiEkspor, c),
+      onTutup: () => {
+        latar.removeAttribute?.("inert");
+        this.pratinjau = null;
+        const keRiwayat = this.pratinjauDiRiwayat;
+        this.pratinjauDiRiwayat = false;
+        if (keRiwayat) { try { window.history.back(); } catch { /* diabaikan */ } }
+        (this.akar.querySelector?.("[data-buka-ekspor]") as HTMLElement | null)?.focus?.({ preventScroll: true });
+      },
+    });
+  }
+
+  private tutupPratinjau(): void {
+    const p = this.pratinjau;
+    this.pratinjau = null;
+    p?.tutup();
+  }
+
+  private muatPrefEkspor(): OpsiEkspor {
+    const o: OpsiEkspor = { ...OPSI_BAWAAN, bagian: [] };
+    try {
+      const v = JSON.parse(localStorage.getItem("nutriva.ekspor") ?? "null") as Partial<OpsiEkspor> | null;
+      if (v) {
+        if (v.kertas === "A4" || v.kertas === "F4") o.kertas = v.kertas;
+        if (typeof v.hemat === "boolean") o.hemat = v.hemat;
+        if (typeof v.padat === "boolean") o.padat = v.padat;
+        if (typeof v.sampul === "boolean") o.sampul = v.sampul;
+      }
+    } catch { /* abaikan */ }
+    return o;
+  }
+
+  private simpanPrefEkspor(): void {
+    try { localStorage.setItem("nutriva.ekspor", JSON.stringify({ kertas: this.eksporOpsi.kertas, hemat: this.eksporOpsi.hemat, padat: this.eksporOpsi.padat, sampul: this.eksporOpsi.sampul })); } catch { /* abaikan */ }
   }
 
   private bangunLembarKontrolMobile(): string {
@@ -1100,7 +1432,7 @@ export class LayarRona {
     const NAMA_PERAN: Record<PeranRona, string> = { ibu: "Ibu / pengasuh", kader: "Kader", ahli: "Mode ahli" };
     const chip = (aktif: boolean, attr: string, teks: string): string =>
       `<button type="button" class="chip ${aktif ? "is-active" : ""}" aria-pressed="${aktif ? "true" : "false"}" ${attr}>${escHtml(teks)}</button>`;
-    const adaKunci = this.kunciApi !== "";
+    const adaKunci = this.kunciEfektif() !== "";
     const st = this.statusKunci;
     return `
       <div class="layar" style="gap:12px;">
@@ -1134,8 +1466,9 @@ export class LayarRona {
             ${(["fajar", "dekap", "terik", "lensa"] as const).map((t) => chip(this.state.tema === t, `data-pick-theme="${t}"`, NAMA_TEMA[t])).join("")}
           </div>
           <div class="baris-aksi">
-            ${chip(!Motion.isHemat(), 'data-pick-motion="penuh"', "Animasi penuh")}
-            ${chip(Motion.isHemat(), 'data-pick-motion="hemat"', "Hemat gerak")}
+            ${chip(Motion.pilihan === "penuh", 'data-pick-motion="penuh"', "Animasi penuh")}
+            ${chip(Motion.pilihan === "otomatis", 'data-pick-motion="otomatis"', "Ikuti sistem")}
+            ${chip(Motion.pilihan === "hemat", 'data-pick-motion="hemat"', "Hemat gerak")}
           </div>
           <div class="baris-aksi">
             ${chip(this.state.teksBesar, 'data-toggle-teks="true"', "Teks besar")}
@@ -1152,8 +1485,9 @@ export class LayarRona {
         <div class="kartu kartu--ai">
           <div class="kartu__baris">
             <span class="kartu__label">Penjelasan AI</span>
-            <span class="lencana ${adaKunci ? "lencana--cukup" : "lencana--perhatian"}">${adaKunci ? "Aktif" : "Belum aktif"}</span>
+            <span class="lencana ${adaKunci ? "lencana--cukup" : "lencana--perhatian"}">${adaKunci ? (this.pakaiBawaan ? "Bawaan" : "Aktif") : "Belum aktif"}</span>
           </div>
+          ${this.pakaiBawaan ? `<p class="kartu__isi">AI bawaan aktif. Anda tidak perlu mengisi apa pun; pemakaian dibatasi per sesi. Isi kunci Anda sendiri di bawah bila ingin tanpa batas.</p>` : ""}
           <p class="kartu__isi">Masukkan kunci API OpenRouter milik Anda agar penjelasan AI dapat dicoba. Tanpa kunci, aplikasi memakai teks cadangan.</p>
           <div class="field">
             <label class="field__label" for="ai-penyedia">Penyedia</label>
@@ -1162,6 +1496,10 @@ export class LayarRona {
           <div class="field">
             <label class="field__label" for="ai-model">Model</label>
             <input id="ai-model" class="field__input" type="text" data-ai-model="true" value="${escHtml(this.modelAi)}" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          </div>
+          <div class="field">
+            <label class="field__label" for="ai-model-gambar">Model gambar (untuk resep)</label>
+            <input id="ai-model-gambar" class="field__input" type="text" data-ai-model-gambar="true" value="${escHtml(this.modelGambar)}" autocomplete="off" autocapitalize="off" spellcheck="false" />
           </div>
           <div class="field">
             <label class="field__label" for="ai-kunci">Kunci API</label>
@@ -1265,7 +1603,19 @@ export class LayarRona {
 
         <div class="kartu kartu--sorot">
           <div class="kartu__baris">
-            <span class="kartu__label">Contoh hasil penggunaan</span>
+            <span class="kartu__label">Data anak Anda</span>
+          </div>
+          <p class="kartu__isi">Masukkan usia, jenis kelamin, berat, dan panjang badan anak. Tanpa nama dan tanpa tanggal lahir. Hasil status pertumbuhan, menu, dan daftar belanja langsung dihitung.</p>
+          <div class="baris-aksi" style="margin-top:4px;">
+            <button type="button" class="btn btn--utama btn--penuh" data-mulai-sendiri="true">
+              <span>${this.state.sendiri && !this.state.belumDiisi ? "Lanjut dengan data Anda →" : "Isi data anak Anda →"}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="kartu">
+          <div class="kartu__baris">
+            <span class="kartu__label">Atau lihat dulu contohnya</span>
           </div>
           <p class="kartu__isi">Pilih satu contoh untuk melihat cara kerja aplikasi.</p>
           <div class="pilihan-grid" style="margin-top:4px;">
@@ -1310,7 +1660,7 @@ export class LayarRona {
         </div>
 
         <div class="kartu kartu--catatan">
-          <p class="kartu__isi">Data anak tidak disimpan dan semua hitungan berjalan di perangkat Anda. Bila ada tanda bahaya, menu dihentikan dan Anda diarahkan ke puskesmas.</p>
+          <p class="kartu__isi">Ukuran yang Anda isi tidak disimpan dan tidak dikirim ke server; semua hitungan berjalan di perangkat Anda. Penjelas AI (opsional) hanya menerima ringkasan kategori tanpa angka mentah. Bila ada tanda bahaya, menu dihentikan dan Anda diarahkan ke puskesmas.</p>
           <button type="button" class="chip" data-go="tentang">
             ${ikon("nav-tentang")}
             <span>Selengkapnya</span>
@@ -1318,8 +1668,8 @@ export class LayarRona {
         </div>
 
         <div class="baris-aksi">
-          <button type="button" class="btn btn--utama btn--penuh" data-go="profil">
-            <span>Mulai dengan ${escHtml(presetAktif.kode)} →</span>
+          <button type="button" class="btn btn--sekunder btn--penuh" data-go="profil">
+            <span>${this.state.sendiri ? "Lanjut dengan data Anda →" : `Coba ${escHtml(presetAktif.kode)} →`}</span>
           </button>
         </div>
       </div>
@@ -1335,16 +1685,17 @@ export class LayarRona {
       <div class="layar">
         <div>
           <div class="layar__kicker">A2 · Profil &amp; Penapisan Keselamatan</div>
-          <h2 class="layar__judul">Data tumbuh kembang <em>${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)}</em></h2>
+          <h2 class="layar__judul">Data tumbuh kembang <em>${escHtml(this.namaKasus())}</em></h2>
           <p class="layar__sub">Usia dihitung dalam bulan penuh (6–23 bulan). Ukuran berdiri dan pembulatan panjang dikoreksi otomatis.</p>
         </div>
 
         <div class="kartu kartu--sorot">
           <div class="kartu__baris">
-            <span class="kartu__label">Contoh yang dipakai</span>
-            <span class="lencana lencana--cukup">${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)}</span>
+            <span class="kartu__label">${this.state.sendiri ? "Data yang dipakai" : "Contoh yang dipakai"}</span>
+            <span class="lencana lencana--cukup">${escHtml(this.namaKasus())}</span>
           </div>
-          <p class="kartu__isi">${escHtml(PRESET_SINTETIS[this.state.presetAktif].catatan)}</p>
+          ${this.state.belumDiisi ? `<p class="kartu__isi"><strong>Ukuran di bawah masih nilai awal, belum milik anak Anda.</strong> Ganti usia, berat, dan panjang badan sebelum membaca hasil.</p><div class="baris-aksi"><button type="button" class="chip" data-ukuran-sesuai="true"><span>Nilai ini sudah sesuai anak saya</span></button></div>` : ""}
+          <p class="kartu__isi">${this.state.sendiri ? "Ubah isian di bawah sesuai hasil timbang dan ukur anak Anda. Hasil dihitung ulang setiap kali isian berubah." : escHtml(PRESET_SINTETIS[this.state.presetAktif].catatan)}</p>
           <div class="baris-aksi" style="margin-top:4px;">
             ${(["A", "B", "C"] as KodePreset[])
               .map(
@@ -1594,11 +1945,13 @@ export class LayarRona {
       <div class="layar">
         <div>
           <div class="layar__kicker">Status pertumbuhan</div>
-          <h2 class="layar__judul">Peta tumbuh <em>${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)}</em> (${st.usia_bulan_penuh} bln)</h2>
+          <h2 class="layar__judul">Peta tumbuh <em>${escHtml(this.namaKasus())}</em> (${st.usia_bulan_penuh} bln)</h2>
           <p class="layar__sub">
             Berat <strong>${fmtId(m.status.bb_kg, 1)} kg</strong> · Panjang pakai <strong>${fmtId(st.panjang_dipakai_cm, 1)} cm</strong> (tabel BB/PB: ${fmtId(st.panjang_tabel_cm, 1)} cm).
           </p>
         </div>
+
+        ${this.state.belumDiisi ? `<div class="kartu kartu--sorot"><div class="kartu__baris">${lencanaStatus("perhatian", "Ukuran belum diisi")}</div><p class="kartu__isi">Hasil di halaman ini masih memakai nilai awal, bukan ukuran anak Anda.</p><div class="baris-aksi"><button type="button" class="btn btn--utama" data-go="profil">Isi ukuran anak →</button></div></div>` : ""}
 
         ${
           dikoreksiBerdiri
@@ -1712,7 +2065,7 @@ export class LayarRona {
 
         <div class="baris-aksi">
           <button type="button" class="btn btn--utama btn--penuh" data-go="${r.rujukan.tingkat === "rujuk" ? "bahaya" : "piring"}">
-            <span>${r.rujukan.tingkat === "rujuk" ? "Lihat Panduan Rujukan Tenaga Kesehatan →" : "Susun contoh menu &amp; belanja →"}</span>
+            <span>${r.rujukan.tingkat === "rujuk" ? "Lihat Panduan Rujukan Tenaga Kesehatan →" : "Susun menu &amp; belanja →"}</span>
           </button>
         </div>
       </div>
@@ -1759,7 +2112,7 @@ export class LayarRona {
     return `
       <div class="layar">
         <div>
-          <div class="layar__kicker">A4 · Contoh Pola Makan dari Aturan · Pita ${escHtml(LABEL_PITA[pola.pita])}</div>
+          <div class="layar__kicker">A4 · Pola Makan dari Aturan · Pita ${escHtml(LABEL_PITA[pola.pita])}</div>
           <h2 class="layar__judul">Racikan dapur <em>Hari ke-${hariAktif.hari_ke}</em></h2>
           <p class="layar__sub">${TAP} tombol <strong>Rincian / Ganti</strong> pada bahan makanan untuk melihat kandungan gizinya di lembar rincian atau menyaring bahan yang tidak tersedia di rumah.</p>
         </div>
@@ -1853,6 +2206,7 @@ export class LayarRona {
                     })
                     .join("")}
                 </div>
+                ${this.kartuResep(r, hariIdx, sl.kode)}
               </div>
             `;
           })
@@ -2261,7 +2615,7 @@ export class LayarRona {
         <div class="kartu">
           <span class="kartu__label">Batas alat ini</span>
           <ul class="daftar-langkah" style="margin-top:6px;">
-            <li><strong>Bukan diagnosis medis:</strong> status pertumbuhan dan contoh menu adalah bahan diskusi bersama kader Posyandu, bidan, atau dokter.</li>
+            <li><strong>Bukan diagnosis medis:</strong> status pertumbuhan dan menu adalah bahan diskusi bersama kader Posyandu, bidan, atau dokter.</li>
             <li><strong>Tidak meresepkan dosis suplemen:</strong> bila ada celah zat besi, aplikasi menyarankan konsultasi ke petugas kesehatan.</li>
             <li><strong>Bekerja tanpa internet:</strong> status, menu, dan daftar belanja dihitung di perangkat Anda. Hanya penjelasan AI yang membutuhkan koneksi.</li>
           </ul>
@@ -2299,7 +2653,7 @@ export class LayarRona {
             ${this.state.modeAhli ? `<span style="font-family:var(--f-mono);font-size:10px;">${escHtml(m.pola.benih)}</span>` : ""}
           </div>
           <div style="font-family:var(--f-display);font-size:21px;color:var(--t-1);">
-            ${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)} · ${m.status.umur.bulan} bln (${fmtId(m.status.bb_kg, 1)} kg / ${fmtId(m.status.pb_cm, 1)} cm)
+            ${escHtml(this.namaKasus())} · ${m.status.umur.bulan} bln (${fmtId(m.status.bb_kg, 1)} kg / ${fmtId(m.status.pb_cm, 1)} cm)
           </div>
           <div class="baris-aksi" style="margin:6px 0;">
             ${
@@ -2315,12 +2669,12 @@ export class LayarRona {
           <p class="kartu__isi" style="font-size:11.5px;">
             ${
               hari1
-                ? `Contoh racikan Hari 1 mencakup ${hari1.slot.length} waktu makan (${Math.round(hari1.energi_kkal)} kkal dari target MPASI ${hari1.energi_target_kkal} kkal).`
+                ? `Racikan Hari 1 mencakup ${hari1.slot.length} waktu makan (${Math.round(hari1.energi_kkal)} kkal dari target MPASI ${hari1.energi_target_kkal} kkal).`
                 : "Rekomendasi menu mandiri tidak ditampilkan pada kondisi rujukan/penghentian."
             }
           </p>
           <div class="kartu-bagi__cap">
-            ${logo("logo--mini", 18)}<span>NUTRIVA · Gizi 1000 HPK</span><span class="cap-penulis">E.13.1</span>
+            ${logo("logo--mini", 18)}<span>NUTRIVA · Gizi 1000 HPK</span><span class="cap-penulis">E.13.1 feat H.A.te</span>
           </div>
         </div>
         <div class="baris-aksi">
@@ -2377,7 +2731,7 @@ export class LayarRona {
           <div class="kartu__baris">
             ${lencanaStatus(this.state.daring ? "cukup" : "perhatian", this.state.daring ? "Daring sekarang" : "Luring sekarang")}
           </div>
-          <p class="kartu__isi">Perhitungan status gizi, contoh menu, dan daftar belanja berjalan langsung di perangkat. Saat koneksi internet terputus, kartu penjelasan otomatis beralih ke <strong>teks cadangan</strong> tanpa galat.</p>
+          <p class="kartu__isi">Perhitungan status gizi, menu, dan daftar belanja berjalan langsung di perangkat. Saat koneksi internet terputus, kartu penjelasan otomatis beralih ke <strong>teks cadangan</strong> tanpa galat.</p>
         </div>
         <div class="baris-aksi">
           <button type="button" class="btn btn--sekunder btn--penuh" data-go="status">Kembali ke Peta Pertumbuhan</button>
@@ -2533,8 +2887,8 @@ export class LayarRona {
       penjelasan.sumber === "ai"
         ? "Penjelasan AI"
         : "Teks cadangan";
-    const catatanGalat = penjelasan.sumber === "templat" && this.kunciApi ? pesanAlasan(penjelasan.alasan_templat) : null;
-    const status = this.kunciApi
+    const catatanGalat = penjelasan.sumber === "templat" && this.kunciEfektif() ? pesanAlasan(penjelasan.alasan_templat) : null;
+    const status = this.kunciEfektif()
       ? `AI aktif · ${escHtml(this.modelAi)}`
       : this.urlWorkerAi
         ? "AI tersedia"
@@ -2568,7 +2922,7 @@ export class LayarRona {
             ${this.state.sedangMemuatAi ? "disabled" : ""}
           >
             ${ikon("spark")}
-            <span>${this.state.sedangMemuatAi ? "Meminta penjelasan…" : this.kunciApi || this.urlWorkerAi ? "Minta penjelasan AI" : "Segarkan"}</span>
+            <span>${this.state.sedangMemuatAi ? "Meminta penjelasan…" : this.kunciEfektif() || this.urlWorkerAi ? "Minta penjelasan AI" : "Segarkan"}</span>
           </button>
         </div>
       </div>
@@ -2765,7 +3119,7 @@ export class LayarRona {
         }
       });
 
-      if (!Motion.isHemat()) {
+      if (!Motion.isHemat() && animasiMasuk) {
         scrollEl.querySelectorAll<HTMLElement>(".z-meter__pin").forEach((pin) => {
           const targetPct = parseFloat((pin.style && pin.style.left) || "50");
           if (Number.isNaN(targetPct)) return;
@@ -2816,6 +3170,20 @@ export class LayarRona {
       });
     });
 
+    this.qa<HTMLElement>("[data-ukuran-sesuai]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.state.belumDiisi = false;
+        this.render();
+      });
+    });
+
+    this.qa<HTMLElement>("[data-mulai-sendiri]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (this.state.sendiri && !this.state.belumDiisi) this.bukaLayar("profil");
+        else this.mulaiDataSendiri();
+      });
+    });
+
     // Pilih Kasus Sintetis A / B / C
     this.qa<HTMLElement>("[data-pick-preset]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -2845,9 +3213,9 @@ export class LayarRona {
     // Pilih Mode Gerak
     this.qa<HTMLElement>("[data-pick-motion]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const m = btn.getAttribute("data-pick-motion") as ModeGerak | null;
-        if (m) {
-          Motion.setMode(m, true);
+        const m = btn.getAttribute("data-pick-motion") as PilihanGerak | null;
+        if (m === "penuh" || m === "hemat" || m === "otomatis") {
+          Motion.pilih(m);
           this.render();
         }
       });
@@ -2911,7 +3279,8 @@ export class LayarRona {
             m.status.cara_ukur = inp.value;
           } else if (f === "bulan") {
             const v = parseInt(inp.value, 10);
-            if (!Number.isNaN(v)) m.status.umur.bulan = v;
+            if (Number.isNaN(v) || v < 0 || v > 36) return false;
+            m.status.umur.bulan = v;
           } else if (f === "hari_umur") {
             const v = parseInt(inp.value, 10);
             if (!Number.isNaN(v)) m.status.umur.hari = Math.max(0, Math.min(30, v));
@@ -2920,12 +3289,11 @@ export class LayarRona {
             const lo = parseFloat(inp.getAttribute("data-min") || "0");
             const hi = parseFloat(inp.getAttribute("data-max") || "0");
             // Nilai di luar rentang masukan ditolak (nilai lama dipertahankan), tidak dipaksa ke angka lain.
-            if (Number.isFinite(v) && v >= lo && v <= hi) {
-              if (f === "bb_kg") m.status.bb_kg = v;
-              else m.status.pb_cm = v;
-            }
+            if (!(Number.isFinite(v) && v >= lo && v <= hi)) return false;
+            if (f === "bb_kg") m.status.bb_kg = v;
+            else m.status.pb_cm = v;
           }
-        });
+        }, f === "bulan" || f === "hari_umur" || f === "bb_kg" || f === "pb_cm" ? f : "");
       });
     });
 
@@ -3061,15 +3429,40 @@ export class LayarRona {
 
     // Ekspor PDF
     this.qa<HTMLElement>("[data-buka-ekspor]").forEach((btn) => {
-      btn.addEventListener("click", () => this.bukaLembar(() => this.bangunLembarEkspor(), "half"));
+      btn.addEventListener("click", () => this.bukaLembarEkspor());
     });
-    this.qa<HTMLElement>("[data-ekspor-jenis]").forEach((btn) => {
+    const ubahEkspor = (f: (o: OpsiEkspor) => void): void => {
+      f(this.eksporOpsi);
+      this.simpanPrefEkspor();
+      this.render();
+    };
+    this.qa<HTMLElement>("[data-eks-bagian]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const jenis = btn.getAttribute("data-ekspor-jenis") as JenisEkspor | null;
-        if (!jenis) return;
+        const id = btn.getAttribute("data-eks-bagian") as BagianId | null;
+        if (!id) return;
+        ubahEkspor((o) => { o.bagian = o.bagian.includes(id) ? o.bagian.filter((x) => x !== id) : [...o.bagian, id]; });
+      });
+    });
+    this.qa<HTMLElement>("[data-eks-cepat]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const x = PILIHAN_CEPAT.find((q) => q.id === btn.getAttribute("data-eks-cepat"));
+        if (x) ubahEkspor((o) => { o.bagian = [...x.bagian]; });
+      });
+    });
+    this.qa<HTMLElement>("[data-eks-kertas]").forEach((btn) => {
+      btn.addEventListener("click", () => ubahEkspor((o) => { o.kertas = btn.getAttribute("data-eks-kertas") === "F4" ? "F4" : "A4"; }));
+    });
+    this.qa<HTMLElement>("[data-eks-opsi]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const k = btn.getAttribute("data-eks-opsi");
+        if (k === "hemat" || k === "padat" || k === "sampul") ubahEkspor((o) => { o[k] = !o[k]; });
+      });
+    });
+    this.qa<HTMLElement>("[data-eks-buka]").forEach((btn) => {
+      btn.addEventListener("click", () => {
         if (this.lembarTerbuka) this.tutupLembar();
-        // Tunggu lembar tertutup dan tampilan stabil sebelum dialog cetak dibuka.
-        setTimeout(() => this.ekspor(jenis), 380);
+        // Tunggu lembar tertutup agar fokus dan riwayat stabil sebelum pratinjau dibuka.
+        setTimeout(() => { void this.bukaPratinjauEkspor(); }, 420);
       });
     });
 
@@ -3093,6 +3486,39 @@ export class LayarRona {
         this.simpanKunci();
         this.statusKunci = { jenis: "info", teks: "Model disimpan." };
         this.render();
+      });
+    });
+    this.qa<HTMLInputElement>("[data-ai-model-gambar]").forEach((inp) => {
+      inp.addEventListener("change", () => {
+        this.modelGambar = inp.value.trim() || MODEL_GAMBAR_BAWAAN;
+        this.simpanKunci();
+        this.statusKunci = { jenis: "info", teks: "Model gambar disimpan." };
+        this.render();
+      });
+    });
+    this.qa<HTMLElement>("[data-resep-buat]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const slot = btn.getAttribute("data-resep-buat");
+        const hari = Number(btn.getAttribute("data-hari-idx"));
+        if (slot && Number.isInteger(hari)) void this.buatResep(hari, slot);
+      });
+    });
+    this.qa<HTMLElement>("[data-resep-pdf]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-resep-pdf");
+        if (id) this.unduhResepPdf(id);
+      });
+    });
+    this.qa<HTMLElement>("[data-eks-ultimate]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const c = this.konteksEkspor();
+        if (!c) return;
+        const ada = ketersediaan(c);
+        const semua = PILIHAN_CEPAT.find((q) => q.id === "ultimate")!.bagian.filter((b) => ada[b] === true);
+        this.eksporOpsi = { ...this.eksporOpsi, bagian: [...semua], sampul: true };
+        delete this.eksporOpsi.resepIds;
+        if (this.lembarTerbuka) this.tutupLembar();
+        setTimeout(() => { void this.bukaPratinjauEkspor(); }, 420);
       });
     });
     this.qa<HTMLElement>("[data-ai-ingat]").forEach((btn) => {

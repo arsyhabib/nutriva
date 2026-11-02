@@ -81,7 +81,25 @@ dibahas merasa sejak menyukai melengkapi pencegahan akibat kebingungan soal uang
 berisiko lancar terhindar sesudah kadar melainkan mulai lengkapi hindari pertimbangkan memilih pilihlah ukur saya
 mohon tergolong silakan buruk
 `;
-export const KOSAKATA_MENTAH = [UMUM, TUMBUH, GIZI, KEADAAN, KATA_KERJA].join(" ");
+const LAZIM = `
+si bunda kecil proporsi porsi komposisi susunan seimbang keseimbangan gambaran gambar umum secara keseluruhan bagian
+bagiannya pola polanya hari harian mingguan minggu bulan usia umur rentang tekstur kasar halus lembut cincang saring
+lunak kenyal renyah potong dipotong kecil-kecil bentuk jari genggam finger food camilan selingan sarapan siang malam
+pagi sore waktu jadwal jam kali sekali dua tiga empat lima enam tujuh delapan sembilan sepuluh beberapa banyak sedikit
+semua setiap tiap masing seluruh sebagian lainnya lain lagi juga serta dan atau tetapi namun karena sehingga agar supaya
+jika bila apabila kalau saat ketika sambil selama sebelum sesudah setelah hingga sampai untuk dari pada dalam dengan
+oleh atas bagi antara tanpa akan telah sudah sedang masih belum pernah selalu sering kadang jarang tidak bukan jangan
+ini itu ada adalah ialah yang apa siapa mana bagaimana mengapa kenapa di mana kapan sini situ sana mereka kami kita
+anda kamu dia ia dirinya diri anak anaknya buah hati balita bayi si-kecil mpasi asi menyusu menyusui 
+hidangan menu resep masak memasak dimasak matang kukus rebus tumis panggang goreng aduk campur haluskan lumatkan
+mangkuk piring gelas porsi takaran ukuran berat gram kilogram liter mililiter menit detik
+bahan bahannya bumbu aroma harum wangi lezat enak nikmat sedap menarik menggugah selera cantik tampilan sajian
+disajikan sajikan hangat dingin suhu ruang segera tutup wadah bersih higienis cuci mencuci kebersihan tangan alat
+membantu mendukung memenuhi mencukupi menutup menutupi kebutuhan gizi harian lengkap beragam bervariasi seimbang
+terima kasih semoga sehat selalu sukses lancar bersama dampingi mendampingi pendampingan
+poin penting ringkas ringkasnya intinya kesimpulan kesimpulannya catatan tambahan tips saran langkah cara
+`;
+export const KOSAKATA_MENTAH = [UMUM, TUMBUH, GIZI, KEADAAN, KATA_KERJA, LAZIM].join(" ");
 export const KOSAKATA: ReadonlySet<string> = new Set(KOSAKATA_MENTAH.toLowerCase().match(/[a-z]+/g) ?? []);
 
 const AWALAN = ["di", "ke", "me", "mem", "men", "meng", "meny", "ber", "be", "ter", "te", "se", "pe", "pem", "pen", "peng", "peny", "per", "memper"];

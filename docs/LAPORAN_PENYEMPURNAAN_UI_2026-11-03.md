@@ -19,3 +19,14 @@ Ringkasan perubahan dan hasil uji. Pemilik yang melakukan commit.
 ## Belum diuji / catatan
 - Perangkat fisik dan pembaca layar belum diuji. Worker belum dideploy. Panggilan OpenRouter sungguhan belum diuji (hanya tiruan jaringan, tanpa kunci).
 - Kunci yang pernah ditempel di percakapan harus dicabut dan diganti oleh pemilik.
+
+## Tambahan sore hari (2026-11-03): data sendiri, resep AI, ekspor Ultimate
+
+1. **Validator penjelas AI**: kosakata wajar (sapaan, "si kecil", "proporsi", dll.) tidak lagi ditolak; angka, kata terlarang, status, dan rujukan tetap ketat. Alasan penolakan ditampilkan ramah di UI.
+2. **Mode data sendiri**: beranda "Isi data anak Anda"; label "Data Anda"; nilai awal ditandai belum diisi sampai usia, berat, dan panjang diganti dengan nilai sah (atau dikonfirmasi); pantangan dan tanda bahaya contoh tidak terbawa; ekspor dikunci selama belum diisi. Tanpa nama, tanpa tanggal lahir, tanpa penyimpanan.
+3. **Resep AI + ilustrasi**: satu klik, teks dan gambar diminta bersamaan (`Promise.all`) dan tampil bersamaan. Bahan dan gram dari mesin; validator resep ketat (bahan di luar daftar, bumbu, gram terikat per bahan, menit 5 sampai 45, klaim manfaat, negasi ketat); gagal-aman ke resep cadangan; gambar diperiksa (data URL, tipe, ukuran) dan dibatasi 8 resep per sesi.
+4. **Ekspor**: bagian baru Ringkasan sesi, Resep dan ilustrasi AI, Penjelasan sederhana; pilihan cepat **Ultimate**; tombol "Unduh PDF" per resep; sampul, daftar isi bernomor halaman.
+5. Audit independen (Sonnet) menemukan 2 kritis dan beberapa tinggi/sedang; yang kritis dan tinggi sudah diperbaiki (lihat tes `tests/ai-resep.test.ts`). Belum diuji: panggilan sungguhan ke OpenRouter (endpoint gambar dan parameter `output_format` mengikuti dokumentasi yang dibaca, belum dicoba dengan kunci nyata), perangkat nyata, pembaca layar.
+
+## Kunci bawaan tersamar
+Jalankan di komputer Anda: `npm run kunci:pasang` (ketik kunci, tidak tampil), lalu `npm run check && npm run build`, commit dan push. Ganti harian: ulangi perintah yang sama. Cabut: `npm run kunci:pasang -- --hapus`. Penyamaran hanya menghindarkan pemindai teks; keamanan sebenarnya ada pada batas kredit kunci di OpenRouter.

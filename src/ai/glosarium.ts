@@ -49,4 +49,4 @@ export const LABEL_PITA: Record<MuatanAi["pita_usia"], string> = {
 export const PERINGATAN_AI =
   "Penjelasan ini dibuat oleh AI dan bisa keliru. Angka dan status dihitung oleh mesin NUTRIVA, bukan oleh AI.";
 export const PERNYATAAN_PRIVASI_AI =
-  "Penjelasan AI bersifat opsional. Yang dikirim hanya ringkasan berkode (rentang usia, kategori status, persen kecukupan gizi). Nama, tanggal lahir, berat badan, dan panjang badan tidak dikirim. Teks cadangan selalu tersedia tanpa jaringan.";
+  "Penjelasan AI bersifat opsional. Yang dikirim hanya ringkasan berkode (rentang usia, kategori status, persen kecukupan gizi). Nama, tanggal lahir, berat badan, dan panjang badan tidak dikirim. Teks cadangan selalu tersedia tanpa jaringan. Resep dan gambar AI (bila Anda memintanya) hanya mengirim nama bahan, takaran gram, dan rentang usia.";

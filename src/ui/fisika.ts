@@ -24,12 +24,32 @@ const mqReduced =
     ? window.matchMedia("(prefers-reduced-motion: reduce)")
     : { matches: false, addEventListener: undefined };
 
+export type PilihanGerak = "otomatis" | "penuh" | "hemat";
+const KUNCI_GERAK = "nutriva.gerak";
+function bacaPilihan(): PilihanGerak {
+  try {
+    const v = typeof localStorage !== "undefined" ? localStorage.getItem(KUNCI_GERAK) : null;
+    if (v === "otomatis" || v === "penuh" || v === "hemat") return v;
+  } catch { /* penyimpanan tak tersedia */ }
+  return "penuh";
+}
+
 export const Motion = {
-  mode: (mqReduced.matches ? "hemat" : "penuh") as ModeGerak,
+  /** Pilihan pengguna. Bawaan "penuh": pengaturan "hapus animasi" milik sistem tidak otomatis mematikan gerak, kecuali pengguna memilih "otomatis". */
+  pilihan: bacaPilihan() as PilihanGerak,
+  mode: "penuh" as ModeGerak,
   userOverride: null as ModeGerak | null,
-  timeScale: 1.0,
+  timeScale: 0.85,
   isHemat(): boolean {
     return this.mode === "hemat";
+  },
+  efektif(p: PilihanGerak): ModeGerak {
+    return p === "otomatis" ? (mqReduced.matches ? "hemat" : "penuh") : p;
+  },
+  pilih(p: PilihanGerak): void {
+    this.pilihan = p;
+    try { if (typeof localStorage !== "undefined") localStorage.setItem(KUNCI_GERAK, p); } catch { /* abaikan */ }
+    this.setMode(this.efektif(p), true);
   },
   setMode(m: ModeGerak, fromUser = false): void {
     if (fromUser) this.userOverride = m;
@@ -57,12 +77,11 @@ export const Motion = {
     }
   },
 };
+Motion.mode = Motion.efektif(Motion.pilihan);
 
 if (mqReduced.addEventListener) {
-  mqReduced.addEventListener("change", (e: MediaQueryListEvent) => {
-    if (!Motion.userOverride) {
-      Motion.setMode(e.matches ? "hemat" : "penuh", false);
-    }
+  mqReduced.addEventListener("change", () => {
+    if (Motion.pilihan === "otomatis") Motion.setMode(Motion.efektif("otomatis"), false);
   });
 }
 if (typeof document !== "undefined" && document.documentElement) {
