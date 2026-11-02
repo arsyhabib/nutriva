@@ -17,6 +17,10 @@ export const SIMBOL: Record<string, string> = {
     '<rect x="4" y="4" width="16" height="16" rx="3" stroke-dasharray="3 3"/><path d="M8.5 12h7"/>',
   "verif-sah":
     '<path d="M12 3l7 3.2v5.3c0 4.6-3 7.9-7 9.5-4-1.6-7-4.9-7-9.5V6.2L12 3z"/><path d="M8.8 12.2l2.1 2.2 4.5-4.6"/>',
+  "pdf": '<path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z"/><path d="M14 3.5V8h4"/><path d="M9 14.5h6M9 17.5h4"/>',
+  "panah-kiri": '<path d="M14.5 6l-6 6 6 6"/>',
+  "panah-kanan": '<path d="M9.5 6l6 6-6 6"/>',
+  "kunci": '<circle cx="8.5" cy="14.5" r="3.5"/><path d="M11 12l8-8m-3 3l2.5 2.5M14 9l2 2"/>',
   "verif-perlu":
     '<circle cx="12" cy="12" r="8.5" stroke-dasharray="4 2.5"/><path d="M12 8.2v4.4"/><circle cx="12" cy="15.6" r="0.8" fill="currentColor"/>',
   "verif-draf":
@@ -59,13 +63,31 @@ export const SIMBOL: Record<string, string> = {
     '<path d="M8 3.8H3.8V8M16 3.8h4.2V8M8 20.2H3.8V16M16 20.2h4.2V16"/>',
 };
 
+/** Tanda merek NUTRIVA: tetes nektar dengan tinggi cairan emas dan huruf N. Vektor murni; warna merek tetap di semua tema. */
+const LOGO_ISI =
+  '<defs><linearGradient id="nv-g1" x1="0.15" y1="0" x2="0.85" y2="1"><stop offset="0" stop-color="#BE3A55"/><stop offset="1" stop-color="#651226"/></linearGradient>' +
+  '<linearGradient id="nv-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DEA8"/><stop offset="1" stop-color="#B98A2E"/></linearGradient>' +
+  '<clipPath id="nv-c"><path d="M60 8C60 8 95 45 95 74a35 35 0 0 1-70 0C25 45 60 8 60 8Z"/></clipPath></defs>' +
+  '<path d="M60 8C60 8 95 45 95 74a35 35 0 0 1-70 0C25 45 60 8 60 8Z" fill="url(#nv-g1)"/>' +
+  '<g clip-path="url(#nv-c)"><path d="M20 93C34 85 46 100 60 93S86 85 100 93V120H20Z" fill="url(#nv-g2)" opacity=".92"/><path d="M20 99C34 91 46 106 60 99S86 91 100 99V120H20Z" fill="#fff" opacity=".18"/></g>' +
+  '<path d="M60 8C60 8 95 45 95 74a35 35 0 0 1-70 0C25 45 60 8 60 8Z" fill="none" stroke="url(#nv-g2)" stroke-width="2" stroke-linejoin="round"/>' +
+  '<path d="M44 80V50L76 80V50" fill="none" stroke="#FFF6EA" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>' +
+  '<path d="M37 54C39 45 45 36 52 28" fill="none" stroke="#FFF6EA" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/>';
+
+/** Logo sebagai gambar dekoratif (nama merek selalu ada sebagai teks di dekatnya). */
+export function logo(kelas = "", ukuran = 32): string {
+  return `<svg class="logo ${kelas}" width="${ukuran}" height="${ukuran}" viewBox="0 0 120 120" aria-hidden="true" focusable="false"><use href="#nv-logo"></use></svg>`;
+}
+
 export function pasangSprite(): void {
   if (typeof document === "undefined" || !document.body) return;
   if (document.getElementById("rona-svg-sprite")) return;
   const div = document.createElement("div");
   div.id = "rona-svg-sprite";
-  div.style.display = "none";
-  let inner = '<svg xmlns="http://www.w3.org/2000/svg">';
+  // Bukan display:none: gradien di dalam sprite tidak tergambar bila wadahnya disembunyikan.
+  div.setAttribute("aria-hidden", "true");
+  div.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none";
+  let inner = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" focusable="false"><symbol id="nv-logo" viewBox="0 0 120 120">${LOGO_ISI}</symbol></svg><svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" focusable="false">`;
   for (const [id, path] of Object.entries(SIMBOL)) {
     inner += `<symbol id="ikon-${id}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path}</symbol>`;
   }
@@ -123,14 +145,12 @@ export function lencanaStatus(
   return `<span class="lencana ${m.cls}">${ikon(m.ikon)}<span>${labelKustom || m.teks}</span></span>`;
 }
 
+/** Penanda asal klaim. Hanya asumsi pengembang yang diberi tanda; rujukan lain tidak ditandai agar tampilan tetap bersih. */
 export function lencanaVerif(kode: "sah" | "perlu" | "draf" = "perlu"): string {
-  if (kode === "sah") {
-    return `<span class="verif verif--sah" title="Merujuk dokumen regulasi; verifikasi dosen belum tentu selesai">${ikon("verif-sah")}<span>[SUMBER DIRUJUK]</span></span>`;
-  }
   if (kode === "draf") {
-    return `<span class="verif verif--draf" title="Asumsi pengembang tingkat D (belum diverifikasi dosen)">${ikon("verif-draf")}<span>[ASUMSI DRAF]</span></span>`;
+    return `<span class="verif verif--draf" title="Asumsi pengembang">${ikon("verif-draf")}<span>Asumsi</span></span>`;
   }
-  return `<span class="verif verif--perlu" title="Tabel/aturan belum diverifikasi dosen pengampu">${ikon("verif-perlu")}<span>[BELUM DIVERIFIKASI DOSEN]</span></span>`;
+  return "";
 }
 
 /**

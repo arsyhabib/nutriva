@@ -18,11 +18,11 @@ export interface PresetSintetis {
 export const PRESET_SINTETIS: Record<KodePreset, PresetSintetis> = {
   A: {
     id: "A",
-    kode: "KASUS-SINTETIS-A",
-    label: "Kasus Sintetis A (9 bln · Gizi Baik)",
+    kode: "Contoh 1",
+    label: "Contoh 1 · 9 bln · Gizi baik",
     ringkas: "9 bln 4 hr · P · 8,2 kg · 70,5 cm · Masih ASI",
     catatan:
-      "Skenario normal kelompok 9–11 bulan (tekstur cincang halus / finger food, masih menyusu ASI, tanpa pantangan bahan).",
+      "Anak 9 bulan dengan gizi baik, masih menyusu ASI, tanpa pantangan bahan.",
     masukan: {
       status: {
         jk: "P",
@@ -43,11 +43,11 @@ export const PRESET_SINTETIS: Record<KodePreset, PresetSintetis> = {
   },
   B: {
     id: "B",
-    kode: "KASUS-SINTETIS-B",
-    label: "Kasus Sintetis B (14 bln · Indikasi Rujuk)",
+    kode: "Contoh 2",
+    label: "Contoh 2 · 14 bln · Perlu rujukan",
     ringkas: "14 bln 12 hr · L · 6,8 kg · 72,0 cm · Tanda Bahaya",
     catatan:
-      "Skenario rujukan wajib (gerbang keselamatan): anak tampak tidak mau minum/menyusu disertai berat badan sangat kurang. Mesin menghentikan rekomendasi menu mandiri.",
+      "Anak 14 bulan dengan tanda bahaya: tidak mau minum atau menyusu dan berat badan sangat kurang. Menu tidak disusun, aplikasi mengarahkan ke rujukan.",
     masukan: {
       status: {
         jk: "L",
@@ -68,11 +68,11 @@ export const PRESET_SINTETIS: Record<KodePreset, PresetSintetis> = {
   },
   C: {
     id: "C",
-    kode: "KASUS-SINTETIS-C",
-    label: "Kasus Sintetis C (18 bln · Pantang Telur)",
+    kode: "Contoh 3",
+    label: "Contoh 3 · 18 bln · Tanpa telur",
     ringkas: "18 bln 2 hr · L · 9,6 kg · 79,5 cm · Tanpa ASI · Pantang Telur",
     catatan:
-      "Skenario kelompok 12–23 bulan (makanan keluarga dihaluskan seperlunya), sudah tidak menyusu ASI, dan menghindari bahan kelompok alergen telur.",
+      "Anak 18 bulan, sudah tidak menyusu ASI, menghindari telur.",
     masukan: {
       status: {
         jk: "L",

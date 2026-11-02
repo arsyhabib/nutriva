@@ -62,9 +62,11 @@ describe("kejujuran isi UI (tanpa angka/klaim karangan)", () => {
     expect(kena).toEqual([]);
   });
 
-  it("setiap layar memuat label prototipe persis dan tidak ada skrip inline", () => {
+  it("tampilan bersih: tanpa label prototipe, kata dosen, atau istilah verifikasi; tanpa skrip inline", () => {
     for (const x of SEMUA) {
-      expect(x.html, x.kunci).toContain(LABEL_PROTOTIPE);
+      expect(x.html, x.kunci).not.toContain(LABEL_PROTOTIPE);
+      const tanpaBenih = x.html.replace(/rona-sintetis-[a-z0-9]+/g, ""); // id benih PRNG bukan teks untuk pembaca
+      expect(/dosen|diverifikasi|verifikasi|Prototipe PjBL|Gerbang Konteks|sintetis|Penguji|Audit Ilmiah/i.test(tanpaBenih), x.kunci + " " + (tanpaBenih.match(/.{30}(dosen|diverifikasi|verifikasi|Prototipe PjBL|Gerbang Konteks|sintetis|Penguji|Audit Ilmiah).{30}/i)?.[0] ?? "")).toBe(false);
       expect(/<script/i.test(x.html), x.kunci).toBe(false);
       expect(/\son[a-z]+=/i.test(x.html), x.kunci).toBe(false);
     }
@@ -167,7 +169,7 @@ describe("render parsial", () => {
       app.aturPeran(PERAN[i % 3]!);
       app.pilihPreset(PRESETS[i % 3]!);
     }
-    expect(app.ambilHtml()).toContain(LABEL_PROTOTIPE);
+    expect(app.ambilHtml()).not.toContain(LABEL_PROTOTIPE);
   });
 });
 

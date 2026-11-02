@@ -4,13 +4,16 @@
  * dapat berjalan secara luring (offline-capable). Permintaan ke proxy AI
  * (/v1/jelaskan) tidak pernah disimpan di cache (ADR-0003 & K-08).
  */
-const NAMA_CACHE = "nutriva-inti-v0.3.0";
+const NAMA_CACHE = "nutriva-inti-v0.4.0";
 const ASET_INTI = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon.svg",
   "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512.png",
+  "./logo.svg",
 ];
 
 /** Muat shell + seluruh aset berhash (JS, CSS, font) saat instal agar kunjungan luring pertama berhasil. */

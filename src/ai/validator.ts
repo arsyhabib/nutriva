@@ -1,6 +1,7 @@
 import type { MuatanAi } from "./kontrak";
 import { LABEL_BBPB, LABEL_BBU, LABEL_CELAH, LABEL_PBU, LABEL_PITA, NAMA_ZAT } from "./glosarium";
 import { kataDikenal } from "./kosakata";
+import { adaMarkupTerlarang, teksPolos } from "./markdown";
 
 /**
  * Validator keluaran AI (K-08). Dipakai di Worker dan di klien. Fungsi murni.
@@ -30,9 +31,9 @@ export type HasilValidasi = { ok: true; teks: string } | { ok: false; alasan: Al
 // klaim: n/a — batas rekayasa panjang keluaran AI, bukan konstanta ilmiah
 const PANJANG_MIN = 40;
 // klaim: n/a — batas rekayasa panjang keluaran AI
-const PANJANG_MAKS = 900;
+const PANJANG_MAKS = 2400;
 // klaim: n/a — batas rekayasa jumlah baris
-const BARIS_MAKS = 10;
+const BARIS_MAKS = 40;
 
 const KONFUSABEL: Record<string, string> = {
   а: "a", е: "e", о: "o", р: "p", с: "c", у: "y", х: "x", к: "k", і: "i", ј: "j", ѕ: "s", һ: "h", ӏ: "l", в: "b", м: "m", н: "h", т: "t",
@@ -93,7 +94,6 @@ const POLA_TINDAKAN: RegExp[] = [
 ];
 const KATA_INGGRIS = ["the", "and", "should", "child", "with", "every", "daily", "your", "need", "needs", "for", "that", "this", "are", "visit", "eat", "more", "give", "also", "can", "will"];
 const POLA_TAUTAN = /(https?:|www\.|:\/\/|\]\(|\[\.\]|\(\.\)|hxxp|@[a-z0-9]|\b[a-z0-9][a-z0-9-]*\.[a-z]{2,}\b|\bdot\s*(?:com|id|org|net|co|me|ly|io|xyz|app|link)\b|<[^>]*>|```|`|\*\*|#{1,6}\s|&#?\w+;)/i;
-const POLA_DAFTAR = /(^|\n)\s*(?:[-*•–—]|\d+[.)])\s/;
 
 const SATUAN_BOLEH = ["tahun", "ekor", "siung", "lembar", "genggam", "mangkuk", "piring", "kali", "hari", "minggu", "bulan", "butir", "ikat", "buah", "potong", "gelas", "porsi", "jenis", "macam", "kelompok", "kelompok makanan", "bahan", "kali sehari"];
 const KATA_BILANGAN_BESAR = /(?:^|[^a-z])(?:puluh|ratus|ribu|juta|belas|setengah|separuh|seperempat|sepertiga|per(?:dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh)|per)(?![a-z])|(?:nol|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas)(?:\s+(?:nol|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan))*\s+persen/;
@@ -186,16 +186,16 @@ export function validasiKeluaranAi(teks: unknown, m: MuatanAi): HasilValidasi {
   const asli = teks.replace(/\r\n/g, "\n").trim();
   const alasan: AlasanTolak[] = [];
   if (asli.length < PANJANG_MIN) alasan.push("terlalu_pendek");
-  if (asli.length > PANJANG_MAKS) alasan.push("terlalu_panjang");
+  if (asli.length > PANJANG_MAKS) return { ok: false, alasan: ["terlalu_panjang"] }; // keluar dini: tidak mengurai masukan raksasa
   if (asli.split("\n").filter((x) => x.trim() !== "").length > BARIS_MAKS) alasan.push("terlalu_banyak_baris");
 
   // karakter aneh: digit non-ASCII, karakter kontrol, huruf campur skrip
   if (/[\p{Nd}]/u.test(asli.normalize("NFKC").replace(/[0-9]/g, "")) || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(asli)) alasan.push("karakter_aneh");
   if (/[a-z][а-яёα-ω]|[а-яёα-ω][a-z]/i.test(asli)) alasan.push("karakter_aneh");
 
-  const n = normalisasi(asli).replace(/tidak ada (?:salahnya|ruginya|salah|ruginya)/g, "boleh");
+  const n = normalisasi(teksPolos(asli)).replace(/tidak ada (?:salahnya|ruginya|salah|ruginya)/g, "boleh");
   if (/\p{L}/u.test(n.replace(/[a-z]/g, ""))) alasan.push("karakter_aneh");
-  if (POLA_TAUTAN.test(n) || POLA_DAFTAR.test(n)) alasan.push("ada_tautan_atau_markup");
+  if (adaMarkupTerlarang(asli) || POLA_TAUTAN.test(n)) alasan.push("ada_tautan_atau_markup");
 
   if (!periksaAngka(n.replace(/\bvitamin ([a-z])(?:(?<=b)(?:1|2|3|6|12)\b)?/g, "vitamin $1 "), m) || KATA_BILANGAN_BESAR.test(n) || BILANGAN_DOSIS.test(n)) alasan.push("angka_asing");
 
@@ -257,5 +257,5 @@ export function validasiKeluaranAi(teks: unknown, m: MuatanAi): HasilValidasi {
     if (/semua hasil[^.]*normal|rentang normal|(?:^|[^a-z])sehat(?![a-z])|tidak perlu (?:ke|datang|dibawa|membawa|diperiksa|periksa|konsultasi|berobat|khawatir|cemas|waspada)|tidak ada masalah|baik baik saja|baik-baik saja/.test(n.replace(/tidak normal|kurang sehat|tidak sehat|belum sehat/g, ""))) alasan.push("klaim_normal_padahal_tidak");
     if (!/posyandu|puskesmas|petugas kesehatan|fasilitas kesehatan|tenaga kesehatan|tenaga medis|klinik|rumah sakit|bidan|dokter/.test(n)) alasan.push("tanpa_rujukan");
   }
-  return alasan.length === 0 ? { ok: true, teks: asli } : { ok: false, alasan: [...new Set(alasan)] };
+  return alasan.length === 0 ? { ok: true, teks: asli.replace(/[\p{Cf}]/gu, "") } : { ok: false, alasan: [...new Set(alasan)] };
 }

@@ -43,12 +43,12 @@ const ke = async (p, id) => {
           await ke(p, id);
           const m = await p.evaluate(() => {
             const sc = document.querySelector(".hp__scroll");
-            const lbl = document.querySelector(".pita-kejujuran")?.textContent || "";
+            const lbl = document.body.innerText;
             return { ow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1, sw: sc.scrollWidth > sc.clientWidth + 1, lbl, tema: document.documentElement.getAttribute("data-theme") };
           });
           const k = `${vp[0]}x${vp[1]} ${preset}/${tema}/${id}`;
           cek(`tanpa gulir horizontal ${k}`, !m.ow && !m.sw);
-          cek(`label prototipe ${k}`, /Prototipe PjBL/.test(m.lbl));
+          cek(`tanpa kata terlarang ${k}`, !/Prototipe PjBL|dosen|verifikasi|gerbang konteks|audit ilmiah|kasus sintetis/i.test(m.lbl));
           cek(`tema terpasang ${k}`, m.tema === tema);
         }
       }

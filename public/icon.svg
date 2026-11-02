@@ -1,10 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ikon NUTRIVA">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="NUTRIVA">
   <rect width="512" height="512" rx="112" fill="#FAF4EE"/>
-  <rect x="24" y="24" width="464" height="464" rx="92" fill="none" stroke="#E8DEC8" stroke-width="6"/>
-  <circle cx="256" cy="256" r="168" fill="#F2EAE0" stroke="#B83B28" stroke-width="10"/>
-  <path d="M128 268 C176 248, 224 288, 256 268 C288 248, 336 288, 384 268 L384 300 A128 128 0 0 1 128 300 Z" fill="#C47B2B" opacity="0.88"/>
-  <path d="M142 316 L370 316 A128 128 0 0 1 142 316 Z" fill="#2E6B47"/>
-  <circle cx="206" cy="212" r="24" fill="#B83B28"/>
-  <circle cx="272" cy="196" r="18" fill="#2E6B47"/>
-  <circle cx="312" cy="224" r="14" fill="#C47B2B"/>
+  <rect x="22" y="22" width="468" height="468" rx="92" fill="none" stroke="#E2D2B4" stroke-width="3"/>
+  <g transform="translate(76 66) scale(3.0)">
+  <defs>
+    <linearGradient id="g1" x1="0.15" y1="0" x2="0.85" y2="1"><stop offset="0" stop-color="#BE3A55"/><stop offset="1" stop-color="#651226"/></linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DEA8"/><stop offset="1" stop-color="#B98A2E"/></linearGradient>
+    <clipPath id="c"><path d="M60 8C60 8 95 45 95 74a35 35 0 0 1-70 0C25 45 60 8 60 8Z"/></clipPath>
+  </defs>
+  <path d="M60 8C60 8 95 45 95 74a35 35 0 0 1-70 0C25 45 60 8 60 8Z" fill="url(#g1)"/>
+  <g clip-path="url(#c)">
+    <path d="M20 93C34 85 46 100 60 93S86 85 100 93V120H20Z" fill="url(#g2)" opacity=".92"/>
+    <path d="M20 99C34 91 46 106 60 99S86 91 100 99V120H20Z" fill="#fff" opacity=".18"/>
+  </g>
+  <path d="M60 8C60 8 95 45 95 74a35 35 0 0 1-70 0C25 45 60 8 60 8Z" fill="none" stroke="url(#g2)" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M44 80V50L76 80V50" fill="none" stroke="#FFF6EA" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M37 54C39 45 45 36 52 28" fill="none" stroke="#FFF6EA" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/>
+</g>
 </svg>

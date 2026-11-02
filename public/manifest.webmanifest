@@ -2,15 +2,15 @@
   "id": "id.ac.vpjbl2026.nutriva",
   "name": "NUTRIVA — Alat Bantu Edukasi & Perencanaan MPASI",
   "short_name": "NUTRIVA",
-  "description": "Alat bantu edukasi dan perencanaan MPASI deterministik berbasis Kemenkes 2020 & WHO 2006 (Prototipe Akademik V-PJBL 2026 — bukan alat medis).",
+  "description": "Alat bantu edukasi dan perencanaan MPASI deterministik berbasis Kemenkes 2020 & WHO 2006 (bukan alat medis).",
   "lang": "id",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#FAF4EE",
-  "theme_color": "#B83B28",
+  "theme_color": "#9E2A42",
   "categories": [
     "education",
     "health"
@@ -29,7 +29,7 @@
       "purpose": "any"
     },
     {
-      "src": "./icon-512.png",
+      "src": "./icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

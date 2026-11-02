@@ -31,7 +31,7 @@ function keluarkanBlokRona(): Plugin {
  * style-src 'unsafe-inline' dipertahankan karena markup memakai atribut style=; skrip tetap 'self' saja.
  */
 const CSP =
-  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.workers.dev; object-src 'none'; base-uri 'none'; form-action 'none'";
+  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.workers.dev https://openrouter.ai; object-src 'none'; base-uri 'none'; form-action 'none'";
 
 function tanamCsp(): Plugin {
   return {

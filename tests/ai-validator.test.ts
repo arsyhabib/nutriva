@@ -26,12 +26,26 @@ describe("validator keluaran AI", () => {
     expect(alasan(42)).toContain("bukan_teks");
     expect(alasan(null)).toContain("bukan_teks");
     expect(alasan("Baik.")).toContain("terlalu_pendek");
-    expect(alasan(baik + " kata".repeat(300))).toContain("terlalu_panjang");
-    expect(alasan(Array.from({ length: 12 }, () => baik.slice(0, 50)).join("\n"))).toContain("terlalu_banyak_baris");
+    expect(alasan(baik + " kata".repeat(700))).toContain("terlalu_panjang");
+    expect(alasan(Array.from({ length: 45 }, () => baik.slice(0, 50)).join("\n"))).toContain("terlalu_banyak_baris");
   });
   it("menolak tautan, domain telanjang, markup, dan kode", () => {
-    for (const x of ["https://contoh.com", "www.contoh.org", "kunjungi contoh.id sekarang", "[klik](x)", "<b>tebal</b>", "```kode```", "**tebal**", "# Judul"]) {
+    for (const x of ["https://contoh.com", "www.contoh.org", "kunjungi contoh.id sekarang", "[klik](x)", "<b>tebal</b>", "```kode```", "![gambar](x)", "`kode`", "&amp;"]) {
       expect(alasan(baik + " " + x), x).toContain("ada_tautan_atau_markup");
+    }
+  });
+  it("mengizinkan format Markdown (tebal, miring, judul, daftar, tabel, kutipan) tanpa menganggap tandanya sebagai kata atau angka", () => {
+    for (const x of [
+      "**Pastikan** anak makan teratur.",
+      "*Pastikan* anak makan teratur.",
+      "### Pastikan anak makan teratur",
+      "- Pastikan anak makan teratur\n- Pastikan anak makan teratur",
+      "1. Pastikan anak makan teratur\n2. Pastikan anak makan teratur",
+      "> Pastikan anak makan teratur.",
+      "| Zat | Hasil |\n|---|---|\n| Pastikan | anak |",
+      "---\nPastikan anak makan teratur.",
+    ]) {
+      expect(alasan(baik + "\n\n" + x), x).toEqual([]);
     }
   });
   it("menolak angka yang tidak ada di muatan, termasuk desimal dan angka berkomposisi", () => {

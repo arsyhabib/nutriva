@@ -27,8 +27,8 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
           app.bukaLayar(info.id);
           const html = app.ambilHtml();
           expect(html.length).toBeGreaterThan(200);
-          // Wajib memuat LABEL_PROTOTIPE di setiap layar
-          expect(html).toContain(LABEL_PROTOTIPE);
+          // Tampilan bersih: label prototipe tidak ditampilkan
+          expect(html).not.toContain(LABEL_PROTOTIPE);
           // Dilarang memuat angka Z-score kontinu atau rumus LMS (K-02, INV-04)
           expect(html).not.toMatch(/Z\s*=\s*-?\d/);
           expect(html).not.toContain("((X/M)^L");
@@ -66,7 +66,7 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
     const htmlStatus = app.ambilHtml();
     expect(htmlStatus).toContain("berat badan normal menurut umur");
     expect(htmlStatus).toContain("gizi baik");
-    expect(htmlStatus).toContain(PERINGATAN_AI);
+    expect(htmlStatus).not.toContain(PERINGATAN_AI); // teks cadangan bukan keluaran AI
     expect(htmlStatus).toContain('data-ai-teks="true"');
 
     app.bukaLayar("piring");
@@ -74,7 +74,6 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
     expect(htmlPiring).toContain("Daftar Belanja 3 Hari");
     expect(htmlPiring).toContain("Kelas Harga:");
     expect(htmlPiring).toContain("Beli ~");
-    expect(htmlPiring).toContain(PERINGATAN_AI);
 
     // Pindah hari menu & ganti variasi benih deterministik
     app.pilihHariMenu(1);
@@ -143,7 +142,9 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
     const app = new LayarRona(akar, { presetAwal: "A", layarAwal: "gerbang" });
     app.pasang();
 
+    app.bukaLayar("tentang");
     expect(app.ambilHtml()).toContain(PERNYATAAN_PRIVASI_AI);
+    app.bukaLayar("gerbang");
 
     // Ubah cara ukur ke berdiri -> koreksi +0,7 cm muncul di layar status
     app.aturMasukanKustom((m) => {

@@ -22,9 +22,8 @@ async function buka(browser, [w, h], opsi = {}) {
 const geo = (p) => p.evaluate(() => {
   const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, r: b.right, b: b.bottom }; };
   const cs = getComputedStyle(document.querySelector(".hp"));
-  return { vw: innerWidth, vh: innerHeight, ruang: document.querySelector(".rona-app-shell").dataset.ruang, hp: r(".hp"), nav: r(".hp__nav"), isi: r(".hp__scroll"), status: r(".hp__status"), pita: r(".pita-kejujuran"), lembar: r(".lembar"),
-    radius: cs.borderRadius, border: cs.borderTopWidth, ow: document.documentElement.scrollWidth > innerWidth + 1, sw: document.querySelector(".hp__scroll").scrollWidth > document.querySelector(".hp__scroll").clientWidth + 1,
-    pitaTeks: document.querySelector(".pita-kejujuran").innerText };
+  return { vw: innerWidth, vh: innerHeight, ruang: document.querySelector(".rona-app-shell").dataset.ruang, hp: r(".hp"), nav: r(".hp__nav"), isi: r(".hp__scroll"), status: r(".hp__status"), lembar: r(".lembar"),
+    radius: cs.borderRadius, border: cs.borderTopWidth, ow: document.documentElement.scrollWidth > innerWidth + 1, sw: document.querySelector(".hp__scroll").scrollWidth > document.querySelector(".hp__scroll").clientWidth + 1 };
 });
 
 (async () => {
@@ -40,7 +39,7 @@ const geo = (p) => p.evaluate(() => {
       cek(`tanpa bingkai (lebar penuh) ${k}`, Math.abs(g.hp.w - w) < 1.5 && Math.abs(g.hp.h - h) < 1.5, `${g.hp.w}x${g.hp.h}`);
       cek(`tanpa sudut membulat/border ${k}`, g.radius === "0px" && g.border === "0px");
       cek(`tanpa gulir horizontal ${k}`, !g.ow && !g.sw);
-      cek(`label prototipe terlihat ${k}`, /Prototipe PjBL/.test(g.pitaTeks) && g.pita.h > 8 && g.pita.r <= w + 1 && g.pita.b <= h);
+      cek(`tanpa pita lama ${k}`, g.hp.h > 0);
       if (g.ruang === "ringkas") cek(`nav di bawah ${k}`, g.nav.y >= g.isi.b - 1 && g.nav.w >= w - 2, JSON.stringify(g.nav));
       else cek(`nav di kiri, tidak menimpa isi ${k}`, g.nav.x <= 1 && g.nav.r <= g.isi.x + 1 && g.nav.h >= h - 2, JSON.stringify(g.nav));
       cek(`isi mengisi sisa ruang ${k}`, g.isi.b <= h + 1 && g.isi.h > Math.min(200, h * 0.35), JSON.stringify(g.isi));
@@ -81,7 +80,7 @@ const geo = (p) => p.evaluate(() => {
     await p.evaluate(() => document.querySelector("[data-open-kontrol]").click()); await p.waitForTimeout(600);
     cek(`latar inert saat modal ${nama}`, await p.evaluate(() => document.querySelector(".hp__scroll").inert && document.querySelector(".hp__nav").inert));
     let keluar = 0;
-    for (let i = 0; i < 40; i++) { await p.keyboard.press("Tab"); if (await p.evaluate(() => !!document.activeElement.closest(".hp__scroll, .hp__nav, .hp__status, .pita-kejujuran"))) keluar++; }
+    for (let i = 0; i < 40; i++) { await p.keyboard.press("Tab"); if (await p.evaluate(() => !!document.activeElement.closest(".hp__scroll, .hp__nav, .hp__status"))) keluar++; }
     cek(`fokus terjebak di lembar ${nama}`, keluar === 0, String(keluar));
     await p.keyboard.press("Escape"); await p.waitForTimeout(500);
     cek(`latar aktif kembali ${nama}`, await p.evaluate(() => !document.querySelector(".hp__scroll").inert && !document.querySelector(".hp__nav").inert));

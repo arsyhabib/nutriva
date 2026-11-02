@@ -10,13 +10,14 @@ import {
   PERINGATAN_AI,
   PERNYATAAN_PRIVASI_AI,
 } from "../ai/glosarium";
-import { mintaPenjelasan, type HasilPenjelasan } from "../ai/klien";
+import { mintaPenjelasan, MODEL_AI_BAWAAN, pesanAlasan, ujiKunci, type HasilPenjelasan } from "../ai/klien";
 import type { MuatanAi } from "../ai/kontrak";
 import { jelaskanTemplat } from "../ai/templat";
 import { DATA } from "../engine/data";
-import { LABEL_PROTOTIPE } from "../engine/konstanta";
 import { daftarTandaBahaya } from "../engine/rujukan";
 import type { KunciZat } from "../engine/schema/bahan";
+import { renderMarkdown } from "../ai/markdown";
+import { bangunDokumen, cetakDokumen, DAFTAR_EKSPOR, judulBerkas, type JenisEkspor } from "./ekspor";
 import klaimData from "../../data/claims.json";
 import sumberData from "../../data/sources.json";
 import {
@@ -38,6 +39,7 @@ import {
   labelPosisiPita,
   lencanaStatus,
   lencanaVerif,
+  logo,
   pasangSprite,
   posisiKePersenPin,
   tingkatVisualBBPB,
@@ -75,20 +77,20 @@ export interface InfoLayar {
   id: IdLayar;
   kode: string;
   label: string;
-  kelompok: "Utama" | "Rujukan & Audit" | "Keadaan Sesi";
+  kelompok: "Utama" | "Rujukan & Sumber" | "Keadaan Sesi";
 }
 
 export const DAFTAR_LAYAR: readonly InfoLayar[] = [
-  { id: "gerbang", kode: "A1", label: "Gerbang & Privasi", kelompok: "Utama" },
+  { id: "gerbang", kode: "A1", label: "Beranda", kelompok: "Utama" },
   { id: "profil", kode: "A2", label: "Profil & Skrining", kelompok: "Utama" },
   { id: "status", kode: "A3", label: "Peta Pertumbuhan", kelompok: "Utama" },
   { id: "piring", kode: "A4", label: "Sajian & Belanja", kelompok: "Utama" },
   { id: "kolam", kode: "A5", label: "Bejana Nektar AKG", kelompok: "Utama" },
   { id: "kenapa", kode: "A6", label: "Kenapa Hasil Ini?", kelompok: "Utama" },
-  { id: "ahli", kode: "A7", label: "Mode Ahli & Sumber", kelompok: "Rujukan & Audit" },
-  { id: "bahaya", kode: "A8", label: "Hening Darurat (Rujuk)", kelompok: "Rujukan & Audit" },
-  { id: "tentang", kode: "A9", label: "Tentang & Hak Data", kelompok: "Rujukan & Audit" },
-  { id: "kartuBagi", kode: "K10", label: "Kartu Ringkasan Posyandu", kelompok: "Rujukan & Audit" },
+  { id: "ahli", kode: "A7", label: "Mode Ahli & Sumber", kelompok: "Rujukan & Sumber" },
+  { id: "bahaya", kode: "A8", label: "Hening Darurat (Rujuk)", kelompok: "Rujukan & Sumber" },
+  { id: "tentang", kode: "A9", label: "Tentang & Hak Data", kelompok: "Rujukan & Sumber" },
+  { id: "kartuBagi", kode: "K10", label: "Kartu Ringkasan Posyandu", kelompok: "Rujukan & Sumber" },
   { id: "kosong", kode: "K01", label: "Keadaan Awal / Kosong", kelompok: "Keadaan Sesi" },
   { id: "memuat", kode: "K02", label: "Menakar Porsi Menu", kelompok: "Keadaan Sesi" },
   { id: "luring", kode: "K03", label: "Mode Luring & Cadangan", kelompok: "Keadaan Sesi" },
@@ -98,6 +100,29 @@ export const DAFTAR_LAYAR: readonly InfoLayar[] = [
   { id: "dataTidakAda", kode: "K07", label: "Transparansi Sel Kosong", kelompok: "Keadaan Sesi" },
   { id: "hapus", kode: "K09", label: "Reset Memori Sesi", kelompok: "Keadaan Sesi" },
 ];
+
+/** Urutan layar utama untuk panah kiri/kanan dan papan ketik. */
+export const ALUR_LAYAR: readonly IdLayar[] = ["gerbang", "profil", "status", "piring", "kolam", "kenapa", "ahli", "tentang"];
+const NAMA_ARAH: Partial<Record<IdLayar, string>> = {
+  gerbang: "Beranda", profil: "Profil", status: "Status", piring: "Sajian", kolam: "Bejana",
+  kenapa: "Penjelasan", ahli: "Mode ahli", tentang: "Tentang",
+};
+
+/** Id layar dari fragmen URL, mis. `#kolam`. */
+export function idLayarDariHash(hash: string): IdLayar | null {
+  const id = hash.replace(/^#\/?/, "");
+  return DAFTAR_LAYAR.find((l) => l.id === id)?.id ?? null;
+}
+
+/** Pernyataan klaim untuk tampilan: buang kalimat catatan proses internal (audit, status pemeriksaan, nomor kendali). */
+export function ringkasKlaim(teks: string): string {
+  const kalimat = teks.split(/(?<=[.;])\s+/);
+  const sisa = kalimat.filter((k) => !/dosen|verifikasi|diverifikasi|PjBL|AUD-\d|DIKARANTINA|pemeriksa|dibaca visual|keputusan [A-Z]-\d|hitung ulang/i.test(k));
+  const hasil = (sisa.length ? sisa : [kalimat[0] ?? ""]).join(" ").replace(/\s*\(Sumber:[^)]*\)\s*$/i, "").trim();
+  return hasil.replace(/\s+/g, " ");
+}
+
+const KUNCI_SIMPAN = { kunci: "nutriva.kunci-ai", model: "nutriva.model-ai", ingat: "nutriva.ingat-kunci" } as const;
 
 const PETA_ATRIBUT = new Map(
   DATA.bahanAtribut.bahan.map((b) => [b.id, b] as const),
@@ -302,7 +327,13 @@ export class LayarRona {
   private lembarSebelumnya = false;
   private layarTerakhir: IdLayar | null = null;
   private nilaiBejanaTerakhir = new Map<string, { fill: number; lo: number; hi: number; asiFrac: number }>();
-  private lembarTerbuka: { html: string; detent: "peek" | "half" | "full" } | null = null;
+  private lembarTerbuka: { html: string; bangun?: () => string; detent: "peek" | "half" | "full" } | null = null;
+  private lembarDiRiwayat = false;
+  private kunciApi = "";
+  private draftKunci = "";
+  private modelAi = MODEL_AI_BAWAAN;
+  private ingatKunci = false;
+  private statusKunci: { jenis: "sah" | "ditolak" | "gagal" | "menguji" | "info"; teks: string } | null = null;
 
   constructor(akar: HTMLElement, opsi: OpsiLayarRona = {}) {
     this.akar = akar;
@@ -314,15 +345,16 @@ export class LayarRona {
       (peran === "kader" ? "terik" : peran === "ahli" ? "lensa" : "fajar");
 
     this.urlWorkerAi = opsi.urlWorkerAi ?? urlWorkerAiDariEnv(import.meta.env as unknown as Record<string, unknown>);
+    this.muatKunci();
     this.state = {
       presetAktif: presetKode,
       peran,
       tema,
-      layar: opsi.layarAwal ?? "gerbang",
+      layar: opsi.layarAwal ?? (typeof window !== "undefined" && window.location ? idLayarDariHash(window.location.hash) : null) ?? "gerbang",
       hariMenuIdx: 0,
       masukan: klonMasukan(preset.masukan),
       showStrata: true,
-      modeAhli: peran === "ahli" || opsi.layarAwal === "ahli",
+      modeAhli: peran === "ahli" || opsi.layarAwal === "ahli" || (typeof window !== "undefined" && window.location ? idLayarDariHash(window.location.hash) === "ahli" : false),
       tampilkanSemuaZat: false,
       teksBesar: false,
       daring: typeof navigator === "undefined" || navigator.onLine !== false,
@@ -346,6 +378,7 @@ export class LayarRona {
     }
     this.render();
     this.pasangAdaptif();
+    this.pasangRiwayat();
   }
 
   /**
@@ -376,9 +409,14 @@ export class LayarRona {
     window.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const t = e.target as HTMLElement | null;
-      if (t && (/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return;
       if (e.key === "Escape" && this.lembarTerbuka) {
         this.tutupLembar();
+        return;
+      }
+      if (t && (/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName) || t.isContentEditable)) return;
+      if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && !e.repeat && !this.lembarTerbuka && !(t && t.closest?.('[role="tablist"], [role="slider"], [role="radiogroup"], .md-tabel, .md-pre'))) {
+        e.preventDefault();
+        this.pindahArah(e.key === "ArrowLeft" ? -1 : 1);
         return;
       }
       const urut: IdLayar[] = ["gerbang", "profil", "status", "piring", "kolam"];
@@ -437,6 +475,75 @@ export class LayarRona {
     return ringkasan(this.state.masukan);
   }
 
+  /** Kunci API milik pengguna: default hanya di sesi tab ini; disimpan di perangkat hanya bila pengguna memilih. */
+  private muatKunci(): void {
+    try {
+      if (typeof localStorage === "undefined" || typeof sessionStorage === "undefined") return;
+      this.ingatKunci = localStorage.getItem(KUNCI_SIMPAN.ingat) === "1";
+      this.kunciApi = (this.ingatKunci ? localStorage.getItem(KUNCI_SIMPAN.kunci) : sessionStorage.getItem(KUNCI_SIMPAN.kunci)) ?? "";
+      this.modelAi = localStorage.getItem(KUNCI_SIMPAN.model) || MODEL_AI_BAWAAN;
+    } catch {
+      /* penyimpanan diblokir: kunci hanya hidup di memori */
+    }
+  }
+
+  private simpanKunci(): void {
+    try {
+      if (typeof localStorage === "undefined" || typeof sessionStorage === "undefined") return;
+      localStorage.removeItem(KUNCI_SIMPAN.kunci);
+      sessionStorage.removeItem(KUNCI_SIMPAN.kunci);
+      if (this.kunciApi) (this.ingatKunci ? localStorage : sessionStorage).setItem(KUNCI_SIMPAN.kunci, this.kunciApi);
+      if (this.ingatKunci) localStorage.setItem(KUNCI_SIMPAN.ingat, "1");
+      else localStorage.removeItem(KUNCI_SIMPAN.ingat);
+      if (this.modelAi && this.modelAi !== MODEL_AI_BAWAAN) localStorage.setItem(KUNCI_SIMPAN.model, this.modelAi);
+      else localStorage.removeItem(KUNCI_SIMPAN.model);
+    } catch {
+      /* diabaikan */
+    }
+  }
+
+  public aturKunciApi(kunci: string, opsi: { ingat?: boolean; model?: string } = {}): void {
+    this.kunciApi = kunci.trim();
+    if (opsi.ingat !== undefined) this.ingatKunci = opsi.ingat;
+    if (opsi.model !== undefined) this.modelAi = opsi.model.trim() || MODEL_AI_BAWAAN;
+    this.statusKunci = this.kunciApi ? { jenis: "info", teks: "Kunci tersimpan. AI aktif untuk penjelasan." } : { jenis: "info", teks: "Kunci dihapus. AI nonaktif." };
+    this.simpanKunci();
+    this.state.aiStatus = null;
+    this.state.aiMenuPerHari = {};
+    this.render();
+  }
+
+  private opsiAi(): { urlWorker: string | undefined; kunciSendiri?: { kunci: string; model: string } } {
+    return this.kunciApi ? { urlWorker: this.urlWorkerAi, kunciSendiri: { kunci: this.kunciApi, model: this.modelAi } } : { urlWorker: this.urlWorkerAi };
+  }
+
+  private simpanDraftKunci(senyap = false): void {
+    const d = this.draftKunci.trim();
+    if (d === "") {
+      this.statusKunci = { jenis: "ditolak", teks: this.kunciApi ? "Tidak ada kunci baru untuk disimpan." : "Masukkan kunci API lebih dulu." };
+      if (!senyap) this.render();
+      return;
+    }
+    this.draftKunci = "";
+    this.aturKunciApi(d);
+  }
+
+  private async jalankanUjiKunci(): Promise<void> {
+    if (!this.kunciApi) {
+      this.statusKunci = { jenis: "ditolak", teks: "Masukkan kunci API lebih dulu." };
+      this.render();
+      return;
+    }
+    this.statusKunci = { jenis: "menguji", teks: "Memeriksa kunci…" };
+    this.render();
+    const h = await ujiKunci(this.kunciApi);
+    this.statusKunci =
+      h === "sah" ? { jenis: "sah", teks: "Kunci valid. Penjelasan AI siap dipakai." }
+      : h === "ditolak" ? { jenis: "ditolak", teks: "Kunci ditolak OpenRouter. Periksa kembali kunci Anda." }
+      : { jenis: "gagal", teks: "Tidak dapat menghubungi OpenRouter. Periksa koneksi lalu coba lagi." };
+    this.render();
+  }
+
   pilihPreset(kode: KodePreset): void {
     const p = PRESET_SINTETIS[kode] ?? PRESET_SINTETIS.A;
     this.state.presetAktif = p.id;
@@ -444,8 +551,9 @@ export class LayarRona {
     this.state.hariMenuIdx = 0;
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
-    this.lembarTerbuka = null;
-    this.render();
+    // Lembar Pengaturan tetap terbuka agar penanda pilihan langsung terlihat berpindah.
+    if (this.lembarTerbuka && !this.lembarTerbuka.bangun) this.tutupLembar();
+    else this.render();
   }
 
   aturPeran(peran: PeranRona): void {
@@ -466,13 +574,61 @@ export class LayarRona {
     this.render();
   }
 
-  bukaLayar(id: IdLayar): void {
+  bukaLayar(id: IdLayar, opsi: { tanpaRiwayat?: boolean } = {}): void {
+    const sama = this.state.layar === id;
     this.state.layar = id;
     if (id === "ahli") {
       this.state.modeAhli = true;
     }
     this.lembarTerbuka = null;
+    if (!opsi.tanpaRiwayat) this.catatRiwayat(id, sama);
+    else this.lembarDiRiwayat = false;
     this.render();
+  }
+
+  /** Satu layar = satu entri riwayat: gestur/tombol kembali peramban berpindah layar, bukan menutup aplikasi. */
+  private catatRiwayat(id: IdLayar, sama: boolean): void {
+    if (typeof window === "undefined" || !window.history || typeof window.history.pushState !== "function") return;
+    try {
+      if (this.lembarDiRiwayat) {
+        // Entri lembar diubah menjadi entri layar baru, bukan ditumpuk.
+        window.history.replaceState({ nutriva: id }, "", `#${id}`);
+        this.lembarDiRiwayat = false;
+      } else if (!sama) {
+        window.history.pushState({ nutriva: id }, "", `#${id}`);
+      }
+    } catch {
+      /* lingkungan tanpa riwayat */
+    }
+  }
+
+  /** Pindah ke layar sebelum/sesudah dalam alur utama (panah kiri/kanan). */
+  public pindahArah(arah: -1 | 1): void {
+    const i = ALUR_LAYAR.indexOf(this.state.layar);
+    if (i < 0) return;
+    const tujuan = ALUR_LAYAR[i + arah];
+    if (tujuan) this.bukaLayar(tujuan);
+  }
+
+  private pasangRiwayat(): void {
+    if (typeof window === "undefined" || !window.history || typeof window.addEventListener !== "function") return;
+    try {
+      if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+      window.history.replaceState({ nutriva: this.state.layar }, "", window.location.hash || undefined);
+    } catch {
+      return;
+    }
+    window.addEventListener("popstate", () => {
+      const st = (window.history.state ?? null) as { nutriva?: IdLayar; lembar?: boolean } | null;
+      const id = st?.nutriva && DAFTAR_LAYAR.some((l) => l.id === st.nutriva) ? st.nutriva : (idLayarDariHash(window.location.hash) ?? "gerbang");
+      if (st?.lembar) {
+        // Maju ke entri lembar yang isinya sudah hilang: bersihkan jadi entri layar biasa.
+        try { window.history.replaceState({ nutriva: id }, ""); } catch { /* diabaikan */ }
+      }
+      this.lembarDiRiwayat = false;
+      if (id !== this.state.layar) this.bukaLayar(id, { tanpaRiwayat: true });
+      else if (this.lembarTerbuka) this.tutupLembar({ dariRiwayat: true });
+    });
   }
 
   pilihHariMenu(idx: number): void {
@@ -509,6 +665,8 @@ export class LayarRona {
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
     this.lembarTerbuka = null;
+    this.lembarDiRiwayat = false;
+    try { window.history.replaceState({ nutriva: "gerbang" }, "", "#gerbang"); } catch { /* riwayat tak tersedia */ }
     this.render();
   }
 
@@ -517,9 +675,7 @@ export class LayarRona {
     if (r.hasil !== "ok" || !r.muatan_ai_status) return;
     this.state.sedangMemuatAi = true;
     this.render();
-    const hasil = await mintaPenjelasan(r.muatan_ai_status, {
-      urlWorker: this.urlWorkerAi,
-    });
+    const hasil = await mintaPenjelasan(r.muatan_ai_status, this.opsiAi());
     this.state.aiStatus = hasil;
     this.state.sedangMemuatAi = false;
     this.render();
@@ -532,9 +688,7 @@ export class LayarRona {
     if (!muatan) return;
     this.state.sedangMemuatAi = true;
     this.render();
-    const hasil = await mintaPenjelasan(muatan, {
-      urlWorker: this.urlWorkerAi,
-    });
+    const hasil = await mintaPenjelasan(muatan, this.opsiAi());
     this.state.aiMenuPerHari[hariIdx] = hasil;
     this.state.sedangMemuatAi = false;
     this.render();
@@ -611,13 +765,26 @@ export class LayarRona {
   }
 
   private bangunStatusHtml(): string {
+    const i = ALUR_LAYAR.indexOf(this.state.layar);
+    const sebelum = i > 0 ? ALUR_LAYAR[i - 1] : undefined;
+    const sesudah = i >= 0 && i < ALUR_LAYAR.length - 1 ? ALUR_LAYAR[i + 1] : undefined;
+    const panah = (arah: -1 | 1, tujuan: IdLayar | undefined, ic: string, awalan: string): string =>
+      `<button type="button" class="hp__panah-btn" data-arah="${arah}" aria-label="${tujuan ? `${awalan}: ${NAMA_ARAH[tujuan] ?? tujuan}` : `${awalan} (tidak ada)`}" ${tujuan ? "" : 'disabled aria-disabled="true"'}>${ikon(ic)}</button>`;
     return `
+      <div class="hp__panah" role="group" aria-label="Pindah layar">
+        ${panah(-1, sebelum, "panah-kiri", "Layar sebelumnya")}
+        ${panah(1, sesudah, "panah-kanan", "Layar berikutnya")}
+      </div>
       <span class="hp__status-pill">
-        <span class="hp__status-dot"></span>
+        ${logo("logo--mini", 22)}
         <span>NUTRIVA</span>
         ${this.state.daring ? "" : '<span class="hp__luring" role="status">Luring</span>'}
       </span>
       <div class="hp__status-actions">
+        <button type="button" class="hp__status-btn" data-buka-ekspor="true" aria-label="Ekspor PDF">
+          ${ikon("pdf")}
+          <span>PDF</span>
+        </button>
         <button type="button" class="hp__status-btn" data-open-kontrol="true" aria-label="Pengaturan">
           ${ikon("kontrol")}
           <span>Pengaturan</span>
@@ -626,8 +793,9 @@ export class LayarRona {
   }
 
   private bangunLembarHtml(): string {
-    const buka = this.lembarTerbuka !== null;
-    return buka ? this.bangunKerangkaLembar(this.lembarTerbuka!.html, this.lembarTerbuka!.detent) : "";
+    const lt = this.lembarTerbuka;
+    if (!lt) return "";
+    return this.bangunKerangkaLembar(lt.bangun ? lt.bangun() : lt.html, lt.detent);
   }
 
   private render(): void {
@@ -636,7 +804,14 @@ export class LayarRona {
       this.state.layar === "bahaya" ||
       (r.hasil === "ok" && r.rujukan.tingkat === "rujuk");
 
-    const isiLayar = this.bangunIsiLayar(r).replace(/(<div class="layar__kicker">)\s*[A-K]\d{1,2} · /g, "$1");
+    const isiLayar =
+      this.bangunIsiLayar(r).replace(/(<div class="layar__kicker">)\s*[A-K]\d{1,2} · /g, "$1") +
+      this.barisEksporLayar() +
+      `<footer class="cap-penulis cap-penulis--isi" aria-label="Karya E.13.1"><span class="cap-penulis__garis" aria-hidden="true"></span><span>E.13.1</span></footer>`;
+    if (typeof document !== "undefined" && document.title !== undefined) {
+      const nama = NAMA_ARAH[this.state.layar] ?? DAFTAR_LAYAR.find((l) => l.id === this.state.layar)?.label;
+      document.title = nama && this.state.layar !== "gerbang" ? `${nama} · NUTRIVA` : "NUTRIVA · Gizi 1000 HPK";
+    }
     const navHtml = this.bangunNavBawah();
     const statusHtml = this.bangunStatusHtml();
     const sheetOpen = this.lembarTerbuka !== null;
@@ -654,10 +829,6 @@ export class LayarRona {
           <nav class="hp__nav" aria-label="Navigasi utama">
             ${navHtml}
           </nav>
-
-          <div class="pita-kejujuran" role="note">
-            <strong>${escHtml(LABEL_PROTOTIPE)}</strong>
-          </div>
 
           <main id="konten-utama" class="hp__scroll" aria-label="Isi aplikasi NUTRIVA" tabindex="-1">
             <div id="rona-hp-scroll" class="hp__isi">${isiLayar}</div>
@@ -696,6 +867,7 @@ export class LayarRona {
       shell?.setAttribute("data-ruang", this.ruang);
       hp?.setAttribute("data-theme", this.state.tema);
       hp?.setAttribute("data-lembar", sheetOpen ? "buka" : "tutup");
+      const fokusSebelum = this.rekamFokus();
       const st = q(".hp__status");
       if (st) st.innerHTML = statusHtml;
       const sc = q(".hp__scroll");
@@ -715,6 +887,7 @@ export class LayarRona {
         lm.innerHTML = lembarHtml;
       }
       this.kuncilatar();
+      this.pulihFokus(fokusSebelum, layarBerganti);
     } else {
       this.bersihkanKanvas();
       this.akar.innerHTML = html;
@@ -731,6 +904,31 @@ export class LayarRona {
       t?.focus?.();
     }
     this.lembarSebelumnya = sheetOpen;
+  }
+
+  /** Catat elemen berfokus lewat atribut data-*nya, agar fokus papan ketik tidak hilang saat isi dirender ulang. */
+  private rekamFokus(): { sel: string; area: string } | null {
+    if (typeof document === "undefined") return null;
+    const el = document.activeElement as HTMLElement | null;
+    if (!el || el === document.body || typeof el.getAttributeNames !== "function") return null;
+    const area = el.closest?.(".hp__status, .hp__nav, .hp__scroll, .lembar");
+    if (!area) return null;
+    const nama = el.getAttributeNames().find((n) => n.startsWith("data-") && n !== "data-terikat" && n !== "data-t" && n !== "data-k");
+    if (!nama) return null;
+    const nilai = (el.getAttribute(nama) ?? "").replace(/"/g, '\\"');
+    const kelas = area.classList.contains("lembar") ? ".lembar" : area.classList.contains("hp__nav") ? ".hp__nav" : area.classList.contains("hp__status") ? ".hp__status" : ".hp__scroll";
+    return { sel: `[${nama}="${nilai}"]`, area: kelas };
+  }
+
+  private pulihFokus(f: { sel: string; area: string } | null, layarBerganti: boolean): void {
+    if (!f || typeof this.akar.querySelector !== "function") return;
+    const wadah = this.akar.querySelector<HTMLElement>(f.area);
+    const target = wadah?.querySelector<HTMLElement>(f.sel);
+    if (target && !(f.area === ".hp__scroll" && layarBerganti)) {
+      target.focus({ preventScroll: true });
+    } else if (f.area === ".hp__scroll" && layarBerganti) {
+      wadah?.focus({ preventScroll: true });
+    }
   }
 
   private bangunKerangkaLembar(
@@ -757,10 +955,18 @@ export class LayarRona {
   }
 
   public bukaLembar(
-    isiHtml: string,
+    isi: string | (() => string),
     detent: "peek" | "half" | "full" = "half",
   ): void {
-    this.lembarTerbuka = { html: isiHtml, detent };
+    if (!this.lembarTerbuka && typeof window !== "undefined" && window.history && typeof window.history.pushState === "function") {
+      try {
+        window.history.pushState({ nutriva: this.state.layar, lembar: true }, "", window.location.href);
+        this.lembarDiRiwayat = true;
+      } catch {
+        this.lembarDiRiwayat = false;
+      }
+    }
+    this.lembarTerbuka = typeof isi === "function" ? { html: isi(), bangun: isi, detent } : { html: isi, detent };
     this.render();
   }
 
@@ -773,10 +979,15 @@ export class LayarRona {
     this.bukaLembar(this.bangunLembarInspeksiZat(zat, r), "half");
   }
 
-  public tutupLembar(): void {
+  public tutupLembar(opsi: { dariRiwayat?: boolean } = {}): void {
     if (!this.lembarTerbuka) return;
     this.lembarTerbuka = null;
+    const keRiwayat = this.lembarDiRiwayat && !opsi.dariRiwayat;
+    this.lembarDiRiwayat = false;
     this.render();
+    if (keRiwayat) {
+      try { window.history.back(); } catch { /* diabaikan */ }
+    }
   }
 
   public toggleStrata(): void {
@@ -819,19 +1030,78 @@ export class LayarRona {
 
     return `
       <div class="nav__merek" aria-hidden="true">
-        <span class="nav__logo">${ikon("nav-kolam")}</span>
+        <span class="nav__logo">${logo("", 40)}</span>
         <span class="nav__nama">NUTRIVA<small>Gizi 1000 HPK</small></span>
       </div>
       <div class="nav__tombol">${tombol}</div>
-      <p class="nav__pintasan" aria-hidden="true">Pintasan: <kbd>1</kbd>–<kbd>5</kbd> pindah layar, <kbd>Esc</kbd> tutup panel</p>
+      <p class="nav__pintasan" aria-hidden="true"><kbd>1</kbd>–<kbd>5</kbd> pindah layar<br><kbd>←</kbd> <kbd>→</kbd> berurutan<br><kbd>Esc</kbd> tutup panel</p>
+      <p class="cap-penulis cap-penulis--nav" aria-label="Karya E.13.1">E.13.1</p>
     `;
+  }
+
+  private barisEksporLayar(): string {
+    const nama: Partial<Record<IdLayar, string>> = { status: "status pertumbuhan", piring: "menu dan belanja", kolam: "kecukupan gizi", kartuBagi: "kartu ringkasan", ahli: "jejak klaim dan sumber" };
+    const n = nama[this.state.layar];
+    if (!n) return "";
+    return `<div class="baris-ekspor"><button type="button" class="btn btn--sekunder" data-ekspor-jenis="${this.jenisEksporLayar()}">${ikon("pdf")}<span>Ekspor ${n} ke PDF</span></button></div>`;
+  }
+
+  /** Jenis ekspor yang paling cocok dengan layar yang sedang dibuka. */
+  private jenisEksporLayar(): JenisEkspor {
+    const peta: Partial<Record<IdLayar, JenisEkspor>> = { status: "status", piring: "menu", kolam: "gizi", kartuBagi: "kartu", ahli: "jejak" };
+    return peta[this.state.layar] ?? "lengkap";
+  }
+
+  private bangunLembarEkspor(): string {
+    const r = this.hitungRingkasan();
+    const bisa = r.hasil === "ok";
+    const saran = this.jenisEksporLayar();
+    return `
+      <div class="layar" style="gap:12px;">
+        <div>
+          <h2 class="layar__judul">Ekspor <em>PDF</em></h2>
+          <p class="layar__sub">Dokumen A4 siap cetak dari contoh yang sedang dipakai. Di dialog cetak, pilih &ldquo;Simpan sebagai PDF&rdquo;.</p>
+        </div>
+        ${
+          bisa
+            ? `<div class="pilihan-grid">
+          ${DAFTAR_EKSPOR.map(
+            (x) => `<button type="button" class="pilihan-item ${x.jenis === saran ? "is-selected" : ""}" data-ekspor-jenis="${x.jenis}">
+              <div><div class="pilihan-item__nama">${escHtml(x.nama)}${x.jenis === saran ? " · halaman ini" : ""}</div><div class="pilihan-item__sub">${escHtml(x.sub)}</div></div>
+              <span class="pilihan-item__indikator">${ikon("pdf")}</span>
+            </button>`,
+          ).join("")}
+        </div>`
+            : `<div class="kartu"><p class="kartu__isi">Isi ukuran anak yang valid lebih dulu agar dokumen dapat dibuat.</p></div>`
+        }
+      </div>`;
+  }
+
+  public ekspor(jenis: JenisEkspor): void {
+    const r = this.hitungRingkasan();
+    if (r.hasil !== "ok") return;
+    const p = PRESET_SINTETIS[this.state.presetAktif];
+    const muatan = r.muatan_ai_status;
+    const pj = this.ambilPenjelasanStatus(muatan);
+    const konteks = {
+      r,
+      masukan: this.state.masukan,
+      labelContoh: p.label,
+      hariIdx: this.state.hariMenuIdx,
+      penjelasan: pj ? { teks: pj.teks, ai: pj.sumber === "ai" } : undefined,
+      tanggal: new Date(),
+      labelAlasan,
+    };
+    cetakDokumen(bangunDokumen(jenis, konteks), judulBerkas(jenis, konteks));
   }
 
   private bangunLembarKontrolMobile(): string {
     const NAMA_TEMA: Record<TemaRona, string> = { fajar: "Fajar", dekap: "Dekap", terik: "Terik (kontras tinggi)", lensa: "Lensa" };
-    const NAMA_PERAN: Record<PeranRona, string> = { ibu: "Ibu / pengasuh", kader: "Kader", ahli: "Ahli / penguji" };
+    const NAMA_PERAN: Record<PeranRona, string> = { ibu: "Ibu / pengasuh", kader: "Kader", ahli: "Mode ahli" };
     const chip = (aktif: boolean, attr: string, teks: string): string =>
       `<button type="button" class="chip ${aktif ? "is-active" : ""}" aria-pressed="${aktif ? "true" : "false"}" ${attr}>${escHtml(teks)}</button>`;
+    const adaKunci = this.kunciApi !== "";
+    const st = this.statusKunci;
     return `
       <div class="layar" style="gap:12px;">
         <div>
@@ -839,7 +1109,7 @@ export class LayarRona {
         </div>
 
         <div class="kartu">
-          <span class="kartu__label">Kasus contoh (data sintetis)</span>
+          <span class="kartu__label">Contoh hasil penggunaan</span>
           <div class="pilihan-grid">
             ${(["A", "B", "C"] as KodePreset[])
               .map((k) => {
@@ -873,19 +1143,49 @@ export class LayarRona {
         </div>
 
         <div class="kartu">
-          <span class="kartu__label">Tampilan untuk siapa</span>
+          <span class="kartu__label">Tampilan untuk</span>
           <div class="baris-aksi">
             ${(["ibu", "kader", "ahli"] as const).map((x) => chip(this.state.peran === x, `data-pick-role="${x}"`, NAMA_PERAN[x])).join("")}
           </div>
         </div>
 
+        <div class="kartu kartu--ai">
+          <div class="kartu__baris">
+            <span class="kartu__label">Penjelasan AI</span>
+            <span class="lencana ${adaKunci ? "lencana--cukup" : "lencana--perhatian"}">${adaKunci ? "Aktif" : "Belum aktif"}</span>
+          </div>
+          <p class="kartu__isi">Masukkan kunci API OpenRouter milik Anda agar penjelasan AI dapat dicoba. Tanpa kunci, aplikasi memakai teks cadangan.</p>
+          <div class="field">
+            <label class="field__label" for="ai-penyedia">Penyedia</label>
+            <input id="ai-penyedia" class="field__input" type="text" value="OpenRouter" readonly />
+          </div>
+          <div class="field">
+            <label class="field__label" for="ai-model">Model</label>
+            <input id="ai-model" class="field__input" type="text" data-ai-model="true" value="${escHtml(this.modelAi)}" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          </div>
+          <div class="field">
+            <label class="field__label" for="ai-kunci">Kunci API</label>
+            <input id="ai-kunci" class="field__input" type="password" data-ai-kunci="true" value="${escHtml(this.draftKunci)}" placeholder="${adaKunci ? "Kunci tersimpan. Isi untuk mengganti." : "Tempel kunci API di sini"}" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          </div>
+          <div class="baris-aksi">
+            ${chip(this.ingatKunci, 'data-ai-ingat="true"', "Ingat di perangkat ini")}
+          </div>
+          <p class="kartu__isi kartu__isi--kecil">${this.ingatKunci ? "Kunci disimpan di peramban perangkat ini." : "Kunci hanya berlaku selama tab ini terbuka."} Kunci dikirim langsung ke OpenRouter dan ke tempat lain tidak. Disarankan memakai kunci dengan batas pengeluaran.</p>
+          <div class="baris-aksi">
+            <button type="button" class="btn btn--utama" data-ai-simpan="true">${ikon("kunci")}<span>Simpan</span></button>
+            <button type="button" class="btn btn--sekunder" data-ai-uji="true"><span>Uji kunci</span></button>
+            ${adaKunci ? '<button type="button" class="btn btn--ghost" data-ai-hapus="true"><span>Hapus kunci</span></button>' : ""}
+          </div>
+          <p class="ai-status ${st ? "ai-status--" + st.jenis : ""}" role="status" aria-live="polite">${st ? escHtml(st.teks) : ""}</p>
+        </div>
+
         <div class="baris-aksi">
-          <button type="button" class="btn btn--sekunder" data-go="tentang" data-close-sheet="true">Tentang &amp; privasi</button>
+          <button type="button" class="btn btn--sekunder" data-go="tentang" data-close-sheet="true">Tentang</button>
           <button type="button" class="btn btn--ghost" data-go="hapus" data-close-sheet="true">Reset sesi</button>
         </div>
 
         <details class="kartu kartu--tinjau">
-          <summary>Keadaan khusus (untuk peninjau)</summary>
+          <summary>Keadaan layar lainnya</summary>
           <div class="dock-grid-2">
             ${DAFTAR_LAYAR.filter((l) => ["kosong", "memuat", "luring", "kedaluwarsa", "galat", "tidakLayak", "dataTidakAda", "kartuBagi"].includes(l.id))
               .map((l) => `<button type="button" class="chip" data-go="${l.id}" data-close-sheet="true">${escHtml(l.label)}</button>`)
@@ -943,49 +1243,38 @@ export class LayarRona {
     }
   }
 
-  /* ---------- A1: Gerbang Konteks, Pemilihan Kasus Sintetis & Privasi Jujur ---------- */
+  /* ---------- A1: Beranda ---------- */
   private layarGerbang(): string {
     const peranList: readonly { id: PeranRona; nama: string; sub: string }[] = [
-      {
-        id: "ibu",
-        nama: "Ibu / Pengasuh Pendamping",
-        sub: "Bahasa hangat, langkah memasak praktis & takaran sendok rumah tangga",
-      },
-      {
-        id: "kader",
-        nama: "Kader Posyandu / Pendamping Lapangan",
-        sub: "Ringkas, kontras tinggi (Tema Terik, kontras tinggi) untuk meja posyandu & skrining rujukan",
-      },
-      {
-        id: "ahli",
-        nama: "Dosen Penguji / Mode Audit Ilmiah",
-        sub: "Buka tabel ambang SD 7-kolom, jejak ID klaim & silsilah sumber regulasi",
-      },
+      { id: "ibu", nama: "Ibu / Pengasuh", sub: "Bahasa sederhana dan langkah yang mudah diikuti" },
+      { id: "kader", nama: "Kader Posyandu", sub: "Ringkas dan berkontras tinggi untuk skrining di lapangan" },
+      { id: "ahli", nama: "Mode ahli", sub: "Tabel ambang, jejak klaim, dan sumber di balik setiap hasil" },
     ];
-
     const presetAktif = PRESET_SINTETIS[this.state.presetAktif];
 
     return `
       <div class="layar">
-        <div>
-          <div class="layar__kicker">A1 · Gerbang Konteks · 1.000 Hari Pertama Kehidupan</div>
-          <h2 class="layar__judul">Tenang meracik <em>MPASI</em> dengan kompas ilmiah yang jujur.</h2>
-          <p class="layar__sub">Dirancang untuk mendampingi Ibu dan Kader memahami tumbuh kembang anak 6–23 bulan berbasis tabel resmi Permenkes RI No. 2/2020 &amp; AKG Permenkes RI No. 28/2019.</p>
+        <div class="beranda__kepala">
+          <span class="beranda__logo">${logo("", 76)}</span>
+          <div>
+            <div class="layar__kicker">1.000 Hari Pertama Kehidupan</div>
+            <h2 class="layar__judul">Tenang meracik <em>MPASI</em>, dengan hitungan yang jujur.</h2>
+            <p class="layar__sub">Pantau tumbuh kembang anak usia 6–23 bulan dan susun menu hariannya.</p>
+          </div>
         </div>
 
         <div class="kartu kartu--sorot">
           <div class="kartu__baris">
-            <span class="kartu__label">1. Pilih Kasus Uji Sintetis (V-PJBL)</span>
-            ${lencanaVerif("sah")}
+            <span class="kartu__label">Contoh hasil penggunaan</span>
           </div>
-          <p class="kartu__isi">Profil rilis demonstrasi ini hanya memproses <strong>kasus sintetis tanpa nama anak pribadi</strong> demi perlindungan data kesehatan anak:</p>
+          <p class="kartu__isi">Pilih satu contoh untuk melihat cara kerja aplikasi.</p>
           <div class="pilihan-grid" style="margin-top:4px;">
             ${(["A", "B", "C"] as KodePreset[])
               .map((k) => {
                 const p = PRESET_SINTETIS[k];
                 const aktif = this.state.presetAktif === k;
                 return `
-                  <button type="button" class="pilihan-item ${aktif ? "is-selected" : ""}" data-pick-preset="${k}">
+                  <button type="button" class="pilihan-item ${aktif ? "is-selected" : ""}" data-pick-preset="${k}" aria-pressed="${aktif ? "true" : "false"}">
                     <div>
                       <div class="pilihan-item__nama">${escHtml(p.label)}</div>
                       <div class="pilihan-item__sub">${escHtml(p.ringkas)}</div>
@@ -1000,15 +1289,14 @@ export class LayarRona {
 
         <div class="kartu">
           <div class="kartu__baris">
-            <span class="kartu__label">2. Pilih Peran Pendampingan</span>
-            <span class="lencana lencana--cukup">Tema: ${this.state.tema.toUpperCase()}</span>
+            <span class="kartu__label">Tampilan untuk</span>
           </div>
           <div class="pilihan-grid">
             ${peranList
               .map((p) => {
                 const aktif = this.state.peran === p.id;
                 return `
-                  <button type="button" class="pilihan-item ${aktif ? "is-selected" : ""}" data-pick-role="${p.id}">
+                  <button type="button" class="pilihan-item ${aktif ? "is-selected" : ""}" data-pick-role="${p.id}" aria-pressed="${aktif ? "true" : "false"}">
                     <div>
                       <div class="pilihan-item__nama">${escHtml(p.nama)}</div>
                       <div class="pilihan-item__sub">${escHtml(p.sub)}</div>
@@ -1021,25 +1309,17 @@ export class LayarRona {
           </div>
         </div>
 
-        <div class="kartu">
-          <div class="kartu__baris">
-            <span class="kartu__label">3. Kejujuran Klinis &amp; Privasi</span>
-            <button type="button" class="chip" data-go="tentang">
-              ${ikon("nav-tentang")}
-              <span>Rincian Privasi</span>
-            </button>
-          </div>
-          <ul class="daftar-langkah">
-            <li><strong>Gerbang keselamatan otomatis:</strong> Jika ada tanda bahaya klinis atau status gizi buruk/sangat kurang, penyusunan menu dihentikan dan aplikasi memandu rujukan ke Puskesmas.</li>
-            <li><strong>Pita ambang SD resmi:</strong> Klasifikasi menggunakan tabel 7-kolom SD Permenkes 2/2020 (bukan taksiran rumus Z-score kontinu).</li>
-            <li><strong>Tidak menyimpan data anak:</strong> masukan hanya ada di memori halaman dan hilang saat ditutup. Penjelasan AI bersifat opsional dan mengirim ringkasan berkode (lihat pernyataan di bawah).</li>
-          </ul>
-          <p class="kartu__isi" style="margin-top:6px;font-size:0.76rem;">${escHtml(PERNYATAAN_PRIVASI_AI)}</p>
+        <div class="kartu kartu--catatan">
+          <p class="kartu__isi">Data anak tidak disimpan dan semua hitungan berjalan di perangkat Anda. Bila ada tanda bahaya, menu dihentikan dan Anda diarahkan ke puskesmas.</p>
+          <button type="button" class="chip" data-go="tentang">
+            ${ikon("nav-tentang")}
+            <span>Selengkapnya</span>
+          </button>
         </div>
 
         <div class="baris-aksi">
           <button type="button" class="btn btn--utama btn--penuh" data-go="profil">
-            <span>Lanjut Periksa Profil (${escHtml(presetAktif.kode)}) →</span>
+            <span>Mulai dengan ${escHtml(presetAktif.kode)} →</span>
           </button>
         </div>
       </div>
@@ -1056,21 +1336,21 @@ export class LayarRona {
         <div>
           <div class="layar__kicker">A2 · Profil &amp; Penapisan Keselamatan</div>
           <h2 class="layar__judul">Data tumbuh kembang <em>${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)}</em></h2>
-          <p class="layar__sub">Usia dihitung dalam bulan penuh (6–23 bulan). Koreksi posisi ukur berdiri (+0,7 cm) dan pembulatan panjang ke 0,5 cm terdekat diterapkan otomatis sesuai Permenkes 2/2020.</p>
+          <p class="layar__sub">Usia dihitung dalam bulan penuh (6–23 bulan). Ukuran berdiri dan pembulatan panjang dikoreksi otomatis.</p>
         </div>
 
         <div class="kartu kartu--sorot">
           <div class="kartu__baris">
-            <span class="kartu__label">Preset Sintetis Aktif</span>
-            <span class="lencana lencana--cukup">Kasus ${this.state.presetAktif}</span>
+            <span class="kartu__label">Contoh yang dipakai</span>
+            <span class="lencana lencana--cukup">${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)}</span>
           </div>
           <p class="kartu__isi">${escHtml(PRESET_SINTETIS[this.state.presetAktif].catatan)}</p>
           <div class="baris-aksi" style="margin-top:4px;">
             ${(["A", "B", "C"] as KodePreset[])
               .map(
                 (k) => `
-                <button type="button" class="chip ${this.state.presetAktif === k ? "is-active" : ""}" data-pick-preset="${k}">
-                  Kasus ${k}
+                <button type="button" class="chip ${this.state.presetAktif === k ? "is-active" : ""}" data-pick-preset="${k}" aria-pressed="${this.state.presetAktif === k ? "true" : "false"}">
+                  ${escHtml(PRESET_SINTETIS[k].kode)}
                 </button>
               `,
               )
@@ -1166,7 +1446,7 @@ export class LayarRona {
               adaBahaya ? `${m.tanda_bahaya.length} Tanda Bahaya Aktif` : "Tidak Ada Tanda Bahaya",
             )}
           </div>
-          <p class="kartu__isi">Jika satu saja tanda bahaya di bawah ini ditemukan, kalkulator wajib menghentikan saran menu mandiri dan mengarahkan ke rujukan tenaga kesehatan:</p>
+          <p class="kartu__isi">Bila salah satu tanda ini ditemukan, menu tidak disusun dan Anda diarahkan ke petugas kesehatan:</p>
           <div class="pilihan-grid" style="margin-top:6px;">
             ${daftarTandaBahaya()
               .map((b) => {
@@ -1175,7 +1455,7 @@ export class LayarRona {
                   <button type="button" class="pilihan-item ${aktif ? "is-danger" : ""}" data-toggle-bahaya="${b.kode}">
                     <div>
                       <div class="pilihan-item__nama">${escHtml(b.label)}</div>
-                      <div class="pilihan-item__sub">Kode aturan: ${escHtml(b.kode)}</div>
+                      ${this.state.modeAhli ? `<div class="pilihan-item__sub">Kode aturan: ${escHtml(b.kode)}</div>` : ""}
                     </div>
                     <span class="pilihan-item__indikator"></span>
                   </button>
@@ -1187,7 +1467,7 @@ export class LayarRona {
 
         <div class="baris-aksi">
           <button type="button" class="btn ${r.hasil === "ok" && r.rujukan.tingkat === "rujuk" ? "btn--bahaya" : "btn--utama"} btn--penuh" data-go="${r.hasil === "ok" && r.rujukan.tingkat === "rujuk" ? "bahaya" : "status"}">
-            <span>${r.hasil === "ok" && r.rujukan.tingkat === "rujuk" ? "Tanda Bahaya Aktif — Buka Panduan Rujukan →" : "Lihat Peta Status Pertumbuhan (A3) →"}</span>
+            <span>${r.hasil === "ok" && r.rujukan.tingkat === "rujuk" ? "Tanda Bahaya Aktif — Buka Panduan Rujukan →" : "Lihat status pertumbuhan →"}</span>
           </button>
         </div>
       </div>
@@ -1236,7 +1516,7 @@ export class LayarRona {
             </div>
             <p class="kartu__isi">${escHtml(info.isi)}</p>
             <div class="baris-aksi" style="margin-top:8px;">
-              <button type="button" class="btn btn--utama" data-pick-preset="A">Kembalikan ke Kasus Sintetis A (9 bln)</button>
+              <button type="button" class="btn btn--utama" data-pick-preset="A">Kembali ke Contoh 1 (9 bln)</button>
               <button type="button" class="btn btn--sekunder" data-go="profil">Ubah Profil Masukan</button>
             </div>
           </div>
@@ -1313,7 +1593,7 @@ export class LayarRona {
     return `
       <div class="layar">
         <div>
-          <div class="layar__kicker">A3 · Status Pertumbuhan · Permenkes RI No. 2/2020</div>
+          <div class="layar__kicker">Status pertumbuhan</div>
           <h2 class="layar__judul">Peta tumbuh <em>${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)}</em> (${st.usia_bulan_penuh} bln)</h2>
           <p class="layar__sub">
             Berat <strong>${fmtId(m.status.bb_kg, 1)} kg</strong> · Panjang pakai <strong>${fmtId(st.panjang_dipakai_cm, 1)} cm</strong> (tabel BB/PB: ${fmtId(st.panjang_tabel_cm, 1)} cm).
@@ -1344,7 +1624,7 @@ export class LayarRona {
             <div class="kartu__judul">Rekomendasi menu mandiri &amp; penjelas AI dinonaktifkan</div>
             <p class="kartu__isi">Alasan: <strong>${escHtml(r.rujukan.alasan.map(labelAlasan).join("; "))}</strong>. Silakan buka panduan rujukan.</p>
             <div class="baris-aksi" style="margin-top:4px;">
-              <button type="button" class="btn btn--bahaya btn--penuh" data-go="bahaya">Buka Panduan Rujukan Darurat (A8) →</button>
+              <button type="button" class="btn btn--bahaya btn--penuh" data-go="bahaya">Buka panduan rujukan →</button>
             </div>
           </div>
         `
@@ -1386,8 +1666,7 @@ export class LayarRona {
 
                 <p class="kartu__isi" style="margin-top:4px;">${escHtml(ix.arti)}</p>
                 <div class="kartu__baris" style="margin-top:2px;">
-                  <span style="font-family:var(--f-mono);font-size:10px;color:var(--t-3);">Klaim: ${escHtml(ix.klaimId)}</span>
-                  ${lencanaVerif("perlu")}
+                  ${this.state.modeAhli ? `<span style="font-family:var(--f-mono);font-size:10px;color:var(--t-3);">Klaim: ${escHtml(ix.klaimId)}</span>` : ""}
                 </div>
 
                 ${
@@ -1433,7 +1712,7 @@ export class LayarRona {
 
         <div class="baris-aksi">
           <button type="button" class="btn btn--utama btn--penuh" data-go="${r.rujukan.tingkat === "rujuk" ? "bahaya" : "piring"}">
-            <span>${r.rujukan.tingkat === "rujuk" ? "Lihat Panduan Rujukan Tenaga Kesehatan →" : "Susun Contoh Pola Makan & Belanja (A4) →"}</span>
+            <span>${r.rujukan.tingkat === "rujuk" ? "Lihat Panduan Rujukan Tenaga Kesehatan →" : "Susun contoh menu &amp; belanja →"}</span>
           </button>
         </div>
       </div>
@@ -1458,7 +1737,7 @@ export class LayarRona {
             <div class="kartu__judul">Prioritaskan pemeriksaan langsung oleh tenaga kesehatan</div>
             <p class="kartu__isi">Anak dengan tanda bahaya atau status gizi buruk memerlukan tata laksana medis terukur di Puskesmas/Rumah Sakit, bukan kalkulator menu rumah tangga.</p>
             <div class="baris-aksi" style="margin-top:8px;">
-              <button type="button" class="btn btn--bahaya" data-go="bahaya">Buka Layar Rujukan Darurat (A8) →</button>
+              <button type="button" class="btn btn--bahaya" data-go="bahaya">Buka panduan rujukan →</button>
               <button type="button" class="btn btn--sekunder" data-pick-preset="A">Simulasikan Kasus Normal (Kasus A)</button>
             </div>
           </div>
@@ -1585,12 +1864,12 @@ export class LayarRona {
           <div class="kartu">
             <div class="kartu__baris">
               <div>
-                <span class="kartu__label">Perkiraan Kebutuhan Bahan Mentah (D-kelas-harga)</span>
+                <span class="kartu__label">Perkiraan kebutuhan bahan mentah</span>
                 <div class="kartu__judul">Daftar Belanja ${pola.hari.length} Hari</div>
               </div>
               ${lencanaVerif("draf")}
             </div>
-            <p class="kartu__isi">Gram beli memperhitungkan bagian tidak dimakan (kulit/tulang/penyusutan) melalui <code>rasio_beli</code> dan dibulatkan ke atas per 5 gram. Bukan klaim harga Rupiah pasar:</p>
+            <p class="kartu__isi">Gram beli sudah memperhitungkan bagian yang tidak dimakan dan dibulatkan ke atas per 5 gram. Kelas harga bersifat relatif, bukan harga pasar:</p>
             <div class="baris-aksi" style="margin-top:4px;">
               ${lencanaStatus("cukup", `Murah: ${r.belanja.jumlah_per_kelas.murah} bahan`)}
               ${lencanaStatus("perhatian", `Sedang: ${r.belanja.jumlah_per_kelas.sedang} bahan`)}
@@ -1623,7 +1902,7 @@ export class LayarRona {
 
         <div class="baris-aksi">
           <button type="button" class="btn btn--utama btn--penuh" data-go="kolam">
-            <span>Periksa Bejana Nektar &amp; Celah AKG (A5) →</span>
+            <span>Lihat bejana gizi →</span>
           </button>
         </div>
       </div>
@@ -1647,7 +1926,7 @@ export class LayarRona {
     return `
       <div class="layar">
         <div>
-          <div class="layar__kicker">A5 · Bejana kecukupan gizi · Permenkes 28/2019</div>
+          <div class="layar__kicker">Kecukupan gizi</div>
           <h2 class="layar__judul">Kecukupan &amp; <em>celah jujur</em> nutrisi</h2>
           <p class="layar__sub">Bejana menunjukkan seberapa jauh menu hari ini memenuhi AKG. Hanya makanan dalam menu yang dihitung; ASI dan makanan lain tidak dihitung. ${TAP} kartu untuk melihat bahan penyumbang.</p>
         </div>
@@ -1730,7 +2009,7 @@ export class LayarRona {
 
         <div class="kartu">
           <div class="kartu__baris">
-            <span class="kartu__label">Tabel Lengkap 23 Zat Gizi (Permenkes 28/2019)</span>
+            <span class="kartu__label">Tabel lengkap 23 zat gizi</span>
             <button type="button" class="chip" data-toggle-semua-zat="true">
               <span>${this.state.tampilkanSemuaZat ? "Ringkas Tabel" : "Buka Semua 23 Zat Gizi"}</span>
             </button>
@@ -1770,7 +2049,7 @@ export class LayarRona {
         <div class="kartu kartu--sorot">
           <div class="kartu__baris">
             <span class="kartu__label">Panduan Diskusi Posyandu &amp; Puskesmas</span>
-            ${lencanaStatus("perhatian", "Tanpa Dosis Obat (T-10)")}
+            ${lencanaStatus("perhatian", "Tanpa dosis obat")}
           </div>
           <p class="kartu__isi">Bejana hanya menghitung makanan dalam menu; ASI dan makanan lain tidak dihitung. Bila zat besi tampak rendah, pertahankan lauk hewani dan diskusikan bersama bidan/dokter mengenai perlunya pangan fortifikasi atau tablet/tetes tambah darah sesuai anjuran bidan/dokter (aplikasi tidak meresepkan dosis suplemen).</p>
         </div>
@@ -1788,9 +2067,9 @@ export class LayarRona {
     return `
       <div class="layar">
         <div>
-          <div class="layar__kicker">A6 · Panel Penjelasan Berlapis (3 Tingkat)</div>
+          <div class="layar__kicker">A6 · Penjelasan berlapis</div>
           <h2 class="layar__judul">Kenapa hasil ini <em>muncul?</em></h2>
-          <p class="layar__sub">Setiap kesimpulan NUTRIVA dapat ditelusuri mulai dari bahasa sehari-hari untuk Ibu hingga batas fisiologis dan rujukan regulasi untuk Dosen Penguji.</p>
+          <p class="layar__sub">Setiap hasil NUTRIVA dapat ditelusuri, dari bahasa sehari-hari sampai sumber rujukannya.</p>
         </div>
 
         <div class="kartu kartu--sorot">
@@ -1821,12 +2100,11 @@ export class LayarRona {
 
         <div class="kartu">
           <div class="kartu__baris">
-            <span class="kartu__label">Lapis 3 · Rujukan Regulasi &amp; Provenans</span>
-            ${lencanaVerif("sah")}
+            <span class="kartu__label">Lapis 3 · Rujukan &amp; sumber</span>
           </div>
-          <p class="kartu__isi">Standar antropometri merujuk pada <strong>Permenkes RI No. 2 Tahun 2020</strong>. Target kecukupan gizi merujuk pada <strong>Permenkes RI No. 28 Tahun 2019</strong>. Nilai gizi bahan pangan v1 dipetakan dari <strong>USDA FoodData Central SR Legacy (CC0 Domain Publik)</strong> dengan status menunggu verifikasi dosen pengampu.</p>
+          <p class="kartu__isi">Standar antropometri merujuk pada <strong>Permenkes RI No. 2 Tahun 2020</strong>. Target kecukupan gizi merujuk pada <strong>Permenkes RI No. 28 Tahun 2019</strong>. Nilai gizi bahan pangan v1 dipetakan dari <strong>USDA FoodData Central SR Legacy (CC0 Domain Publik)</strong>.</p>
           <div class="baris-aksi" style="margin-top:8px;">
-            <button type="button" class="btn btn--sekunder btn--penuh" data-go="ahli">Buka Mode Ahli &amp; Jejak Klaim Lengkap (A7) →</button>
+            <button type="button" class="btn btn--sekunder btn--penuh" data-go="ahli">Buka Mode ahli →</button>
           </div>
         </div>
       </div>
@@ -1848,14 +2126,14 @@ export class LayarRona {
     return `
       <div class="layar">
         <div>
-          <div class="layar__kicker">A7 · Mode Ahli &amp; Silsilah Sumber Ilmiah</div>
-          <h2 class="layar__judul">Audit deterministik &amp; <em>provenans</em></h2>
-          <p class="layar__sub">Dirancang untuk pengujian akademik transparan. Tidak ada klaim yang disajikan sebagai terverifikasi bila masih berstatus asumsi atau belum diperiksa dosen.</p>
+          <div class="layar__kicker">Mode ahli</div>
+          <h2 class="layar__judul">Mode ahli: <em>jejak &amp; sumber</em></h2>
+          <p class="layar__sub">Versi mesin, jejak klaim, dan sumber di balik setiap hasil.</p>
         </div>
 
         <div class="kartu kartu--sorot">
           <div class="kartu__baris">
-            <span class="kartu__label">1. Telemetri Mesin &amp; Cap Versi</span>
+            <span class="kartu__label">1. Versi mesin</span>
             ${lencanaVerif("sah")}
           </div>
           <div class="panel-ahli">
@@ -1876,7 +2154,7 @@ export class LayarRona {
 
         <div class="kartu">
           <div class="kartu__baris">
-            <span class="kartu__label">2. Registri Klaim Ilmiah &amp; Asumsi (${klaimData.klaim.length} Klaim)</span>
+            <span class="kartu__label">2. Jejak klaim (${klaimData.klaim.length})</span>
             ${lencanaVerif("perlu")}
           </div>
           <div class="pilihan-grid">
@@ -1888,9 +2166,9 @@ export class LayarRona {
                   <div class="pilihan-item ${dipakai ? "is-selected" : ""}" style="cursor:default;">
                     <div>
                       <div class="pilihan-item__nama">${escHtml(k.id)} · Tingkat ${escHtml(k.tingkat)}</div>
-                      <div class="pilihan-item__sub">${escHtml(k.pernyataan)} (Sumber: ${escHtml(daftarSumber)})</div>
+                      <div class="pilihan-item__sub">${escHtml(ringkasKlaim(k.pernyataan))}${daftarSumber !== "—" ? ` <span class="sumber-klaim">Sumber: ${escHtml(daftarSumber)}</span>` : ""}</div>
                     </div>
-                    ${lencanaVerif(k.status === "terverifikasi-manusia" ? "sah" : k.tingkat === "D" ? "draf" : "perlu")}
+                    ${k.tingkat === "D" ? lencanaVerif("draf") : ""}
                   </div>
                 `;
               })
@@ -1955,7 +2233,7 @@ export class LayarRona {
 
         <div class="baris-aksi">
           <button type="button" class="btn btn--sekunder btn--penuh" data-pick-preset="A">
-            <span>Kembali ke Simulasi Kasus Normal (Kasus Sintetis A)</span>
+            <span>Kembali ke Contoh 1</span>
           </button>
         </div>
       </div>
@@ -1966,26 +2244,26 @@ export class LayarRona {
   private layarTentang(): string {
     return `
       <div class="layar">
-        <div>
-          <div class="layar__kicker">A9 · Tentang, Batas Alat &amp; Privasi Jujur</div>
-          <h2 class="layar__judul">Kendali penuh &amp; <em>transparansi</em></h2>
-          <p class="layar__sub">Aplikasi ini dirancang sebagai alat bantu edukasi dan demonstrasi akademik V-PJBL, bukan alat diagnosis medis maupun pengganti tenaga kesehatan.</p>
+        <div class="beranda__kepala">
+          <span class="beranda__logo">${logo("", 76)}</span>
+          <div>
+            <div class="layar__kicker">Tentang</div>
+            <h2 class="layar__judul">NUTRIVA, <em>gizi 1000 hari</em> pertama.</h2>
+            <p class="layar__sub">Alat bantu edukasi MPASI. Bukan alat diagnosis dan tidak menggantikan pemeriksaan oleh petugas kesehatan.</p>
+          </div>
         </div>
 
         <div class="kartu kartu--sorot">
-          <div class="kartu__baris">
-            <span class="kartu__label">Pernyataan Privasi &amp; Arsitektur Data (K-08 &amp; K-12)</span>
-            ${lencanaVerif("sah")}
-          </div>
+          <span class="kartu__label">Privasi</span>
           <p class="kartu__isi">${escHtml(PERNYATAAN_PRIVASI_AI)}</p>
         </div>
 
         <div class="kartu">
-          <span class="kartu__label">Apa yang Dilakukan &amp; Tidak Dilakukan Alat Ini</span>
+          <span class="kartu__label">Batas alat ini</span>
           <ul class="daftar-langkah" style="margin-top:6px;">
-            <li><strong>Bukan diagnosis medis:</strong> Status antropometri dan contoh pola makan adalah bahan diskusi bersama kader Posyandu atau bidan/dokter.</li>
-            <li><strong>Tidak meresepkan dosis suplemen:</strong> Bila ada celah zat besi, alat menyarankan konsultasi ke tenaga kesehatan tanpa menyebut miligram obat.</li>
-            <li><strong>Inti deterministik bekerja tanpa jaringan:</strong> Perhitungan status pertumbuhan, pola makan, daftar belanja, dan penjelasan templat cadangan berjalan langsung di peramban perangkat; hanya fitur penjelasan AI opsional yang memerlukan koneksi jaringan.</li>
+            <li><strong>Bukan diagnosis medis:</strong> status pertumbuhan dan contoh menu adalah bahan diskusi bersama kader Posyandu, bidan, atau dokter.</li>
+            <li><strong>Tidak meresepkan dosis suplemen:</strong> bila ada celah zat besi, aplikasi menyarankan konsultasi ke petugas kesehatan.</li>
+            <li><strong>Bekerja tanpa internet:</strong> status, menu, dan daftar belanja dihitung di perangkat Anda. Hanya penjelasan AI yang membutuhkan koneksi.</li>
           </ul>
         </div>
 
@@ -1994,11 +2272,11 @@ export class LayarRona {
             <span class="kartu__label">Data tidak disimpan</span>
             <span class="lencana lencana--cukup">Hilang saat ditutup</span>
           </div>
-          <p class="kartu__isi">Seluruh perubahan angka simulasi hanya berada di memori RAM sementara dan hilang otomatis saat tab ditutup, atau dapat direset seketika:</p>
+          <p class="kartu__isi">Masukan anak hanya berada di memori sementara dan hilang saat tab ditutup, atau dapat direset seketika:</p>
           <div class="baris-aksi" style="margin-top:8px;">
             <button type="button" class="btn btn--bahaya btn--penuh" data-go="hapus">
               ${ikon("aksi-hapus")}
-              <span>Reset Memori Sesi Sekarang</span>
+              <span>Reset sesi sekarang</span>
             </button>
           </div>
         </div>
@@ -2014,14 +2292,14 @@ export class LayarRona {
 
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 10 · Kartu Ringkasan Edukasi Posyandu</div>
+        <div class="layar__kicker">Kartu ringkasan</div>
         <div class="kartu-bagi">
           <div class="kartu__baris">
-            <span class="kartu__label">RINGKASAN SIMULASI EDUKASI MPASI</span>
-            <span style="font-family:var(--f-mono);font-size:10px;">${escHtml(m.pola.benih)}</span>
+            <span class="kartu__label">RINGKASAN MPASI</span>
+            ${this.state.modeAhli ? `<span style="font-family:var(--f-mono);font-size:10px;">${escHtml(m.pola.benih)}</span>` : ""}
           </div>
           <div style="font-family:var(--f-display);font-size:21px;color:var(--t-1);">
-            ${escHtml(PRESET_SINTETIS[this.state.presetAktif].label)} · ${m.status.umur.bulan} bln (${fmtId(m.status.bb_kg, 1)} kg / ${fmtId(m.status.pb_cm, 1)} cm)
+            ${escHtml(PRESET_SINTETIS[this.state.presetAktif].kode)} · ${m.status.umur.bulan} bln (${fmtId(m.status.bb_kg, 1)} kg / ${fmtId(m.status.pb_cm, 1)} cm)
           </div>
           <div class="baris-aksi" style="margin:6px 0;">
             ${
@@ -2042,7 +2320,7 @@ export class LayarRona {
             }
           </p>
           <div class="kartu-bagi__cap">
-            ${escHtml(LABEL_PROTOTIPE)}
+            ${logo("logo--mini", 18)}<span>NUTRIVA · Gizi 1000 HPK</span><span class="cap-penulis">E.13.1</span>
           </div>
         </div>
         <div class="baris-aksi">
@@ -2056,10 +2334,10 @@ export class LayarRona {
   private layarKondisiKosong(): string {
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 01 · Keadaan Awal / Siap Diisi</div>
+        <div class="layar__kicker">Keadaan Awal / Siap Diisi</div>
         <h2 class="layar__judul">Bejana siap <em>diisi</em></h2>
         <div class="kartu kartu--sorot" style="text-align:center;padding:22px 16px;">
-          <div style="font-family:var(--f-display);font-size:26px;color:var(--aksen);">Pilih Kasus Sintetis atau Isi Ukuran</div>
+          <div style="font-family:var(--f-display);font-size:26px;color:var(--aksen);">Pilih contoh atau isi ukuran</div>
           <p class="kartu__isi" style="margin-top:6px;">Masukkan usia (6–23 bulan), berat badan, dan panjang badan untuk menyalakan pita pertumbuhan Permenkes 2/2020 dan racikan MPASI deterministik.</p>
           <div class="baris-aksi" style="justify-content:center;margin-top:12px;">
             <button type="button" class="btn btn--utama" data-go="profil">Buka Formulir Profil →</button>
@@ -2072,12 +2350,11 @@ export class LayarRona {
   private layarKondisiMemuat(): string {
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 02 · Menakar Porsi Deterministik</div>
+        <div class="layar__kicker">Menyusun menu</div>
         <h2 class="layar__judul">Menyusun <em>kombinasi bahan...</em></h2>
         <div class="kartu">
           <div class="kartu__baris">
-            <span class="kartu__label">Mesin Heuristik Slot + PRNG Mulberry32</span>
-            <span class="lencana lencana--perhatian">&lt; 5 ms</span>
+            <span class="kartu__label">Sedang disusun</span>
           </div>
           <p class="kartu__isi">Memilih bahan pangan lokal sesuai pita usia, menyaring alergen, memeriksa batas keamanan retinol hati ayam, dan menghitung persen kecukupan 23 zat gizi AKG.</p>
           <div style="height:10px;border-radius:999px;background:var(--permukaan-2);overflow:hidden;margin-top:8px;">
@@ -2100,7 +2377,7 @@ export class LayarRona {
           <div class="kartu__baris">
             ${lencanaStatus(this.state.daring ? "cukup" : "perhatian", this.state.daring ? "Daring sekarang" : "Luring sekarang")}
           </div>
-          <p class="kartu__isi">Seluruh perhitungan status gizi Permenkes 2/2020, contoh pola makan, dan daftar belanja berjalan langsung di perangkat. Saat koneksi internet terputus, kartu penjelasan otomatis beralih ke <strong>templat deterministik lokal</strong> tanpa galat.</p>
+          <p class="kartu__isi">Perhitungan status gizi, contoh menu, dan daftar belanja berjalan langsung di perangkat. Saat koneksi internet terputus, kartu penjelasan otomatis beralih ke <strong>teks cadangan</strong> tanpa galat.</p>
         </div>
         <div class="baris-aksi">
           <button type="button" class="btn btn--sekunder btn--penuh" data-go="status">Kembali ke Peta Pertumbuhan</button>
@@ -2112,7 +2389,7 @@ export class LayarRona {
   private layarKondisiKedaluwarsa(): string {
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 04 · Pengingat Pembaruan Ukuran Bulanan</div>
+        <div class="layar__kicker">Pengingat Pembaruan Ukuran Bulanan</div>
         <h2 class="layar__judul">Saatnya <em>timbang ulang</em> di Posyandu</h2>
         <div class="kartu">
           <div class="kartu__baris">
@@ -2131,7 +2408,7 @@ export class LayarRona {
   private layarKondisiGalat(): string {
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 05 · Validasi Rentang Ukuran &amp; Koreksi Posisi</div>
+        <div class="layar__kicker">Validasi Rentang Ukuran &amp; Koreksi Posisi</div>
         <h2 class="layar__judul">Periksa kembali <em>satuan ukur</em></h2>
         <div class="kartu">
           <div class="kartu__baris">
@@ -2140,7 +2417,7 @@ export class LayarRona {
           <p class="kartu__isi">Jika panjang badan yang dimasukkan berada di luar rentang <strong>45,0 hingga 110,0 cm</strong>, mesin menolak menebak status BB/PB dan meminta pemeriksaan ulang alat ukur (pastikan satuan sentimeter, bukan inci).</p>
         </div>
         <div class="kartu kartu--sorot">
-          <span class="kartu__label">Koreksi Otomatis Posisi Ukur (+0,7 cm) &amp; Pembulatan D-6</span>
+          <span class="kartu__label">Koreksi otomatis posisi ukur (+0,7 cm)</span>
           <p class="kartu__isi">Anak usia &lt;24 bulan yang diukur berdiri ditambah <strong>+0,7 cm</strong> secara otomatis, lalu dibulatkan ke kelipatan <strong>0,5 cm terdekat (setengah naik)</strong> agar dapat dicocokkan secara presisi pada tabel BB/PB Permenkes 2/2020.</p>
         </div>
       </div>
@@ -2194,7 +2471,7 @@ export class LayarRona {
   private layarKondisiDataTidakAda(): string {
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 07 · Transparansi Sel Data Belum Lengkap</div>
+        <div class="layar__kicker">Transparansi Sel Data Belum Lengkap</div>
         <h2 class="layar__judul">Bukan <em>nol persen</em></h2>
         <div class="bejana">
           <div class="bejana__kepala">
@@ -2219,7 +2496,7 @@ export class LayarRona {
           </div>
         </div>
         <div class="kartu">
-          <p class="kartu__isi">Menampilkan angka 0% ketika tabel sumber belum memuat nilai zat gizi tertentu akan menyesatkan pengguna. Mesin menandai <code>lengkap: false</code> dan menggambar kisi kristal kering.</p>
+          <p class="kartu__isi">Angka 0% tidak ditampilkan bila data sumber belum memuat nilai zat gizi tersebut, karena akan menyesatkan.</p>
         </div>
       </div>
     `;
@@ -2229,10 +2506,10 @@ export class LayarRona {
     return `
       <div class="layar">
         <div class="layar__kicker">Reset sesi</div>
-        <h2 class="layar__judul">Mulai ulang <em>sesi simulasi?</em></h2>
+        <h2 class="layar__judul">Mulai ulang <em>sesi?</em></h2>
         <div class="kartu kartu--bahaya">
           <p class="kartu__isi" style="color:var(--t-1);">
-            NUTRIVA tidak menyimpan data pribadi di penyimpanan peramban. Menekan tombol di bawah akan mengatur ulang seluruh masukan di memori RAM kembali ke kondisi awal <strong>Kasus Sintetis A</strong>.
+            Data anak tidak disimpan. Tombol di bawah mengembalikan semua masukan ke kondisi awal <strong>Contoh 1</strong>.
           </p>
           <div class="baris-aksi" style="margin-top:10px;">
             <button type="button" class="btn btn--bahaya" data-confirm-reset="true">
@@ -2254,14 +2531,20 @@ export class LayarRona {
   ): string {
     const labelSumber =
       penjelasan.sumber === "ai"
-        ? "Penjelasan AI (diperiksa pagar aturan)"
-        : "Templat Deterministik Lokal";
+        ? "Penjelasan AI"
+        : "Teks cadangan";
+    const catatanGalat = penjelasan.sumber === "templat" && this.kunciApi ? pesanAlasan(penjelasan.alasan_templat) : null;
+    const status = this.kunciApi
+      ? `AI aktif · ${escHtml(this.modelAi)}`
+      : this.urlWorkerAi
+        ? "AI tersedia"
+        : "AI belum aktif. Masukkan kunci API di Pengaturan.";
 
     return `
       <div class="kartu-ai" aria-live="polite">
         <div class="kartu__baris">
           <div>
-            <span class="kartu__label">Penjelas Bahasa Sederhana (K-08)</span>
+            <span class="kartu__label">Penjelasan sederhana</span>
             <div class="kartu__judul" style="display:flex;align-items:center;gap:6px;">
               ${ikon("spark")}
               <span>Ringkasan untuk Ibu &amp; Kader</span>
@@ -2270,16 +2553,13 @@ export class LayarRona {
           ${lencanaStatus(penjelasan.sumber === "ai" ? "cukup" : "perhatian", labelSumber)}
         </div>
 
-        <p class="kartu-ai__isi" data-ai-teks="true">${escHtml(penjelasan.teks)}</p>
+        <div class="kartu-ai__isi md" data-ai-teks="true">${renderMarkdown(penjelasan.teks)}</div>
 
-        <div class="kartu-ai__peringatan" role="note">
-          ${escHtml(PERINGATAN_AI)}
-        </div>
+        ${penjelasan.sumber === "ai" ? `<div class="kartu-ai__peringatan" role="note">${escHtml(PERINGATAN_AI)}</div>` : ""}
 
+        ${catatanGalat ? `<p class="ai-status ai-status--ditolak" role="status">${escHtml(catatanGalat)}</p>` : ""}
         <div class="kartu__baris">
-          <span style="font-family:var(--f-mono);font-size:10px;color:var(--t-3);">
-            ${this.urlWorkerAi ? "Proksi AI tersedia" : "Mode tanpa Worker: otomatis memakai templat deterministik"}
-          </span>
+          <span class="kartu-ai__status">${status}</span>
           <button
             type="button"
             class="chip"
@@ -2288,7 +2568,7 @@ export class LayarRona {
             ${this.state.sedangMemuatAi ? "disabled" : ""}
           >
             ${ikon("spark")}
-            <span>${this.state.sedangMemuatAi ? "Meminta Penjelasan..." : "Segarkan Penjelasan"}</span>
+            <span>${this.state.sedangMemuatAi ? "Meminta penjelasan…" : this.kunciApi || this.urlWorkerAi ? "Minta penjelasan AI" : "Segarkan"}</span>
           </button>
         </div>
       </div>
@@ -2585,7 +2865,7 @@ export class LayarRona {
     // Buka Lembar Kontrol Mobile
     this.qa<HTMLElement>("[data-open-kontrol]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        this.bukaLembar(this.bangunLembarKontrolMobile(), "half");
+        this.bukaLembar(() => this.bangunLembarKontrolMobile(), "half");
       });
     });
 
@@ -2776,6 +3056,65 @@ export class LayarRona {
         } else if (jenis === "menu") {
           void this.segarkanPenjelasanAiMenu(hariIdx);
         }
+      });
+    });
+
+    // Ekspor PDF
+    this.qa<HTMLElement>("[data-buka-ekspor]").forEach((btn) => {
+      btn.addEventListener("click", () => this.bukaLembar(() => this.bangunLembarEkspor(), "half"));
+    });
+    this.qa<HTMLElement>("[data-ekspor-jenis]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const jenis = btn.getAttribute("data-ekspor-jenis") as JenisEkspor | null;
+        if (!jenis) return;
+        if (this.lembarTerbuka) this.tutupLembar();
+        // Tunggu lembar tertutup dan tampilan stabil sebelum dialog cetak dibuka.
+        setTimeout(() => this.ekspor(jenis), 380);
+      });
+    });
+
+    // Panah kiri/kanan antar layar
+    this.qa<HTMLElement>("[data-arah]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.pindahArah(btn.getAttribute("data-arah") === "-1" ? -1 : 1);
+      });
+    });
+
+    // Pengaturan AI: kunci API milik pengguna
+    this.qa<HTMLInputElement>("[data-ai-kunci]").forEach((inp) => {
+      inp.addEventListener("input", () => { this.draftKunci = inp.value; });
+      inp.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); this.simpanDraftKunci(); }
+      });
+    });
+    this.qa<HTMLInputElement>("[data-ai-model]").forEach((inp) => {
+      inp.addEventListener("change", () => {
+        this.modelAi = inp.value.trim() || MODEL_AI_BAWAAN;
+        this.simpanKunci();
+        this.statusKunci = { jenis: "info", teks: "Model disimpan." };
+        this.render();
+      });
+    });
+    this.qa<HTMLElement>("[data-ai-ingat]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.ingatKunci = !this.ingatKunci;
+        this.simpanKunci();
+        this.render();
+      });
+    });
+    this.qa<HTMLElement>("[data-ai-simpan]").forEach((btn) => {
+      btn.addEventListener("click", () => this.simpanDraftKunci());
+    });
+    this.qa<HTMLElement>("[data-ai-uji]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (this.draftKunci.trim()) this.simpanDraftKunci(true);
+        void this.jalankanUjiKunci();
+      });
+    });
+    this.qa<HTMLElement>("[data-ai-hapus]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.draftKunci = "";
+        this.aturKunciApi("");
       });
     });
 

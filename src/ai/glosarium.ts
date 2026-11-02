@@ -1,5 +1,4 @@
 import type { MuatanAi } from "./kontrak";
-import { LABEL_PROTOTIPE } from "../engine/konstanta";
 
 /** Arti kode dalam bahasa sehari-hari. Dipakai templat cadangan, prompt Worker, dan validator (satu sumber kata). */
 export const LABEL_BBU: Record<NonNullable<MuatanAi["status"]>["bbu"], string> = {
@@ -48,6 +47,6 @@ export const LABEL_PITA: Record<MuatanAi["pita_usia"], string> = {
 
 /** Tulisan wajib yang ditampilkan antarmuka di samping teks AI (bukan bagian keluaran AI). */
 export const PERINGATAN_AI =
-  "Penjelasan ini dibuat oleh AI dan bisa keliru. Angka dan status dihitung oleh mesin NUTRIVA, bukan oleh AI. " + LABEL_PROTOTIPE;
+  "Penjelasan ini dibuat oleh AI dan bisa keliru. Angka dan status dihitung oleh mesin NUTRIVA, bukan oleh AI.";
 export const PERNYATAAN_PRIVASI_AI =
-  "Jika penjelasan AI dipakai, aplikasi hanya mengirim ringkasan berkode: jenis layar, rentang usia anak (6 sampai 8, 9 sampai 11, atau 12 sampai 23 bulan), kategori status gizi, persen kecukupan gizi yang dibulatkan, ringkasan keragaman makanan, dan nomor versi aplikasi. Nama, tanggal lahir, berat badan, dan panjang badan tidak dikirim. Ringkasan itu melewati server perantara di Cloudflare, lalu OpenRouter, lalu penyedia model Claude; server-server tersebut berada di luar Indonesia. Alamat IP terlihat oleh Cloudflare dan server perantara; server perantara hanya menyimpannya sementara di memori untuk membatasi laju. NUTRIVA tidak memiliki akun atau basis data pengguna dan kodenya tidak mencatat isi permintaan, tetapi OpenRouter dan penyedia model dapat menyimpan catatan sesuai kebijakan mereka. Ringkasan ini tetap termasuk data kesehatan anak yang sudah dikodekan. Penjelasan AI bersifat opsional, dan teks cadangan selalu tersedia tanpa jaringan.";
+  "Penjelasan AI bersifat opsional. Yang dikirim hanya ringkasan berkode (rentang usia, kategori status, persen kecukupan gizi). Nama, tanggal lahir, berat badan, dan panjang badan tidak dikirim. Teks cadangan selalu tersedia tanpa jaringan.";
