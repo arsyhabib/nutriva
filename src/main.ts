@@ -1,4 +1,4 @@
-import { LayarRona, type OpsiLayarRona } from "./ui/layar";
+import { DAFTAR_LAYAR, LayarRona, type IdLayar, type OpsiLayarRona } from "./ui/layar";
 
 export function pasangAplikasiRona(
   akar: HTMLElement,
@@ -19,10 +19,22 @@ function daftarkanServiceWorker(): void {
   });
 }
 
+/** Tautan dalam: `#kolam`, `#kenapa`, dst. Hanya id layar yang dikenal yang diterima. */
+export function layarDariHash(hash: string): IdLayar | null {
+  const id = hash.replace(/^#\/?/, "");
+  return DAFTAR_LAYAR.find((l) => l.id === id)?.id ?? null;
+}
+
 if (typeof document !== "undefined") {
   const el = document.getElementById("app");
   if (el) {
-    pasangAplikasiRona(el);
+    const app = pasangAplikasiRona(el);
+    const awal = layarDariHash(window.location.hash);
+    if (awal) app.bukaLayar(awal);
+    window.addEventListener("hashchange", () => {
+      const id = layarDariHash(window.location.hash);
+      if (id) app.bukaLayar(id);
+    });
     daftarkanServiceWorker();
   }
 }

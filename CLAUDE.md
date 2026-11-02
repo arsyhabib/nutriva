@@ -47,3 +47,6 @@ Cowork (Claude di cloud) menulis `src/engine/{gizi,polaMakan,belanja,prng}.ts`, 
 
 ## Catatan kepemilikan (pra-Hari 4)
 Atas permintaan pemilik, Cowork juga mengerjakan `src/app/` (fasad untuk UI), `src/engine/rujukan.ts`, `public/_headers`, dan skrip `PASANG_WORKER.cmd`. Pembuatan `src/ui/` pada Hari 4 juga dikerjakan Cowork kecuali pemilik menugaskan Antigravity.
+
+## Catatan kepemilikan (penyempurnaan Rona, 2026-11-02)
+Hasil Antigravity (`src/ui/`) dinilai tidak layak, lalu **Cowork menyempurnakannya** di atas templat Rona (bukan desain baru): solver gelombang bejana stabil (`langkahGelombang`, uji `tests/fisika-stabil.test.ts`), render parsial (kerangka & kanvas latar persisten), angka/klaim karangan dibuang (strata ASI, takaran sdm, jam makan, nomor 119, P3K), dock pengembang diganti sheet Pengaturan, tipografi Plus Jakarta Sans + Instrument Serif italic, hierarki visual 3 tingkat, target sentuh ≥48 px, SW prakirim aset (luring pertama), CSP meta saat build. Uji: `npm run check` dan e2e Chromium `npm run e2e` (butuh `vite preview` di :4173 dan playwright global). Tautan dalam: `#kolam`, `#kenapa`, dst.

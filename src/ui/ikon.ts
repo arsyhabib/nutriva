@@ -125,7 +125,7 @@ export function lencanaStatus(
 
 export function lencanaVerif(kode: "sah" | "perlu" | "draf" = "perlu"): string {
   if (kode === "sah") {
-    return `<span class="verif verif--sah" title="Merujuk langsung pada dokumen regulasi resmi">${ikon("verif-sah")}<span>[ACUAN RESMI]</span></span>`;
+    return `<span class="verif verif--sah" title="Merujuk dokumen regulasi; verifikasi dosen belum tentu selesai">${ikon("verif-sah")}<span>[SUMBER DIRUJUK]</span></span>`;
   }
   if (kode === "draf") {
     return `<span class="verif verif--draf" title="Asumsi pengembang tingkat D (belum diverifikasi dosen)">${ikon("verif-draf")}<span>[ASUMSI DRAF]</span></span>`;

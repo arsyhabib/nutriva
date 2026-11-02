@@ -111,7 +111,6 @@ const DAFTAR_ALERGEN_UI: readonly { kode: string; label: string }[] = [
   { kode: "ikan", label: "Ikan" },
   { kode: "kedelai", label: "Kedelai (Tempe/Tahu)" },
   { kode: "susu", label: "Susu Sapi / Olahan" },
-  { kode: "udang", label: "Udang" },
   { kode: "gluten", label: "Gluten / Oat" },
 ];
 
@@ -151,34 +150,10 @@ const DAFTAR_BENIH_VARIASI: readonly {
   judul: string;
   catatan: string;
 }[] = [
-  {
-    benih: "rona-sintetis-a1",
-    kode: "#A7F3",
-    judul: "Variasi #A7F3 — Racikan Seimbang Harian",
-    catatan:
-      "Kombinasi makanan pokok, protein hewani/nabati, sayur kaya vitamin A, dan lemak tambahan sesuai pita usia.",
-  },
-  {
-    benih: "rona-sintetis-v2",
-    kode: "#3C9B",
-    judul: "Variasi #3C9B — Alternatif Pesisir & Kebun",
-    catatan:
-      "Menukar sumber karbohidrat, lauk protein, dan sayuran lokal secara deterministik agar anak tidak bosan.",
-  },
-  {
-    benih: "rona-sintetis-v3",
-    kode: "#E1D0",
-    judul: "Variasi #E1D0 — Padat Mikronutrien Lokal",
-    catatan:
-      "Mengutamakan variasi lauk hewani dan kacang-kacangan dengan buah penyerap zat besi.",
-  },
-  {
-    benih: "rona-sintetis-v4",
-    kode: "#C0DE",
-    judul: "Variasi #C0DE — Rotasi Menu Keluarga",
-    catatan:
-      "Alternatif rotasi bahan dapur harian dengan tetap menjaga target minimal 5 dari 8 kelompok pangan MDD.",
-  },
+  { benih: "rona-sintetis-a1", kode: "1", judul: "Susunan 1", catatan: "Susunan bahan dipilih otomatis dari aturan mesin; hasilnya sama setiap kali dengan masukan yang sama." },
+  { benih: "rona-sintetis-v2", kode: "2", judul: "Susunan 2", catatan: "Bahan pokok, lauk, dan sayur ditukar oleh mesin dengan aturan yang sama." },
+  { benih: "rona-sintetis-v3", kode: "3", judul: "Susunan 3", catatan: "Bahan pokok, lauk, dan sayur ditukar oleh mesin dengan aturan yang sama." },
+  { benih: "rona-sintetis-v4", kode: "4", judul: "Susunan 4", catatan: "Bahan pokok, lauk, dan sayur ditukar oleh mesin dengan aturan yang sama." },
 ];
 
 const ZAT_BEJANA_UTAMA: readonly {
@@ -194,7 +169,7 @@ const ZAT_BEJANA_UTAMA: readonly {
     viskositas: 0.9,
     meniskus: 5.8,
     catatan:
-      "Protein hewani (telur, ikan, ayam, hati) dan nabati (tempe, tahu) menyediakan asam amino esensial pertumbuhan jaringan.",
+      "Dari lauk hewani dan nabati dalam menu.",
   },
   {
     zat: "besi_mg",
@@ -202,7 +177,7 @@ const ZAT_BEJANA_UTAMA: readonly {
     viskositas: 0.85,
     meniskus: 6.8,
     catatan:
-      "Target AKG 6–11 bln (11 mg/hari) sangat tinggi dibanding kapasitas lambung bayi; hati ayam, daging, dan ikan membantu memperkecil celah.",
+      "Zat besi paling sulit dipenuhi; lauk hewani dalam menu membantu memperkecil celah.",
   },
   {
     zat: "seng_mg",
@@ -210,7 +185,7 @@ const ZAT_BEJANA_UTAMA: readonly {
     viskositas: 0.88,
     meniskus: 5.4,
     catatan:
-      "Mendukung pembelahan sel dan daya tahan saluran cerna; banyak terdapat pada lauk hewani dan kacang-kacangan.",
+      "Dari lauk hewani dan kacang-kacangan dalam menu.",
   },
   {
     zat: "kalsium_mg",
@@ -218,7 +193,7 @@ const ZAT_BEJANA_UTAMA: readonly {
     viskositas: 0.93,
     meniskus: 5.0,
     catatan:
-      "Mendukung mineralisasi tulang dan gigi bersama Vitamin D dan fosfor.",
+      "Dari bahan menu yang dihitung; ASI dan susu lain tidak dihitung.",
   },
   {
     zat: "vit_a_rae_mcg",
@@ -226,7 +201,7 @@ const ZAT_BEJANA_UTAMA: readonly {
     viskositas: 0.95,
     meniskus: 4.6,
     catatan:
-      "Berasal dari hati ayam, telur, wortel, bayam, labu kuning, dan pepaya (perhatikan perbedaan satuan RAE di USDA vs RE di AKG).",
+      "Dari bahan menu yang dihitung. Satuan sumber (RAE) berbeda dari AKG (RE), tanpa konversi tebakan.",
   },
   {
     zat: "vit_c_mg",
@@ -234,7 +209,7 @@ const ZAT_BEJANA_UTAMA: readonly {
     viskositas: 0.96,
     meniskus: 4.2,
     catatan:
-      "Asam askorbat dari buah segar dan sayur membantu penyerapan zat besi non-heme di saluran cerna.",
+      "Dari buah dan sayur dalam menu.",
   },
 ];
 
@@ -251,43 +226,32 @@ function escHtml(teks: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function takaranRumahTangga(gram: number, peran: string): string {
-  if (peran === "lemak") {
-    const sdt = Math.max(0.5, Math.round((gram / 5) * 2) / 2);
-    return `${gram} g (~${fmtId(sdt, sdt % 1 === 0 ? 0 : 1)} sdt)`;
+/** Alasan rujukan dari mesin → kalimat manusia. Kode mentah hanya untuk Mode Ahli. */
+function labelAlasan(kode: string): string {
+  const [jenis, nilai = ""] = kode.split(":");
+  if (jenis === "tanda_bahaya") {
+    const t = daftarTandaBahaya().find((b) => b.kode === nilai);
+    return t ? `Tanda bahaya: ${t.label}` : "Tanda bahaya tidak dikenal (diperlakukan sebagai rujukan)";
   }
-  if (peran === "protein_hewani" || peran === "protein_nabati") {
-    const ptg = Math.max(0.5, Math.round((gram / 30) * 2) / 2);
-    return `${gram} g (~${fmtId(ptg, ptg % 1 === 0 ? 0 : 1)} potong kecil)`;
-  }
-  const sdm = Math.max(1, Math.round(gram / 15));
-  return `${gram} g (~${sdm} sdm)`;
+  if (jenis === "tanda_bahaya_tak_dikenal") return "Tanda bahaya tidak dikenal (diperlakukan sebagai rujukan)";
+  const IND: Record<string, string> = { bbu: "Berat badan menurut umur", pbu: "Panjang/tinggi badan menurut umur", bbpb: "Berat badan menurut panjang/tinggi" };
+  const kat = nilai.replace(/^(bb|pb|gizi)_/, "").replace(/_/g, " ");
+  return IND[jenis ?? ""] ? `${IND[jenis!]}: ${kat}` : kode.replace(/[:_]/g, " ");
+}
+
+function takaranRumahTangga(gram: number, _peran: string): string {
+  return `${gram} g`;
 }
 
 function namaSlotWaktu(kode: string): { judul: string; sub: string } {
-  const peta: Record<string, { judul: string; sub: string }> = {
-    makan_1: {
-      judul: "Makan Utama Pagi (08.00)",
-      sub: "Karbohidrat pokok + lauk protein + sayur + lemak tambahan",
-    },
-    makan_2: {
-      judul: "Makan Utama Siang (12.30)",
-      sub: "Rotasi lauk protein kedua + sayuran + lemak sehat",
-    },
-    makan_3: {
-      judul: "Makan Utama Sore (17.00)",
-      sub: "Makan utama ketiga untuk melengkapi kebutuhan energi harian",
-    },
-    selingan_1: {
-      judul: "Selingan Pagi (10.00)",
-      sub: "Buah kaya vitamin C & pelengkap energi di antara jam makan",
-    },
-    selingan_2: {
-      judul: "Selingan Sore (15.00)",
-      sub: "Selingan buah segar & pangan padat gizi sore hari",
-    },
-  };
-  return peta[kode] ?? { judul: `Waktu Makan (${kode})`, sub: "Porsi terukur" };
+  const m = /^(makan|selingan)_(\d+)$/.exec(kode);
+  if (m) {
+    const n = m[2];
+    return m[1] === "makan"
+      ? { judul: `Makan ${n}`, sub: "Makanan utama" }
+      : { judul: `Selingan ${n}`, sub: "Makanan kecil di antara waktu makan" };
+  }
+  return { judul: kode, sub: "" };
 }
 
 export interface StateLayarRona {
@@ -301,6 +265,8 @@ export interface StateLayarRona {
   modeAhli: boolean;
   tampilkanSemuaZat: boolean;
   layoutPenuh: boolean;
+  teksBesar: boolean;
+  daring: boolean;
   aiStatus: HasilPenjelasan | null;
   aiMenuPerHari: Record<number, HasilPenjelasan>;
   sedangMemuatAi: boolean;
@@ -322,6 +288,10 @@ export class LayarRona {
   private sutraAtelier: SutraField | null = null;
   private sutraHp: SutraField | null = null;
   private bejanaInstances: BejanaNektar[] = [];
+  private kerangkaSiap = false;
+  private lembarSebelumnya = false;
+  private layarTerakhir: IdLayar | null = null;
+  private nilaiBejanaTerakhir = new Map<string, { fill: number; lo: number; hi: number; asiFrac: number }>();
   private lembarTerbuka: { html: string; detent: "peek" | "half" | "full" } | null = null;
 
   constructor(akar: HTMLElement, opsi: OpsiLayarRona = {}) {
@@ -345,6 +315,8 @@ export class LayarRona {
       modeAhli: peran === "ahli" || opsi.layarAwal === "ahli",
       tampilkanSemuaZat: false,
       layoutPenuh: false,
+      teksBesar: false,
+      daring: typeof navigator === "undefined" || navigator.onLine !== false,
       aiStatus: null,
       aiMenuPerHari: {},
       sedangMemuatAi: false,
@@ -355,6 +327,14 @@ export class LayarRona {
     pasangSprite();
     inisialisasiOptikGlobal();
     this.sinkronAtributDokumen();
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+      const ubah = (nilai: boolean): void => {
+        this.state.daring = nilai;
+        this.render();
+      };
+      window.addEventListener("online", () => ubah(true));
+      window.addEventListener("offline", () => ubah(false));
+    }
     this.render();
   }
 
@@ -477,6 +457,14 @@ export class LayarRona {
     if (typeof document === "undefined" || !document.documentElement) return;
     document.documentElement.setAttribute("data-theme", this.state.tema);
     document.documentElement.setAttribute("data-peran", this.state.peran);
+    if (this.state.teksBesar) document.documentElement.setAttribute("data-zoom", "200");
+    else document.documentElement.removeAttribute("data-zoom");
+  }
+
+  public aturTeksBesar(nyala: boolean): void {
+    this.state.teksBesar = nyala;
+    this.sinkronAtributDokumen();
+    this.render();
   }
 
   private ambilPenjelasanStatus(muatan: MuatanAi | null): HasilPenjelasan | null {
@@ -503,9 +491,13 @@ export class LayarRona {
     };
   }
 
-  private bersihkanKanvas(): void {
+  private bersihkanBejana(): void {
     this.bejanaInstances.forEach((b) => b.destroy());
     this.bejanaInstances = [];
+  }
+
+  private bersihkanKanvas(): void {
+    this.bersihkanBejana();
     if (this.sutraHp) {
       this.sutraHp.destroy();
       this.sutraHp = null;
@@ -516,43 +508,71 @@ export class LayarRona {
     }
   }
 
+  /** Querysemua hanya pada wilayah dinamis (yang diganti tiap render), agar pendengar tidak menumpuk. */
+  private qa<T extends HTMLElement>(selector: string): T[] {
+    const hasil: T[] = [];
+    for (const sel of [".hp__status", ".hp__scroll", ".hp__nav", ".lembar", ".lembar-backdrop", ".dock-panel"]) {
+      const wadah = this.akar.querySelector<HTMLElement>(sel);
+      if (!wadah) continue;
+      // Wadah persisten (latar lembar) hanya diikat sekali agar pendengar tidak menumpuk.
+      if (sel === ".lembar-backdrop") {
+        if (wadah.matches(selector) && !wadah.hasAttribute("data-terikat")) {
+          wadah.setAttribute("data-terikat", "1");
+          hasil.push(wadah as unknown as T);
+        }
+        continue;
+      }
+      wadah.querySelectorAll<T>(selector).forEach((e) => hasil.push(e));
+    }
+    return hasil;
+  }
+
+  private bangunStatusHtml(): string {
+    return `
+      <span class="hp__status-pill">
+        <span class="hp__status-dot"></span>
+        <span>NUTRIVA</span>
+        ${this.state.daring ? "" : '<span class="hp__luring" role="status">Luring</span>'}
+      </span>
+      <div class="hp__status-actions">
+        <button type="button" class="hp__status-btn" data-open-kontrol="true" aria-label="Pengaturan">
+          ${ikon("kontrol")}
+          <span>Pengaturan</span>
+        </button>
+      </div>`;
+  }
+
+  private bangunLembarHtml(): string {
+    const buka = this.lembarTerbuka !== null;
+    return buka ? this.bangunKerangkaLembar(this.lembarTerbuka!.html, this.lembarTerbuka!.detent) : "";
+  }
+
   private render(): void {
-    this.bersihkanKanvas();
     const r = this.hitungRingkasan();
     const darurat =
       this.state.layar === "bahaya" ||
       (r.hasil === "ok" && r.rujukan.tingkat === "rujuk");
 
-    const isiLayar = this.bangunIsiLayar(r);
+    const isiLayar = this.bangunIsiLayar(r).replace(/(<div class="layar__kicker">)\s*[A-K]\d{1,2} · /g, "$1");
     const navHtml = this.bangunNavBawah();
+    const statusHtml = this.bangunStatusHtml();
     const dockHtml = this.bangunDockDesktop(r);
     const sheetOpen = this.lembarTerbuka !== null;
     const sheetDetent = this.lembarTerbuka?.detent ?? "half";
+    const lembarHtml = this.bangunLembarHtml();
+    const layout = this.state.layoutPenuh ? "penuh" : "bingkai";
+    const layarBerganti = this.layarTerakhir !== this.state.layar;
+    this.layarTerakhir = this.state.layar;
 
     const html = `
-      <div class="rona-app-shell" data-theme="${this.state.tema}" data-peran="${this.state.peran}" data-layout="${this.state.layoutPenuh ? "penuh" : "bingkai"}">
+      <div class="rona-app-shell" data-theme="${this.state.tema}" data-peran="${this.state.peran}" data-layout="${layout}">
         <canvas class="atelier-bg" id="rona-atelier-canvas" aria-hidden="true"></canvas>
         <div class="rona-app-stage">
-          <main id="konten-utama" class="hp" data-theme="${this.state.tema}" aria-label="Aplikasi Mobile NUTRIVA Rona">
+          <main id="konten-utama" class="hp" data-theme="${this.state.tema}" aria-label="Aplikasi NUTRIVA">
             <canvas class="sutra-bg" id="rona-hp-sutra" aria-hidden="true"></canvas>
             <div class="tetes-layer" id="rona-tetes-layer" aria-hidden="true"></div>
 
-            <header class="hp__status">
-              <span class="hp__status-pill">
-                <span class="hp__status-dot"></span>
-                <span>NUTRIVA Rona · Kasus ${this.state.presetAktif}</span>
-              </span>
-              <div class="hp__status-actions">
-                <button type="button" class="hp__status-btn" data-open-kontrol="true" title="Buka Pengaturan Kasus, Tema & Semua Layar">
-                  ${ikon("kontrol")}
-                  <span>Kontrol &amp; Layar</span>
-                </button>
-                <button type="button" class="hp__status-btn" data-toggle-layout="true" title="Ubah Mode Layar Penuh / Bingkai Ponsel">
-                  ${ikon("layar-penuh")}
-                  <span>${this.state.layoutPenuh ? "Bingkai" : "Penuh"}</span>
-                </button>
-              </div>
-            </header>
+            <header class="hp__status">${statusHtml}</header>
 
             <div class="pita-kejujuran" role="note">
               <strong>${escHtml(LABEL_PROTOTIPE)}</strong>
@@ -567,13 +587,13 @@ export class LayarRona {
               class="lembar"
               role="dialog"
               aria-modal="true"
-              aria-label="Lembar Rincian & Kontrol"
+              aria-label="Lembar rincian dan kontrol"
               ${sheetOpen ? `data-detent="${sheetDetent}"` : ""}
             >
-              ${sheetOpen ? this.bangunKerangkaLembar(this.lembarTerbuka!.html, sheetDetent) : ""}
+              ${lembarHtml}
             </section>
 
-            <nav class="hp__nav" aria-label="Navigasi Utama Aplikasi">
+            <nav class="hp__nav" aria-label="Navigasi utama">
               ${navHtml}
             </nav>
           </main>
@@ -584,10 +604,55 @@ export class LayarRona {
     `;
 
     this.htmlTerakhir = html;
-    this.akar.innerHTML = html;
 
-    this.hidupkanMesinVisual(darurat);
+    const bisaParsial =
+      this.kerangkaSiap &&
+      typeof this.akar.querySelector === "function" &&
+      this.akar.querySelector(".rona-app-shell") !== null;
+
+    if (bisaParsial) {
+      this.bersihkanBejana();
+      const q = (sel: string): HTMLElement | null => this.akar.querySelector<HTMLElement>(sel);
+      const shell = q(".rona-app-shell");
+      const hp = q(".hp");
+      shell?.setAttribute("data-theme", this.state.tema);
+      shell?.setAttribute("data-peran", this.state.peran);
+      shell?.setAttribute("data-layout", layout);
+      hp?.setAttribute("data-theme", this.state.tema);
+      const st = q(".hp__status");
+      if (st) st.innerHTML = statusHtml;
+      const sc = q(".hp__scroll");
+      const posisi = sc ? sc.scrollTop : 0;
+      if (sc) sc.innerHTML = isiLayar;
+      if (sc && !layarBerganti) sc.scrollTop = posisi;
+      const nv = q(".hp__nav");
+      if (nv) nv.innerHTML = navHtml;
+      const dock = q(".dock-panel");
+      if (dock) dock.outerHTML = dockHtml;
+      const lb = q(".lembar-backdrop");
+      lb?.classList.toggle("is-open", sheetOpen);
+      const lm = q(".lembar");
+      if (lm) {
+        if (sheetOpen) lm.setAttribute("data-detent", sheetDetent);
+        else lm.removeAttribute("data-detent");
+        lm.innerHTML = lembarHtml;
+      }
+    } else {
+      this.bersihkanKanvas();
+      this.akar.innerHTML = html;
+      this.kerangkaSiap = typeof this.akar.querySelector === "function";
+    }
+
+    this.hidupkanMesinVisual(darurat, layarBerganti || !bisaParsial);
     this.ikatInteraksiDom(r);
+
+    if (bisaParsial && sheetOpen !== this.lembarSebelumnya && typeof this.akar.querySelector === "function") {
+      const t = sheetOpen
+        ? this.akar.querySelector<HTMLElement>(".lembar [data-close-sheet]")
+        : this.akar.querySelector<HTMLElement>("[data-open-kontrol]");
+      t?.focus?.();
+    }
+    this.lembarSebelumnya = sheetOpen;
   }
 
   private bangunKerangkaLembar(
@@ -598,11 +663,11 @@ export class LayarRona {
       <div class="lembar__pegangan" data-cycle-detent="true" title="Ketuk untuk ubah tinggi lembar"></div>
       <div class="lembar__kontrol">
         <div class="lembar__detents" role="group" aria-label="Tinggi lembar">
-          <button type="button" class="lembar__detent-btn ${detent === "peek" ? "is-active" : ""}" data-set-detent="peek">Intip (36%)</button>
-          <button type="button" class="lembar__detent-btn ${detent === "half" ? "is-active" : ""}" data-set-detent="half">Separuh (64%)</button>
-          <button type="button" class="lembar__detent-btn ${detent === "full" ? "is-active" : ""}" data-set-detent="full">Penuh (88%)</button>
+          <button type="button" class="lembar__detent-btn ${detent === "peek" ? "is-active" : ""}" data-set-detent="peek">Kecil</button>
+          <button type="button" class="lembar__detent-btn ${detent === "half" ? "is-active" : ""}" data-set-detent="half">Sedang</button>
+          <button type="button" class="lembar__detent-btn ${detent === "full" ? "is-active" : ""}" data-set-detent="full">Tinggi</button>
         </div>
-        <button type="button" class="btn btn--ghost" data-close-sheet="true" style="min-height:32px;padding:4px 10px;font-size:11px;">
+        <button type="button" class="btn btn--ghost" data-close-sheet="true">
           ${ikon("aksi-tutup")}
           <span>Tutup</span>
         </button>
@@ -680,189 +745,77 @@ export class LayarRona {
       .join("");
   }
 
-  private bangunDockDesktop(r: Ringkasan): string {
-    const tingkatLabel =
-      r.hasil === "stop"
-        ? `BERHENTI (${r.alasan})`
-        : r.rujukan.tingkat === "rujuk"
-          ? "WAJIB RUJUK NAKES"
-          : r.rujukan.tingkat === "perhatian"
-            ? "PERLU PERHATIAN"
-            : "PERTUMBUHAN NORMAL";
-
-    return `
-      <aside class="dock-panel" aria-label="Panel Kendali & Simulasi Penguji">
-        <div class="dock-panel__head">
-          <div>
-            <div class="layar__kicker">Studio Pendamping · V-PJBL 2026</div>
-            <div class="dock-panel__brand">NUTRIVA <em>Rona</em></div>
-            <div class="dock-panel__sub">Aplikasi mobile MPASI &amp; antropometri deterministik berbasis Permenkes RI No. 2/2020 &amp; 28/2019.</div>
-          </div>
-        </div>
-
-        <div class="dock-section">
-          <span class="dock-section__label">Status Mesin Deterministik</span>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;">
-            ${lencanaStatus(
-              r.hasil === "stop" || (r.hasil === "ok" && r.rujukan.tingkat === "rujuk")
-                ? "bahaya"
-                : r.hasil === "ok" && r.rujukan.tingkat === "perhatian"
-                  ? "perhatian"
-                  : "cukup",
-              tingkatLabel,
-            )}
-            ${lencanaVerif("perlu")}
-          </div>
-        </div>
-
-        <div class="dock-section">
-          <span class="dock-section__label">1. Pilih Kasus Uji Sintetis (Tanpa Data Pribadi)</span>
-          <div class="pilihan-grid">
-            ${(["A", "B", "C"] as KodePreset[])
-              .map((k) => {
-                const p = PRESET_SINTETIS[k];
-                const aktif = this.state.presetAktif === k;
-                return `
-                  <button type="button" class="dock-btn ${aktif ? "is-active" : ""}" data-pick-preset="${k}">
-                    <span>${escHtml(p.label)}</span>
-                    <small>${escHtml(p.ringkas)}</small>
-                  </button>
-                `;
-              })
-              .join("")}
-          </div>
-        </div>
-
-        <div class="dock-section">
-          <span class="dock-section__label">2. Tema Cahaya &amp; Peran Pengguna</span>
-          <div class="dock-grid-2">
-            ${(
-              [
-                { id: "fajar", nama: "Fajar", sub: "Pagi Hangat" },
-                { id: "dekap", nama: "Dekap", sub: "Malam 02.00" },
-                { id: "terik", nama: "Terik", sub: "Kontras AAA" },
-                { id: "lensa", nama: "Lensa", sub: "Mode Ahli" },
-              ] as const
-            )
-              .map(
-                (t) => `
-                <button type="button" class="dock-btn ${this.state.tema === t.id ? "is-active" : ""}" data-pick-theme="${t.id}">
-                  <span>Tema ${t.nama}</span>
-                  <small>${t.sub}</small>
-                </button>
-              `,
-              )
-              .join("")}
-          </div>
-          <div class="dock-grid-3" style="margin-top:4px;">
-            ${(
-              [
-                { id: "ibu", label: "Ibu" },
-                { id: "kader", label: "Kader" },
-                { id: "ahli", label: "Ahli" },
-              ] as const
-            )
-              .map(
-                (pr) => `
-                <button type="button" class="dock-btn ${this.state.peran === pr.id ? "is-active" : ""}" data-pick-role="${pr.id}">
-                  <span>Peran ${pr.label}</span>
-                </button>
-              `,
-              )
-              .join("")}
-          </div>
-        </div>
-
-        <div class="dock-section">
-          <span class="dock-section__label">3. Fisika Optik &amp; Gerak</span>
-          <div class="dock-grid-2">
-            <button type="button" class="dock-btn ${!Motion.isHemat() ? "is-active" : ""}" data-pick-motion="penuh">
-              <span>Fisika Penuh</span>
-              <small>60fps + Meniskus</small>
-            </button>
-            <button type="button" class="dock-btn ${Motion.isHemat() ? "is-active" : ""}" data-pick-motion="hemat">
-              <span>Hemat Gerak</span>
-              <small>Tanpa Animasi</small>
-            </button>
-          </div>
-        </div>
-
-        <div class="dock-section">
-          <span class="dock-section__label">4. Loncat Cepat (18 Layar Aplikasi)</span>
-          <div class="dock-grid-2">
-            ${DAFTAR_LAYAR.map(
-              (l) => `
-                <button type="button" class="dock-btn ${this.state.layar === l.id ? "is-active" : ""}" data-go="${l.id}">
-                  <span>${l.kode} · ${escHtml(l.label)}</span>
-                </button>
-              `,
-            ).join("")}
-          </div>
-        </div>
-      </aside>
-    `;
+  /** Dock 18 layar adalah alat pengembang Rona; produk tidak menampilkannya. */
+  private bangunDockDesktop(_r: Ringkasan): string {
+    return "";
   }
 
   private bangunLembarKontrolMobile(): string {
+    const NAMA_TEMA: Record<TemaRona, string> = { fajar: "Fajar", dekap: "Dekap", terik: "Terik (kontras tinggi)", lensa: "Lensa" };
+    const NAMA_PERAN: Record<PeranRona, string> = { ibu: "Ibu / pengasuh", kader: "Kader", ahli: "Ahli / penguji" };
+    const chip = (aktif: boolean, attr: string, teks: string): string =>
+      `<button type="button" class="chip ${aktif ? "is-active" : ""}" aria-pressed="${aktif ? "true" : "false"}" ${attr}>${escHtml(teks)}</button>`;
     return `
-      <div class="layar" style="gap:10px;">
+      <div class="layar" style="gap:12px;">
         <div>
-          <div class="layar__kicker">Pusat Kendali Aplikasi &amp; Pengujian</div>
-          <div style="font-family:var(--f-display);font-size:1.35rem;color:var(--t-1);">Pilih Kasus, Tema &amp; <em>Layar</em></div>
+          <h2 class="layar__judul">Pengaturan</h2>
         </div>
 
         <div class="kartu">
-          <span class="kartu__label">Pilih Kasus Uji Sintetis</span>
+          <span class="kartu__label">Kasus contoh (data sintetis)</span>
           <div class="pilihan-grid">
             ${(["A", "B", "C"] as KodePreset[])
               .map((k) => {
                 const p = PRESET_SINTETIS[k];
                 const aktif = this.state.presetAktif === k;
                 return `
-                  <button type="button" class="pilihan-item ${aktif ? "is-selected" : ""}" data-pick-preset="${k}">
+                  <button type="button" class="pilihan-item ${aktif ? "is-selected" : ""}" data-pick-preset="${k}" aria-pressed="${aktif ? "true" : "false"}">
                     <div>
                       <div class="pilihan-item__nama">${escHtml(p.label)}</div>
                       <div class="pilihan-item__sub">${escHtml(p.ringkas)}</div>
                     </div>
                     <span class="pilihan-item__indikator"></span>
-                  </button>
-                `;
+                  </button>`;
               })
               .join("")}
           </div>
         </div>
 
         <div class="kartu">
-          <span class="kartu__label">Tema Cahaya &amp; Mode Gerak</span>
+          <span class="kartu__label">Tampilan</span>
           <div class="baris-aksi">
-            ${(["fajar", "dekap", "terik", "lensa"] as const)
-              .map(
-                (t) => `
-                <button type="button" class="chip ${this.state.tema === t ? "is-active" : ""}" data-pick-theme="${t}">
-                  Tema ${t.charAt(0).toUpperCase() + t.slice(1)}
-                </button>
-              `,
-              )
-              .join("")}
+            ${(["fajar", "dekap", "terik", "lensa"] as const).map((t) => chip(this.state.tema === t, `data-pick-theme="${t}"`, NAMA_TEMA[t])).join("")}
           </div>
-          <div class="baris-aksi" style="margin-top:4px;">
-            <button type="button" class="chip ${!Motion.isHemat() ? "is-active" : ""}" data-pick-motion="penuh">Fisika Penuh 60fps</button>
-            <button type="button" class="chip ${Motion.isHemat() ? "is-active" : ""}" data-pick-motion="hemat">Hemat Gerak</button>
+          <div class="baris-aksi">
+            ${chip(!Motion.isHemat(), 'data-pick-motion="penuh"', "Animasi penuh")}
+            ${chip(Motion.isHemat(), 'data-pick-motion="hemat"', "Hemat gerak")}
+          </div>
+          <div class="baris-aksi">
+            ${chip(this.state.teksBesar, 'data-toggle-teks="true"', "Teks besar")}
+            ${chip(this.state.layoutPenuh, 'data-toggle-layout="true"', "Layar penuh")}
           </div>
         </div>
 
         <div class="kartu">
-          <span class="kartu__label">Semua 18 Layar &amp; Keadaan Khusus</span>
-          <div class="dock-grid-2">
-            ${DAFTAR_LAYAR.map(
-              (l) => `
-                <button type="button" class="dock-btn ${this.state.layar === l.id ? "is-active" : ""}" data-go="${l.id}">
-                  <span>${l.kode} · ${escHtml(l.label)}</span>
-                </button>
-              `,
-            ).join("")}
+          <span class="kartu__label">Tampilan untuk siapa</span>
+          <div class="baris-aksi">
+            ${(["ibu", "kader", "ahli"] as const).map((x) => chip(this.state.peran === x, `data-pick-role="${x}"`, NAMA_PERAN[x])).join("")}
           </div>
         </div>
+
+        <div class="baris-aksi">
+          <button type="button" class="btn btn--sekunder" data-go="tentang" data-close-sheet="true">Tentang &amp; privasi</button>
+          <button type="button" class="btn btn--ghost" data-go="hapus" data-close-sheet="true">Reset sesi</button>
+        </div>
+
+        <details class="kartu kartu--tinjau">
+          <summary>Keadaan khusus (untuk peninjau)</summary>
+          <div class="dock-grid-2">
+            ${DAFTAR_LAYAR.filter((l) => ["kosong", "memuat", "luring", "kedaluwarsa", "galat", "tidakLayak", "dataTidakAda", "kartuBagi"].includes(l.id))
+              .map((l) => `<button type="button" class="chip" data-go="${l.id}" data-close-sheet="true">${escHtml(l.label)}</button>`)
+              .join("")}
+          </div>
+        </details>
       </div>
     `;
   }
@@ -921,7 +874,7 @@ export class LayarRona {
       {
         id: "kader",
         nama: "Kader Posyandu / Pendamping Lapangan",
-        sub: "Ringkas, kontras tinggi (Tema Terik AAA) untuk meja posyandu & skrining rujukan",
+        sub: "Ringkas, kontras tinggi (Tema Terik, kontras tinggi) untuk meja posyandu & skrining rujukan",
       },
       {
         id: "ahli",
@@ -999,7 +952,7 @@ export class LayarRona {
           <ul class="daftar-langkah">
             <li><strong>Gerbang keselamatan otomatis:</strong> Jika ada tanda bahaya klinis atau status gizi buruk/sangat kurang, penyusunan menu dihentikan dan aplikasi memandu rujukan ke Puskesmas.</li>
             <li><strong>Pita ambang SD resmi:</strong> Klasifikasi menggunakan tabel 7-kolom SD Permenkes 2/2020 (bukan taksiran rumus Z-score kontinu).</li>
-            <li><strong>Memori sesi saja (ADR-0003):</strong> Tidak ada data anak yang disimpan ke penyimpanan permanen peramban atau basis data server.</li>
+            <li><strong>Tidak menyimpan data anak:</strong> masukan hanya ada di memori halaman dan hilang saat ditutup. Penjelasan AI bersifat opsional dan mengirim ringkasan berkode (lihat pernyataan di bawah).</li>
           </ul>
           <p class="kartu__isi" style="margin-top:6px;font-size:0.76rem;">${escHtml(PERNYATAAN_PRIVASI_AI)}</p>
         </div>
@@ -1016,7 +969,6 @@ export class LayarRona {
   /* ---------- A2: Profil Anak, Antropometri, Alergi & Penapisan Tanda Bahaya ---------- */
   private layarProfil(r: Ringkasan): string {
     const m = this.state.masukan;
-    const daftarBahaya = daftarTandaBahaya();
     const adaBahaya = m.tanda_bahaya.length > 0;
 
     return `
@@ -1085,14 +1037,16 @@ export class LayarRona {
                 <span>Berat Badan</span>
                 <span class="field__unit">${fmtId(m.status.bb_kg, 1)} kg</span>
               </label>
-              <input id="inp-bb" class="field__input" type="number" min="2" max="25" step="0.1" value="${m.status.bb_kg}" data-field="bb_kg" />
+              <input id="inp-bb" class="field__input" type="text" inputmode="decimal" autocomplete="off" aria-describedby="rentang-bb" value="${fmtId(m.status.bb_kg, 1)}" data-field="bb_kg" data-min="2" data-max="25" />
+              <span id="rentang-bb" class="field__unit">Rentang masukan 2–25 kg</span>
             </div>
             <div class="field">
               <label class="field__label" for="inp-pb">
                 <span>Panjang / Tinggi</span>
                 <span class="field__unit">${fmtId(m.status.pb_cm, 1)} cm</span>
               </label>
-              <input id="inp-pb" class="field__input" type="number" min="40" max="115" step="0.5" value="${m.status.pb_cm}" data-field="pb_cm" />
+              <input id="inp-pb" class="field__input" type="text" inputmode="decimal" autocomplete="off" aria-describedby="rentang-pb" value="${fmtId(m.status.pb_cm, 1)}" data-field="pb_cm" data-min="40" data-max="115" />
+              <span id="rentang-pb" class="field__unit">Rentang masukan 40–115 cm</span>
             </div>
           </div>
 
@@ -1134,7 +1088,7 @@ export class LayarRona {
           </div>
           <p class="kartu__isi">Jika satu saja tanda bahaya di bawah ini ditemukan, kalkulator wajib menghentikan saran menu mandiri dan mengarahkan ke rujukan tenaga kesehatan:</p>
           <div class="pilihan-grid" style="margin-top:6px;">
-            ${daftarBahaya
+            ${daftarTandaBahaya()
               .map((b) => {
                 const aktif = m.tanda_bahaya.includes(b.kode);
                 return `
@@ -1168,7 +1122,7 @@ export class LayarRona {
       const pesanStop: Record<string, { judul: string; isi: string }> = {
         usia_di_bawah_6_bulan: {
           judul: "Usia < 6 Bulan: Periode ASI Eksklusif",
-          isi: "Untuk bayi di bawah 6 bulan penuh, pedoman Kemenkes RI dan WHO menganjurkan pemberian ASI Eksklusif tanpa makanan/minuman tambahan kecuali atas indikasi medis dokter.",
+          isi: "Aplikasi ini hanya untuk anak 6–23 bulan. Untuk bayi di bawah 6 bulan, tanyakan pemberian makan kepada bidan atau dokter.",
         },
         usia_24_bulan_atau_lebih_di_luar_cakupan: {
           judul: "Usia ≥ 24 Bulan: Di Luar Cakupan MPASI Baduta",
@@ -1306,10 +1260,9 @@ export class LayarRona {
           <div class="kartu kartu--bahaya">
             <div class="kartu__baris">
               ${lencanaStatus("bahaya", "INDIKASI RUJUKAN WAJIB KE NAKES")}
-              <span style="font-family:var(--f-mono);font-size:10px;">KESELAMATAN UTAMA</span>
-            </div>
+              </div>
             <div class="kartu__judul">Rekomendasi menu mandiri &amp; penjelas AI dinonaktifkan</div>
-            <p class="kartu__isi">Ditemukan alasan rujukan: <strong>${escHtml(r.rujukan.alasan.join(", "))}</strong>. Silakan buka panduan rujukan darurat.</p>
+            <p class="kartu__isi">Alasan: <strong>${escHtml(r.rujukan.alasan.map(labelAlasan).join("; "))}</strong>. Silakan buka panduan rujukan.</p>
             <div class="baris-aksi" style="margin-top:4px;">
               <button type="button" class="btn btn--bahaya btn--penuh" data-go="bahaya">Buka Panduan Rujukan Darurat (A8) →</button>
             </div>
@@ -1415,7 +1368,7 @@ export class LayarRona {
           <div>
             <div class="layar__kicker">A4 · Gerbang Keselamatan Menu</div>
             <h2 class="layar__judul"><em>Rekomendasi Menu Dihentikan Sementara</em></h2>
-            <p class="layar__sub">Sesuai aturan keselamatan klinis NUTRIVA (K-04 &amp; K-08), ketika ditemukan tanda bahaya atau indikasi rujukan wajib, aplikasi tidak menampilkan saran menu mandiri maupun penjelasan AI.</p>
+            <p class="layar__sub">Sesuai aturan keselamatan klinis NUTRIVA (keselamatan), ketika ditemukan tanda bahaya atau indikasi rujukan wajib, aplikasi tidak menampilkan saran menu mandiri maupun penjelasan AI.</p>
           </div>
           <div class="kartu kartu--bahaya">
             <div class="kartu__baris">
@@ -1452,13 +1405,13 @@ export class LayarRona {
           <p class="layar__sub">Ketuk tombol <strong>Rincian / Ganti</strong> pada bahan makanan untuk melihat kandungan gizinya di Lembar Bawah atau menyaring bahan yang tidak tersedia di rumah.</p>
         </div>
 
-        <div class="kartu kartu--sorot">
+        <div class="kartu">
           <div class="kartu__baris">
             <div>
-              <span class="kartu__label">Benih Deterministik · ${escHtml(infoBenih.kode)} (${escHtml(pola.benih)})</span>
-              <div class="kartu__judul">${escHtml(infoBenih.judul)}</div>
+              <span class="kartu__label">Susunan menu</span>
+              <div class="kartu__judul">${escHtml(infoBenih.judul)} dari ${DAFTAR_BENIH_VARIASI.length}</div>
             </div>
-            <button type="button" class="btn btn--sekunder" data-cycle-benih="true" style="min-height:36px;padding:6px 12px;font-size:11.5px;">
+            <button type="button" class="btn btn--sekunder" data-cycle-benih="true">
               ${ikon("aksi-tukar")}
               <span>Varian Lain</span>
             </button>
@@ -1470,7 +1423,7 @@ export class LayarRona {
               `Keragaman MDD: ${hariAktif.jumlah_kelompok_mdd}/8 kelompok (Target ≥5)`,
             )}
             ${lencanaStatus(
-              "cukup",
+              "kosong",
               `Energi MPASI: ${Math.round(hariAktif.energi_kkal)} / ${hariAktif.energi_target_kkal} kkal (${hariAktif.energi_persen_target}%)`,
             )}
             ${lencanaVerif("perlu")}
@@ -1597,7 +1550,7 @@ export class LayarRona {
     `;
   }
 
-  /* ---------- A5: Bejana Nektar Dual-Strata ASI+MPASI & Kejujuran Ketidakpastian ---------- */
+  /* ---------- A5: Bejana kecukupan gizi ASI+MPASI & Kejujuran Ketidakpastian ---------- */
   private layarKolam(r: Ringkasan): string {
     if (r.hasil === "stop" || r.rujukan.tingkat === "rujuk" || !r.pola) {
       return this.layarPiring(r);
@@ -1607,36 +1560,19 @@ export class LayarRona {
     const hariIdx = Math.min(this.state.hariMenuIdx, pola.hari.length - 1);
     const hariAktif = pola.hari[hariIdx]!;
     const akgMap = new Map(hariAktif.akg.zat.map((z) => [z.zat, z] as const));
-    const masihAsi = this.state.masukan.pola.masih_asi;
-
-    // Estimasi proporsi visual strata ASI untuk membantu ibu melihat peran ASI + MPASI
-    const estimasiAsiFrac = (zat: KunciZat, fillTotal: number): number => {
-      if (!masihAsi) return 0;
-      const rasioVisual: Partial<Record<KunciZat, number>> = {
-        protein_g: 0.45,
-        besi_mg: 0.03,
-        seng_mg: 0.25,
-        kalsium_mg: 0.55,
-        vit_a_rae_mcg: 0.48,
-        vit_c_mg: 0.4,
-      };
-      const rAsi = rasioVisual[zat] ?? 0.3;
-      return Math.min(fillTotal * 0.85, rAsi);
-    };
+    
+    // ASI tidak dihitung mesin: tidak ada strata ASI karangan.
+    const estimasiAsiFrac = (_zat: KunciZat, _fill: number): number => 0;
 
     return `
       <div class="layar">
         <div>
-          <div class="layar__kicker">A5 · Bejana Nektar Dual-Strata · Permenkes 28/2019</div>
+          <div class="layar__kicker">A5 · Bejana kecukupan gizi · Permenkes 28/2019</div>
           <h2 class="layar__judul">Kecukupan &amp; <em>celah jujur</em> nutrisi</h2>
-          <p class="layar__sub">Sentuh atau usap permukaan cairan untuk merasakan viskositasnya, atau ketuk kartu bejana untuk melihat kontribusi tiap bahan makanan di Lembar Bawah.</p>
+          <p class="layar__sub">Bejana menunjukkan seberapa jauh menu hari ini memenuhi AKG. Hanya makanan dalam menu yang dihitung; ASI dan makanan lain tidak dihitung. Ketuk kartu untuk melihat bahan penyumbang.</p>
         </div>
 
         <div class="baris-aksi">
-          <button type="button" class="chip ${this.state.showStrata ? "is-active" : ""}" data-toggle-strata="true">
-            ${ikon("info-asi")}
-            <span>${this.state.showStrata ? "Strata Visual ASI + MPASI: Aktif" : "Tampilkan Strata ASI + MPASI"}</span>
-          </button>
           <button type="button" class="chip" data-go="kenapa">
             ${ikon("nav-kenapa")}
             <span>Kenapa ada celah?</span>
@@ -1653,8 +1589,8 @@ export class LayarRona {
             if (!itemAkg) return "";
             const pct = itemAkg.persen;
             const fill = Math.max(0, Math.min(1.15, pct / 100));
-            const lo = Math.max(0, fill * 0.9);
-            const hi = Math.min(1.18, fill * 1.1);
+            const lo = fill;
+            const hi = fill;
             const asiFrac = estimasiAsiFrac(cfg.zat, fill);
             const statusVis: StatusVisualRona = !itemAkg.lengkap
               ? "kosong"
@@ -1674,11 +1610,11 @@ export class LayarRona {
 
             const teksAngka = `${fmtId(itemAkg.nilai, 1)} / ${fmtId(itemAkg.akg, 0)} ${satuanTampil} (${pct}% AKG)`;
             const teksRentang = itemAkg.satuan_beda
-              ? "Catatan: USDA memakai RAE, AKG Permenkes memakai RE (tanpa konversi spekulatif)"
-              : `Rentang variasi alami bahan: ~${Math.round(lo * 100)}%–${Math.round(hi * 100)}% AKG`;
+              ? "Satuan sumber (RAE) berbeda dari AKG (RE); tidak dikonversi."
+              : "Dihitung dari bahan dalam menu hari ini.";
 
             return `
-              <div class="bejana" data-inspect-zat="${cfg.zat}" style="cursor:pointer;" title="Ketuk untuk rincian penyumbang ${escHtml(cfg.label)}">
+              <div class="bejana" data-inspect-zat="${cfg.zat}" role="button" tabindex="0" style="cursor:pointer;" title="Ketuk untuk rincian penyumbang ${escHtml(cfg.label)}">
                 <div class="bejana__kepala">
                   <div>
                     <div class="bejana__nama">${escHtml(cfg.label)}</div>
@@ -1706,7 +1642,7 @@ export class LayarRona {
                   <span class="bejana__rentang">${escHtml(teksRentang)}</span>
                   ${lencanaVerif("perlu")}
                 </div>
-                <p class="kartu__isi" style="font-size:11.5px;margin-top:2px;">${escHtml(cfg.catatan)}</p>
+                <p class="bejana__catatan">${escHtml(cfg.catatan)}</p>
               </div>
             `;
           }).join("")}
@@ -1756,7 +1692,7 @@ export class LayarRona {
             <span class="kartu__label">Panduan Diskusi Posyandu &amp; Puskesmas</span>
             ${lencanaStatus("perhatian", "Tanpa Dosis Obat (T-10)")}
           </div>
-          <p class="kartu__isi">Pada usia 6–11 bulan, target AKG zat besi (<strong>11 mg/hari</strong>) sulit dipenuhi dari porsi lambung bayi semata. Pertahankan lauk hewani setiap hari, dan diskusikan bersama bidan/dokter mengenai perlunya pangan fortifikasi atau tablet/tetes tambah darah sesuai anjuran bidan/dokter (aplikasi tidak meresepkan dosis suplemen).</p>
+          <p class="kartu__isi">Bejana hanya menghitung makanan dalam menu; ASI dan makanan lain tidak dihitung. Bila zat besi tampak rendah, pertahankan lauk hewani dan diskusikan bersama bidan/dokter mengenai perlunya pangan fortifikasi atau tablet/tetes tambah darah sesuai anjuran bidan/dokter (aplikasi tidak meresepkan dosis suplemen).</p>
         </div>
       </div>
     `;
@@ -1783,7 +1719,7 @@ export class LayarRona {
             ${lencanaStatus("perhatian", "Kapasitas Lambung vs Target AKG")}
           </div>
           <div class="kartu__judul">Mengapa zat besi pada MPASI alami sering tampak belum mencapai 100% AKG?</div>
-          <p class="kartu__isi">Sejak usia 6 bulan, cadangan zat besi bawaan lahir bayi mulai menipis, sementara kapasitas lambung bayi masih kecil (sekitar 200–300 kkal dari MPASI pada usia 6–11 bulan). Itulah sebabnya setiap suapan perlu mengutamakan <strong>protein hewani padat besi</strong> (hati ayam, ikan, telur, daging) ditambah buah kaya Vitamin C.</p>
+          <p class="kartu__isi">Zat besi sering paling sulit dipenuhi karena porsi anak kecil. Karena itu menu mengutamakan <strong>lauk hewani</strong> (ikan, telur, daging, dan hati bila diizinkan) bersama sayur dan buah.</p>
         </div>
 
         <div class="kartu">
@@ -1793,7 +1729,7 @@ export class LayarRona {
           </div>
           <ul class="daftar-langkah">
             <li><strong>Batas Porsi Fisiologis:</strong> Aturan mesin membatasi gram maksimum per waktu makan sesuai pita usia (<code>6-8</code>, <code>9-11</code>, <code>12-23</code> bulan) agar tidak menyarankan porsi yang mustahil dihabiskan bayi.</li>
-            <li><strong>Batas Keamanan Vitamin A Hewani:</strong> Hati ayam dibatasi maksimal 1 kali per pekan (10 g/porsi) agar retinol hewani tidak melewati batas keamanan harian (600 mcg RAE/hari).</li>
+            <li><strong>Batas Keamanan Vitamin A Hewani:</strong> Hati ayam hanya masuk bila diizinkan, paling banyak sekali per pekan dengan porsi dibatasi aturan mesin.</li>
             <li><strong>Keragaman Pangan (MDD ≥ 5/8):</strong> Mesin merotasi serealia, telur, daging/ikan, kacang-kacangan, sayur/buah vitamin A, dan sayur/buah lain.</li>
           </ul>
           ${
@@ -1908,52 +1844,33 @@ export class LayarRona {
 
   /* ---------- A8: Hening Darurat / Tanda Bahaya & Rujukan Tenaga Kesehatan ---------- */
   private layarBahaya(r: Ringkasan): string {
-    const daftarBahaya = daftarTandaBahaya();
-    const petaBahaya = new Map(daftarBahaya.map((b) => [b.kode, b.label] as const));
-    const alasanList =
-      r.hasil === "ok" && r.rujukan.alasan.length > 0
-        ? r.rujukan.alasan
-        : ["tanda_bahaya:tidak_mau_minum_atau_menyusu"];
+    const alasanList = r.hasil === "ok" ? r.rujukan.alasan : [];
+    const adaRujuk = r.hasil === "ok" && r.rujukan.tingkat === "rujuk";
 
     return `
       <div class="layar">
-        <div class="kartu kartu--bahaya">
+        <div class="kartu ${adaRujuk ? "kartu--bahaya" : "kartu--sorot"}">
           <div class="kartu__baris">
-            ${lencanaStatus("bahaya", "BERHENTI · PRIORITAS KESELAMATAN")}
-            <span style="font-family:var(--f-mono);font-size:10.5px;">A8 · HENING DARURAT</span>
+            ${adaRujuk ? lencanaStatus("bahaya", "Berhenti · prioritas keselamatan") : lencanaStatus("cukup", "Tidak ada indikasi rujukan pada kasus ini")}
           </div>
-          <h2 class="layar__judul" style="color:var(--s-bahaya-t);margin-top:4px;">Segera bawa anak ke petugas kesehatan hari ini.</h2>
+          <h2 class="layar__judul" style="${adaRujuk ? "color:var(--s-bahaya-t);" : ""}margin-top:4px;">${adaRujuk ? "Segera bawa anak ke petugas kesehatan hari ini." : "Panduan rujukan"}</h2>
           <p class="kartu__isi" style="color:var(--t-1);font-weight:600;">
-            Demi keselamatan anak pada skenario ini, NUTRIVA menghentikan penyusunan menu MPASI mandiri, menonaktifkan penjelas AI, dan membekukan animasi latar.
+            ${adaRujuk ? "Demi keselamatan anak, NUTRIVA menghentikan penyusunan menu MPASI, menonaktifkan penjelas AI, dan membekukan animasi latar." : "Halaman ini muncul bila ada tanda bahaya atau status gizi yang perlu dirujuk. Bila anak menunjukkan tanda bahaya, segera ke petugas kesehatan."}
           </p>
-          <div class="baris-aksi" style="margin-top:8px;">
-            <a class="btn btn--bahaya btn--penuh" href="tel:119">
-              ${ikon("phone")}
-              <span>Hubungi Layanan Darurat 119 / Puskesmas</span>
-            </a>
-          </div>
+          <p class="kartu__isi" style="margin-top:8px;">Bawa Buku KIA/KMS dan sampaikan tanda bahaya serta ukuran terakhir kepada petugas kesehatan.</p>
         </div>
 
         <div class="kartu">
-          <span class="kartu__label">Alasan Penghentian Kalkulator (Kode Audit)</span>
+          <span class="kartu__label">Alasan</span>
           <ul class="daftar-langkah" style="margin-top:6px;">
-            ${alasanList
-              .map((kode) => {
-                const kBersih = kode.replace(/^tanda_bahaya:/, "");
-                const arti = petaBahaya.get(kBersih);
-                return `<li><strong>${escHtml(kode)}</strong>${arti ? ` — ${escHtml(arti)}` : ""}</li>`;
-              })
-              .join("")}
+            ${
+              alasanList.length === 0
+                ? "<li>Tidak ada.</li>"
+                : alasanList
+                    .map((kode) => `<li><strong>${escHtml(labelAlasan(kode))}</strong>${this.state.modeAhli ? ` <code>${escHtml(kode)}</code>` : ""}</li>`)
+                    .join("")
+            }
           </ul>
-        </div>
-
-        <div class="kartu">
-          <span class="kartu__label">Langkah Pertolongan Pertama Saat Menuju Puskesmas / Bidan</span>
-          <ol class="daftar-langkah" style="margin-top:6px;">
-            <li><strong>Teruskan ASI / cairan sedikit demi sedikit</strong> jika anak masih sadar dan mampu menelan.</li>
-            <li><strong>Jaga tubuh anak tetap hangat</strong> (dekap di dada Ibu dan selimuti).</li>
-            <li><strong>Bawa Buku KIA / KMS</strong> dan sampaikan tanda bahaya serta ukuran terakhir kepada bidan atau dokter.</li>
-          </ol>
         </div>
 
         <div class="baris-aksi">
@@ -1994,8 +1911,8 @@ export class LayarRona {
 
         <div class="kartu">
           <div class="kartu__baris">
-            <span class="kartu__label">Memori Sesi Saja (ADR-0003)</span>
-            <span class="lencana lencana--cukup">Tanpa Penyimpanan Disk</span>
+            <span class="kartu__label">Data tidak disimpan</span>
+            <span class="lencana lencana--cukup">Hilang saat ditutup</span>
           </div>
           <p class="kartu__isi">Seluruh perubahan angka simulasi hanya berada di memori RAM sementara dan hilang otomatis saat tab ditutup, atau dapat direset seketika:</p>
           <div class="baris-aksi" style="margin-top:8px;">
@@ -2097,12 +2014,11 @@ export class LayarRona {
   private layarKondisiLuring(): string {
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 03 · Mode Tanpa Jaringan &amp; Cadangan Deterministik</div>
+        <div class="layar__kicker">Mode Tanpa Jaringan &amp; Cadangan Deterministik</div>
         <h2 class="layar__judul">Tanpa sinyal, <em>inti tetap jalan</em></h2>
         <div class="kartu kartu--sorot">
           <div class="kartu__baris">
-            ${lencanaStatus("cukup", "Inti Deterministik + Service Worker Aktif")}
-            ${lencanaVerif("sah")}
+            ${lencanaStatus(this.state.daring ? "cukup" : "perhatian", this.state.daring ? "Daring sekarang" : "Luring sekarang")}
           </div>
           <p class="kartu__isi">Seluruh perhitungan status gizi Permenkes 2/2020, contoh pola makan, dan daftar belanja berjalan langsung di perangkat. Saat koneksi internet terputus, kartu penjelasan otomatis beralih ke <strong>templat deterministik lokal</strong> tanpa galat.</p>
         </div>
@@ -2156,27 +2072,28 @@ export class LayarRona {
       r.hasil === "ok" && r.pola
         ? r.pola.hari[0]?.akg.zat.find((z) => z.zat === "besi_mg")
         : null;
-    const pct = feItem?.persen ?? 41;
-    const fill = Math.max(0.1, Math.min(1, pct / 100));
+    const ada = !!feItem;
+    const pct = feItem?.persen ?? 0;
+    const fill = ada ? Math.max(0, Math.min(1, pct / 100)) : 0;
 
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 06 · Transparansi Celah Zat Besi &amp; Batas Cakupan</div>
+        <div class="layar__kicker">Transparansi Celah Zat Besi &amp; Batas Cakupan</div>
         <h2 class="layar__judul">Kejujuran <em>celah nutrisi</em></h2>
         <div class="bejana">
           <div class="bejana__kepala">
             <div>
               <div class="bejana__nama">Zat Besi (Fe) — Nutrisi Kritis Baduta</div>
-              <div class="bejana__angka">${feItem ? `${fmtId(feItem.nilai, 1)} / ${fmtId(feItem.akg, 0)} mg (${pct}% AKG)` : "Celah Zat Besi MPASI"}</div>
+              <div class="bejana__angka">${feItem ? `${fmtId(feItem.nilai, 1)} / ${fmtId(feItem.akg, 0)} mg (${pct}% AKG)` : "Tidak ada angka: menu tidak disusun pada kasus ini"}</div>
             </div>
-            ${lencanaStatus("celah", `Celah ${Math.max(0, 100 - pct)}%`)}
+            ${ada ? lencanaStatus("celah", `Celah ${Math.max(0, 100 - pct)}%`) : lencanaStatus("kosong", "Data tidak tersedia")}
           </div>
           <canvas
             class="bejana__kanvas"
             data-bejana-canvas="fe-khusus"
             data-fill="${fill.toFixed(3)}"
-            data-lo="${(fill * 0.88).toFixed(3)}"
-            data-hi="${(fill * 1.12).toFixed(3)}"
+            data-lo="${fill.toFixed(3)}"
+            data-hi="${fill.toFixed(3)}"
             data-asi="0.03"
             data-viskositas="0.85"
             data-meniskus="6.8"
@@ -2231,11 +2148,11 @@ export class LayarRona {
   private layarKondisiHapus(): string {
     return `
       <div class="layar">
-        <div class="layar__kicker">Kondisi Khusus 09 · Reset Memori Sesi (ADR-0003)</div>
+        <div class="layar__kicker">Reset sesi</div>
         <h2 class="layar__judul">Mulai ulang <em>sesi simulasi?</em></h2>
         <div class="kartu kartu--bahaya">
           <p class="kartu__isi" style="color:var(--t-1);">
-            Sesuai keputusan arsitektur <strong>ADR-0003</strong>, NUTRIVA tidak menyimpan data pribadi di penyimpanan peramban. Menekan tombol di bawah akan mengatur ulang seluruh masukan di memori RAM kembali ke kondisi awal <strong>Kasus Sintetis A</strong>.
+            NUTRIVA tidak menyimpan data pribadi di penyimpanan peramban. Menekan tombol di bawah akan mengatur ulang seluruh masukan di memori RAM kembali ke kondisi awal <strong>Kasus Sintetis A</strong>.
           </p>
           <div class="baris-aksi" style="margin-top:10px;">
             <button type="button" class="btn btn--bahaya" data-confirm-reset="true">
@@ -2257,7 +2174,7 @@ export class LayarRona {
   ): string {
     const labelSumber =
       penjelasan.sumber === "ai"
-        ? "AI Tervalidasi Pagar Deterministik"
+        ? "Penjelasan AI (diperiksa pagar aturan)"
         : "Templat Deterministik Lokal";
 
     return `
@@ -2429,13 +2346,13 @@ export class LayarRona {
   }
 
   /* ---------- Penghidup Fisika Visual, Kanvas & Koreografi Mikro ---------- */
-  private hidupkanMesinVisual(darurat: boolean): void {
+  private hidupkanMesinVisual(darurat: boolean, animasiMasuk: boolean): void {
     if (typeof window === "undefined" || typeof this.akar.querySelectorAll !== "function") {
       return;
     }
 
     const cvAtelier = this.akar.querySelector<HTMLCanvasElement>("#rona-atelier-canvas");
-    if (cvAtelier) {
+    if (cvAtelier && !this.sutraAtelier) {
       this.sutraAtelier = new SutraField(cvAtelier, {
         cols: 40,
         rows: 24,
@@ -2443,11 +2360,11 @@ export class LayarRona {
         motes: 16,
         interactive: true,
       });
-      this.sutraAtelier.setBeku(darurat);
     }
+    this.sutraAtelier?.setBeku(darurat);
 
     const cvHp = this.akar.querySelector<HTMLCanvasElement>("#rona-hp-sutra");
-    if (cvHp) {
+    if (cvHp && !this.sutraHp) {
       this.sutraHp = new SutraField(cvHp, {
         cols: 32,
         rows: 20,
@@ -2455,10 +2372,10 @@ export class LayarRona {
         motes: 14,
         interactive: true,
       });
-      this.sutraHp.setBeku(darurat);
     }
+    this.sutraHp?.setBeku(darurat);
 
-    this.akar.querySelectorAll<HTMLCanvasElement>("[data-bejana-canvas]").forEach((cv) => {
+    this.qa<HTMLCanvasElement>("[data-bejana-canvas]").forEach((cv) => {
       const fill = parseFloat(cv.getAttribute("data-fill") || "0.75");
       const lo = parseFloat(cv.getAttribute("data-lo") || "0.68");
       const hi = parseFloat(cv.getAttribute("data-hi") || "0.82");
@@ -2467,7 +2384,11 @@ export class LayarRona {
       const men = parseFloat(cv.getAttribute("data-meniskus") || "5.5");
       const st = (cv.getAttribute("data-status") || "cukup") as StatusVisualRona;
 
+      const kunci = cv.getAttribute("data-bejana-canvas") || "";
+      const dari = kunci ? this.nilaiBejanaTerakhir.get(kunci) : undefined;
+      if (kunci) this.nilaiBejanaTerakhir.set(kunci, { fill, lo, hi, asiFrac: asi });
       const inst = new BejanaNektar(cv, {
+        dari,
         fill,
         lo,
         hi,
@@ -2490,7 +2411,7 @@ export class LayarRona {
         if (item.style && item.style.setProperty) {
           item.style.setProperty("--urutan", String(idx));
         }
-        if (item.classList) {
+        if (item.classList && animasiMasuk) {
           item.classList.add("rona-masuk");
         }
       });
@@ -2512,7 +2433,7 @@ export class LayarRona {
         });
       }
 
-      geserKe(scrollEl, 10, darurat ? "hening" : "sutra");
+      if (animasiMasuk) geserKe(scrollEl, 10, darurat ? "hening" : "sutra");
     }
 
     pasangEfekOptik(this.akar);
@@ -2536,10 +2457,10 @@ export class LayarRona {
   }
 
   private ikatInteraksiDom(r: Ringkasan): void {
-    if (typeof this.akar.querySelectorAll !== "function") return;
+    if (typeof this.akar.querySelector !== "function") return;
 
     // Navigasi antar layar data-go
-    this.akar.querySelectorAll<HTMLElement>("[data-go]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-go]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const tujuan = btn.getAttribute("data-go") as IdLayar | null;
         if (tujuan) this.bukaLayar(tujuan);
@@ -2547,7 +2468,7 @@ export class LayarRona {
     });
 
     // Pilih Kasus Sintetis A / B / C
-    this.akar.querySelectorAll<HTMLElement>("[data-pick-preset]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-pick-preset]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const kode = btn.getAttribute("data-pick-preset") as KodePreset | null;
         if (kode && PRESET_SINTETIS[kode]) {
@@ -2557,7 +2478,7 @@ export class LayarRona {
     });
 
     // Pilih Peran
-    this.akar.querySelectorAll<HTMLElement>("[data-pick-role]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-pick-role]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const peran = btn.getAttribute("data-pick-role") as PeranRona | null;
         if (peran) this.aturPeran(peran);
@@ -2565,7 +2486,7 @@ export class LayarRona {
     });
 
     // Pilih Tema
-    this.akar.querySelectorAll<HTMLElement>("[data-pick-theme]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-pick-theme]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const tema = btn.getAttribute("data-pick-theme") as TemaRona | null;
         if (tema) this.aturTema(tema);
@@ -2573,7 +2494,7 @@ export class LayarRona {
     });
 
     // Pilih Mode Gerak
-    this.akar.querySelectorAll<HTMLElement>("[data-pick-motion]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-pick-motion]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const m = btn.getAttribute("data-pick-motion") as ModeGerak | null;
         if (m) {
@@ -2584,28 +2505,36 @@ export class LayarRona {
     });
 
     // Toggle Layout Penuh / Bingkai Ponsel
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-layout]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-layout]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.state.layoutPenuh = !this.state.layoutPenuh;
         this.render();
       });
     });
 
+    this.qa<HTMLElement>("[data-toggle-teks]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.state.teksBesar = !this.state.teksBesar;
+        this.sinkronAtributDokumen();
+        this.render();
+      });
+    });
+
     // Buka Lembar Kontrol Mobile
-    this.akar.querySelectorAll<HTMLElement>("[data-open-kontrol]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-open-kontrol]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.bukaLembar(this.bangunLembarKontrolMobile(), "half");
       });
     });
 
     // Kontrol Detent & Tutup Lembar Bawah
-    this.akar.querySelectorAll<HTMLElement>("[data-close-sheet]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-close-sheet]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.tutupLembar();
       });
     });
 
-    this.akar.querySelectorAll<HTMLElement>("[data-set-detent]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-set-detent]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const dt = btn.getAttribute("data-set-detent") as "peek" | "half" | "full" | null;
         if (dt && this.lembarTerbuka) {
@@ -2615,7 +2544,7 @@ export class LayarRona {
       });
     });
 
-    this.akar.querySelectorAll<HTMLElement>("[data-cycle-detent]").forEach((el) => {
+    this.qa<HTMLElement>("[data-cycle-detent]").forEach((el) => {
       el.addEventListener("click", () => {
         if (!this.lembarTerbuka) return;
         const urutan: ("peek" | "half" | "full")[] = ["peek", "half", "full"];
@@ -2626,7 +2555,7 @@ export class LayarRona {
     });
 
     // Input Formulir Profil A2
-    this.akar.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-field]").forEach((inp) => {
+    this.qa<HTMLInputElement | HTMLSelectElement>("[data-field]").forEach((inp) => {
       inp.addEventListener("change", () => {
         const f = inp.getAttribute("data-field");
         if (!f) return;
@@ -2644,19 +2573,22 @@ export class LayarRona {
           } else if (f === "hari_umur") {
             const v = parseInt(inp.value, 10);
             if (!Number.isNaN(v)) m.status.umur.hari = Math.max(0, Math.min(30, v));
-          } else if (f === "bb_kg") {
-            const v = parseFloat(inp.value.replace(",", "."));
-            if (!Number.isNaN(v)) m.status.bb_kg = v;
-          } else if (f === "pb_cm") {
-            const v = parseFloat(inp.value.replace(",", "."));
-            if (!Number.isNaN(v)) m.status.pb_cm = v;
+          } else if (f === "bb_kg" || f === "pb_cm") {
+            const v = parseFloat(inp.value.trim().replace(",", "."));
+            const lo = parseFloat(inp.getAttribute("data-min") || "0");
+            const hi = parseFloat(inp.getAttribute("data-max") || "0");
+            // Nilai di luar rentang masukan ditolak (nilai lama dipertahankan), tidak dipaksa ke angka lain.
+            if (Number.isFinite(v) && v >= lo && v <= hi) {
+              if (f === "bb_kg") m.status.bb_kg = v;
+              else m.status.pb_cm = v;
+            }
           }
         });
       });
     });
 
     // Toggle ASI & Hati Ayam
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-asi]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-asi]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.aturMasukanKustom((m) => {
           m.pola.masih_asi = !m.pola.masih_asi;
@@ -2664,7 +2596,7 @@ export class LayarRona {
       });
     });
 
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-hati]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-hati]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.aturMasukanKustom((m) => {
           m.pola.izinkan_hati = !m.pola.izinkan_hati;
@@ -2673,7 +2605,7 @@ export class LayarRona {
     });
 
     // Toggle Hindari Alergen / Bahan
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-hindari]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-hindari]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const kode = btn.getAttribute("data-toggle-hindari");
         if (!kode) return;
@@ -2688,7 +2620,7 @@ export class LayarRona {
     });
 
     // Toggle Tanda Bahaya
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-bahaya]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-bahaya]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const kode = btn.getAttribute("data-toggle-bahaya");
         if (!kode) return;
@@ -2701,7 +2633,7 @@ export class LayarRona {
     });
 
     // Toggle Mode Ahli di A3
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-ahli]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-ahli]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.state.modeAhli = !this.state.modeAhli;
         this.render();
@@ -2709,7 +2641,7 @@ export class LayarRona {
     });
 
     // Pilih Hari Menu di A4
-    this.akar.querySelectorAll<HTMLElement>("[data-pick-hari]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-pick-hari]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const idx = parseInt(btn.getAttribute("data-pick-hari") || "0", 10);
         if (!Number.isNaN(idx)) {
@@ -2720,7 +2652,7 @@ export class LayarRona {
     });
 
     // Siklus Variasi Benih di A4
-    this.akar.querySelectorAll<HTMLElement>("[data-cycle-benih]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-cycle-benih]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.lembarTerbuka = null;
         this.gantiVariasiBenih(btn);
@@ -2728,7 +2660,7 @@ export class LayarRona {
     });
 
     // Inspeksi Bahan Pangan di Lembar Bawah
-    this.akar.querySelectorAll<HTMLElement>("[data-inspect-bahan]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-inspect-bahan]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-inspect-bahan");
         const gram = parseInt(btn.getAttribute("data-inspect-gram") || "30", 10);
@@ -2739,7 +2671,13 @@ export class LayarRona {
     });
 
     // Inspeksi Penyumbang Zat Gizi pada Bejana di A5
-    this.akar.querySelectorAll<HTMLElement>("[data-inspect-zat]").forEach((card) => {
+    this.qa<HTMLElement>("[data-inspect-zat]").forEach((card) => {
+      card.addEventListener("keydown", (e) => {
+        if ((e as KeyboardEvent).key === "Enter" || (e as KeyboardEvent).key === " ") {
+          e.preventDefault();
+          card.click();
+        }
+      });
       card.addEventListener("click", (e) => {
         const target = e.target as HTMLElement | null;
         if (target && target.tagName === "CANVAS") return;
@@ -2751,7 +2689,7 @@ export class LayarRona {
     });
 
     // Toggle Strata ASI + MPASI di A5
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-strata]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-strata]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.state.showStrata = !this.state.showStrata;
         this.render();
@@ -2759,7 +2697,7 @@ export class LayarRona {
     });
 
     // Toggle Tabel 23 Zat Gizi di A5
-    this.akar.querySelectorAll<HTMLElement>("[data-toggle-semua-zat]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-toggle-semua-zat]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.state.tampilkanSemuaZat = !this.state.tampilkanSemuaZat;
         this.render();
@@ -2767,7 +2705,7 @@ export class LayarRona {
     });
 
     // Segarkan Penjelasan AI
-    this.akar.querySelectorAll<HTMLElement>("[data-refresh-ai]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-refresh-ai]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const jenis = btn.getAttribute("data-refresh-ai");
         const hariIdx = parseInt(btn.getAttribute("data-hari-idx") || "0", 10);
@@ -2780,7 +2718,7 @@ export class LayarRona {
     });
 
     // Konfirmasi Reset Sesi di Layar Hapus
-    this.akar.querySelectorAll<HTMLElement>("[data-confirm-reset]").forEach((btn) => {
+    this.qa<HTMLElement>("[data-confirm-reset]").forEach((btn) => {
       btn.addEventListener("click", () => {
         this.resetSesiKeAwal();
       });

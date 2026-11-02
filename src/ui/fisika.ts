@@ -78,6 +78,7 @@ export type TickerCallback = (
 ) => void;
 
 const tasks = new Set<TickerCallback>();
+const gagalBeruntun = new Map<TickerCallback, number>();
 let rafId = 0;
 let lastT = typeof performance !== "undefined" ? performance.now() : 0;
 let frameCount = 0;
@@ -90,8 +91,15 @@ function tick(now: number): void {
   tasks.forEach((fn) => {
     try {
       fn(dt, now, rawDt, frameCount);
+      gagalBeruntun.delete(fn);
     } catch {
-      tasks.delete(fn);
+      // Satu bingkai yang gagal tidak boleh mematikan animasi selamanya (dulu: bejana macet).
+      // Tugas baru dicabut setelah gagal beruntun 5 kali.
+      const n = (gagalBeruntun.get(fn) ?? 0) + 1;
+      if (n >= 5) {
+        tasks.delete(fn);
+        gagalBeruntun.delete(fn);
+      } else gagalBeruntun.set(fn, n);
     }
   });
   if (tasks.size > 0 && typeof requestAnimationFrame === "function") {
@@ -1461,9 +1469,68 @@ export interface OpsiBejanaNektar {
   meniskus?: number;
   indeksBias?: number;
   interactive?: boolean;
+  /** Nilai bejana sebelumnya: pegas bergerak mulus dari sini ke nilai baru (tanpa mulai dari nol). */
+  dari?: { fill: number; lo: number; hi: number; asiFrac: number };
 }
 
 let bejanaInstanceCounter = 0;
+
+/**
+ * Solver gelombang permukaan cairan: pegas ke posisi diam + penyebaran ke tetangga.
+ * Versi lama memakai langkah waktu bingkai (hingga 45 ms) dengan koefisien sebaran 190, sehingga
+ * pergeseran per iterasi (190 x dt) jauh melampaui batas kestabilan dan permukaan berosilasi belang-belang.
+ * Sekarang: sub-langkah tetap 1/240 detik, koefisien sebaran dipilih agar sebaran per sub-langkah <= 0,25,
+ * dan keluaran diklem. Ada uji numerik (tests/fisika-stabil.test.ts).
+ */
+export interface ParamGelombang {
+  tension: number;
+  spread: number;
+  viskositas: number;
+}
+export const PARAM_GELOMBANG: ParamGelombang = { tension: 165, spread: 42, viskositas: 0.92 };
+export const SUBLANGKAH_GELOMBANG = 1 / 240;
+export const BATAS_TINGGI_GELOMBANG = 24;
+
+export function langkahGelombang(
+  h: Float32Array,
+  v: Float32Array,
+  dt: number,
+  fase: number,
+  ampIdle: number,
+  p: ParamGelombang,
+): void {
+  const N = h.length;
+  const dtc = Math.min(0.05, Math.max(0, Number.isFinite(dt) ? dt : 0));
+  if (dtc === 0) return;
+  const n = Math.max(1, Math.ceil(dtc / SUBLANGKAH_GELOMBANG));
+  const s = dtc / n;
+  const damp = Math.pow(Math.max(0.5, Math.min(0.999, p.viskositas)), s * 18);
+  for (let k = 0; k < n; k++) {
+    for (let i = 0; i < N; i++) {
+      const idle = Math.sin(i * 0.28 + fase) * ampIdle;
+      const f = -p.tension * ((h[i] ?? 0) - idle);
+      v[i] = ((v[i] ?? 0) + f * s) * damp;
+    }
+    for (let j = 0; j < 2; j++) {
+      for (let i = 0; i < N; i++) {
+        if (i > 0) {
+          const d = p.spread * ((h[i] ?? 0) - (h[i - 1] ?? 0)) * s;
+          v[i - 1] = (v[i - 1] ?? 0) + d;
+          v[i] = (v[i] ?? 0) - d;
+        }
+        if (i < N - 1) {
+          const d = p.spread * ((h[i] ?? 0) - (h[i + 1] ?? 0)) * s;
+          v[i + 1] = (v[i + 1] ?? 0) + d;
+          v[i] = (v[i] ?? 0) - d;
+        }
+      }
+    }
+    for (let i = 0; i < N; i++) {
+      const nh = (h[i] ?? 0) + (v[i] ?? 0) * s;
+      h[i] = Math.max(-BATAS_TINGGI_GELOMBANG, Math.min(BATAS_TINGGI_GELOMBANG, nh));
+    }
+  }
+}
 
 export class BejanaNektar {
   canvas: HTMLCanvasElement;
@@ -1520,6 +1587,13 @@ export class BejanaNektar {
     this.pegasLo = new Pegas(lo, "nektar");
     this.pegasHi = new Pegas(hi, "nektar");
     this.pegasAsi = new Pegas(asiFrac, "nektar");
+    if (opts?.dari && !Motion.isHemat()) {
+      const d = opts.dari;
+      this.pegasFill.x = d.fill;
+      this.pegasLo.x = d.lo;
+      this.pegasHi.x = d.hi;
+      this.pegasAsi.x = d.asiFrac;
+    }
     this.phase = acakDeterministik() * Math.PI * 2;
 
     this._step = (dt) => {
@@ -1682,45 +1756,11 @@ export class BejanaNektar {
 
     if (this.status !== "kosong") {
       this.phase += dt * 2.1;
-      const N = this.N;
-      const tension = 165;
-      const spread = 190;
-      const damp = Math.pow(this.viskositas, dt * 18);
-
-      const stepWave = (
-        hArr: Float32Array,
-        vArr: Float32Array,
-        phaseMul: number,
-        ampIdle: number,
-      ): void => {
-        for (let i = 0; i < N; i++) {
-          const idle = Math.sin(i * 0.28 + phaseMul) * ampIdle;
-          const f = -tension * ((hArr[i] ?? 0) - idle);
-          vArr[i] = ((vArr[i] ?? 0) + f * dt) * damp;
-        }
-        for (let j = 0; j < 2; j++) {
-          for (let i = 0; i < N; i++) {
-            if (i > 0) {
-              const dL = spread * ((hArr[i] ?? 0) - (hArr[i - 1] ?? 0)) * dt;
-              vArr[i - 1] = (vArr[i - 1] ?? 0) + dL;
-              vArr[i] = (vArr[i] ?? 0) - dL;
-            }
-            if (i < N - 1) {
-              const dR = spread * ((hArr[i] ?? 0) - (hArr[i + 1] ?? 0)) * dt;
-              vArr[i + 1] = (vArr[i + 1] ?? 0) + dR;
-              vArr[i] = (vArr[i] ?? 0) - dR;
-            }
-          }
-        }
-        for (let i = 0; i < N; i++) {
-          hArr[i] = (hArr[i] ?? 0) + (vArr[i] ?? 0) * dt;
-        }
-      };
-
-      stepWave(this.hFront, this.vFront, this.phase, 1.35);
-      stepWave(this.hBack, this.vBack, -this.phase * 0.85 + 1.4, 1.05);
+      const par: ParamGelombang = { ...PARAM_GELOMBANG, viskositas: this.viskositas };
+      langkahGelombang(this.hFront, this.vFront, dt, this.phase, 1.35, par);
+      langkahGelombang(this.hBack, this.vBack, dt, -this.phase * 0.85 + 1.4, 1.05, par);
       if (this.pegasAsi.x > 0.02) {
-        stepWave(this.hMid, this.vMid, this.phase * 0.6 + 0.8, 0.75);
+        langkahGelombang(this.hMid, this.vMid, dt, this.phase * 0.6 + 0.8, 0.75, par);
       }
 
       for (let i = this.gelembung.length - 1; i >= 0; i--) {
@@ -1773,7 +1813,7 @@ export class BejanaNektar {
       }
       ctx.setLineDash([]);
       ctx.fillStyle = tema.target;
-      ctx.font = '600 10px "Atkinson Next", sans-serif';
+      ctx.font = '600 10px "Plus Jakarta Sans", system-ui, sans-serif';
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("DATA SUMBER BELUM LENGKAP — BUKAN 0%", w / 2, h / 2);
@@ -1955,7 +1995,7 @@ export class BejanaNektar {
       );
 
       if (h >= 48) {
-        ctx.font = '600 9.5px "Atkinson Mono", monospace';
+        ctx.font = '600 9.5px "Plus Jakarta Sans", system-ui, sans-serif';
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         if (h - yAsi > 13) {

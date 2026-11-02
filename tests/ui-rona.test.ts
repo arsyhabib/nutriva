@@ -109,8 +109,11 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
     // Di layar bahaya, terdapat nomor darurat 119 dan alasan rujukan
     app.bukaLayar("bahaya");
     const htmlBahaya = app.ambilHtml();
-    expect(htmlBahaya).toContain("tel:119");
-    expect(htmlBahaya).toContain("tanda_bahaya:tidak_mau_minum_atau_menyusu");
+    // Tidak ada nomor darurat atau langkah P3K tanpa sumber (hanya merujuk ke petugas kesehatan)
+    expect(htmlBahaya).not.toContain("tel:");
+    expect(htmlBahaya).not.toContain("119");
+    expect(htmlBahaya).toContain("petugas kesehatan");
+    expect(htmlBahaya).toContain("Tanda bahaya:");
     expect(htmlBahaya).not.toContain('data-ai-teks="true"');
   });
 
@@ -182,10 +185,9 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
     expect(htmlKolam).toContain('class="bejana__kanvas"');
     expect(htmlKolam).toContain('data-bejana-canvas="besi_mg"');
 
-    // Toggle Strata ASI vs MPASI
-    expect(app.ambilState().showStrata).toBe(true);
-    app.toggleStrata();
-    expect(app.ambilState().showStrata).toBe(false);
+    // Tidak ada strata ASI karangan: ASI tidak dihitung mesin
+    expect(htmlKolam).not.toMatch(/data-asi="0\.[1-9]/);
+    expect(htmlKolam).not.toContain("data-toggle-strata");
 
     // Buka lembar rincian Bejana Nektar
     app.bukaLembarBejana("besi_mg");
@@ -227,10 +229,11 @@ describe("Integrasi UI NUTRIVA Rona (Hari 4 & 5)", () => {
 
     const swIsi = readFileSync(swPath, "utf8");
     expect(swIsi).toContain("/v1/jelaskan");
+    expect(swIsi).toContain("prakirim");
     expect(swIsi).toContain("caches.open");
 
     const indexIsi = readFileSync(indexPath, "utf8");
-    expect(indexIsi).toContain('rel="manifest" href="/manifest.webmanifest"');
+    expect(indexIsi).toContain('rel="manifest" href="./manifest.webmanifest"');
     expect(indexIsi).toContain('id="lisensi-font"');
     expect(indexIsi).not.toContain("100% LURING");
 

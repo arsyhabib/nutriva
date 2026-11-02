@@ -15,7 +15,8 @@
         "check": "npm run typecheck && npm run test && npm run verify:claims && npm run lint:fixtures",
         "cek:otorisasi": "tsx src/tools/cli-cek-otorisasi.ts",
         "gate:m1a": "tsx src/tools/cli-gate-m1a.ts",
-        "cek:bundel": "tsx src/tools/cli-cek-bundel.ts"
+        "cek:bundel": "tsx src/tools/cli-cek-bundel.ts",
+        "e2e": "node e2e/smoke.cjs"
     },
     "devDependencies": {
         "@types/node": "26.6.5",
