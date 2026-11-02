@@ -1,0 +1,3797 @@
+{
+  "versi": "0.1.0",
+  "dibuat_oleh": "hitung_golden.py (hitung tangan independen, tanpa kode mesin)",
+  "aturan": "Permenkes 2/2020; usia bulan penuh; berdiri <24 bulan +0,7 cm; kategori dari batas SD tabel; pada garis SD mengikuti 'sd' (-3 s.d. <-2 kurang; -2 s.d. +1 normal BB/U)",
+  "catatan_terbuka": [
+    "D-6 diputuskan eksekutor 2026-11-02: panjang dibulatkan ke 0,5 cm terdekat, setengah naik (asumsi D, KL-ASUMSI-PEMBULATAN-PANJANG)",
+    "usia >=24 bulan di luar cakupan aplikasi (ambiguitas '0-24' vs 'di atas 24' tercatat C-022)"
+  ],
+  "kasus": [
+    {
+      "id": "G01",
+      "keterangan": "5 bulan 29 hari: di bawah cakupan",
+      "jk": "L",
+      "umur": {
+        "bulan": 5,
+        "hari": 29
+      },
+      "bb_kg": 7.0,
+      "pb_cm": 65.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "stop",
+        "alasan": "usia_di_bawah_6_bulan"
+      }
+    },
+    {
+      "id": "G02",
+      "keterangan": "6 bulan 0 hari: batas bawah",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 7.9,
+      "pb_cm": 67.6,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 67.6,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 67.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G03",
+      "keterangan": "23 bulan 30 hari: masih 23 bulan penuh",
+      "jk": "P",
+      "umur": {
+        "bulan": 23,
+        "hari": 30
+      },
+      "bb_kg": 11.3,
+      "pb_cm": 85.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 23,
+        "panjang_dipakai_cm": 85.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 85.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G04",
+      "keterangan": "24 bulan 0 hari: di luar cakupan",
+      "jk": "P",
+      "umur": {
+        "bulan": 24,
+        "hari": 0
+      },
+      "bb_kg": 11.5,
+      "pb_cm": 86.4,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "stop",
+        "alasan": "usia_24_bulan_atau_lebih_di_luar_cakupan"
+      }
+    },
+    {
+      "id": "G05",
+      "keterangan": "median BB/U dan PB/U, L 9 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 9,
+        "hari": 0
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 72.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 9,
+        "panjang_dipakai_cm": 72.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 72.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G06",
+      "keterangan": "median BB/U dan PB/U, P 9 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 9,
+        "hari": 0
+      },
+      "bb_kg": 8.2,
+      "pb_cm": 70.1,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 9,
+        "panjang_dipakai_cm": 70.1,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 70.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G07",
+      "keterangan": "median BB/U dan PB/U, L 15 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 15,
+        "hari": 0
+      },
+      "bb_kg": 10.3,
+      "pb_cm": 79.1,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 15,
+        "panjang_dipakai_cm": 79.1,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G08",
+      "keterangan": "median BB/U dan PB/U, P 20 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 20,
+        "hari": 0
+      },
+      "bb_kg": 10.6,
+      "pb_cm": 82.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 20,
+        "panjang_dipakai_cm": 82.7,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 82.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G09",
+      "keterangan": "median BB/U dan PB/U, L 23 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 23,
+        "hari": 0
+      },
+      "bb_kg": 12.0,
+      "pb_cm": 86.9,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 23,
+        "panjang_dipakai_cm": 86.9,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 87.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G10",
+      "keterangan": "median BB/U dan PB/U, P 12 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 74.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 74.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 74.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "-1..0"
+        }
+      }
+    },
+    {
+      "id": "G11",
+      "keterangan": "BB tepat di garis -2 SD, L 8 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 6.9,
+      "pb_cm": 70.6,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 70.6,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 70.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G12",
+      "keterangan": "BB tepat di garis -2 SD, P 8 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 6.3,
+      "pb_cm": 68.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 68.7,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 68.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G13",
+      "keterangan": "BB tepat di garis -3 SD, L 14 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 14,
+        "hari": 0
+      },
+      "bb_kg": 7.2,
+      "pb_cm": 78.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 14,
+        "panjang_dipakai_cm": 78.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "tepat:-3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 78.0,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G14",
+      "keterangan": "BB tepat di garis -3 SD, P 14 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 14,
+        "hari": 0
+      },
+      "bb_kg": 6.6,
+      "pb_cm": 76.4,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 14,
+        "panjang_dipakai_cm": 76.4,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "tepat:-3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 76.5,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G15",
+      "keterangan": "BB tepat di garis +1 SD, L 18 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 12.2,
+      "pb_cm": 82.3,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 82.3,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:+1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 82.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G16",
+      "keterangan": "BB tepat di garis +1 SD, P 18 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 11.6,
+      "pb_cm": 80.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 80.7,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:+1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 80.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G17",
+      "keterangan": "PB tepat di garis -2 SD, L 10 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 10,
+        "hari": 0
+      },
+      "bb_kg": 9.2,
+      "pb_cm": 68.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 10,
+        "panjang_dipakai_cm": 68.7,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:-2"
+        },
+        "panjang_tabel_cm": 68.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G18",
+      "keterangan": "PB tepat di garis -2 SD, P 10 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 10,
+        "hari": 0
+      },
+      "bb_kg": 8.5,
+      "pb_cm": 66.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 10,
+        "panjang_dipakai_cm": 66.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:-2"
+        },
+        "panjang_tabel_cm": 66.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G19",
+      "keterangan": "PB tepat di garis -3 SD, L 16 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 16,
+        "hari": 0
+      },
+      "bb_kg": 10.5,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 16,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "pendek",
+          "posisi": "tepat:-3"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G20",
+      "keterangan": "PB tepat di garis +3 SD, P 16 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 16,
+        "hari": 0
+      },
+      "bb_kg": 9.8,
+      "pb_cm": 87.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 16,
+        "panjang_dipakai_cm": 87.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+3"
+        },
+        "panjang_tabel_cm": 87.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G21",
+      "keterangan": "PB tepat di garis +3 SD, L 22 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 22,
+        "hari": 0
+      },
+      "bb_kg": 11.8,
+      "pb_cm": 94.9,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 22,
+        "panjang_dipakai_cm": 94.9,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+3"
+        },
+        "panjang_tabel_cm": 95.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G22",
+      "keterangan": "BB sangat rendah (di bawah -3 SD), L 12 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 6.4,
+      "pb_cm": 75.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 75.7,
+        "bbu": {
+          "kategori": "bb_sangat_kurang",
+          "posisi": "<-3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 75.5,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G23",
+      "keterangan": "PB di bawah -3 SD, L 12 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.6,
+      "pb_cm": 67.6,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 67.6,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "sangat_pendek",
+          "posisi": "<-3"
+        },
+        "panjang_tabel_cm": 67.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G24",
+      "keterangan": "BB di atas +1 SD, L 12 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 11.2,
+      "pb_cm": 75.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 75.7,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 75.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G25",
+      "keterangan": "BB sangat rendah (di bawah -3 SD), P 12 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 5.8,
+      "pb_cm": 74.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 74.0,
+        "bbu": {
+          "kategori": "bb_sangat_kurang",
+          "posisi": "<-3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 74.0,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G26",
+      "keterangan": "PB di bawah -3 SD, P 12 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 65.3,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 65.3,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "sangat_pendek",
+          "posisi": "<-3"
+        },
+        "panjang_tabel_cm": 65.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G27",
+      "keterangan": "BB di atas +1 SD, P 12 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 10.5,
+      "pb_cm": 74.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 74.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 74.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G28",
+      "keterangan": "BB/PB tepat di garis -2 SD pada 70.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 10,
+        "hari": 0
+      },
+      "bb_kg": 7.2,
+      "pb_cm": 70.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 10,
+        "panjang_dipakai_cm": 70.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-2..-1"
+        },
+        "panjang_tabel_cm": 70.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G29",
+      "keterangan": "BB/PB tepat di garis -2 SD pada 70.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 10,
+        "hari": 0
+      },
+      "bb_kg": 6.9,
+      "pb_cm": 70.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 10,
+        "panjang_dipakai_cm": 70.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 70.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G30",
+      "keterangan": "BB/PB tepat di garis +2 SD pada 75.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 13,
+        "hari": 0
+      },
+      "bb_kg": 11.4,
+      "pb_cm": 75.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 13,
+        "panjang_dipakai_cm": 75.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 75.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G31",
+      "keterangan": "BB/PB tepat di garis +3 SD pada 75.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 13,
+        "hari": 0
+      },
+      "bb_kg": 12.3,
+      "pb_cm": 75.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 13,
+        "panjang_dipakai_cm": 75.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 75.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G32",
+      "keterangan": "BB/PB tepat di garis -3 SD pada 80.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 8.2,
+      "pb_cm": 80.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 80.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 80.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G33",
+      "keterangan": "BB/PB tepat di garis +1 SD pada 65.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 7.8,
+      "pb_cm": 65.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 65.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-2..-1"
+        },
+        "panjang_tabel_cm": 65.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G34",
+      "keterangan": "diukur berdiri 11 bulan: +0,7 cm",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 5
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 73.8,
+      "cara_ukur": "berdiri",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 74.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 74.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "-1..0"
+        }
+      }
+    },
+    {
+      "id": "G35",
+      "keterangan": "diukur berdiri 17 bulan: +0,7 cm",
+      "jk": "P",
+      "umur": {
+        "bulan": 17,
+        "hari": 12
+      },
+      "bb_kg": 9.8,
+      "pb_cm": 78.6,
+      "cara_ukur": "berdiri",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 79.3,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 79.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "-1..0"
+        }
+      }
+    },
+    {
+      "id": "G36",
+      "keterangan": "berat nol",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 0.0,
+      "pb_cm": 75.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "stop",
+        "alasan": "berat_tidak_valid"
+      }
+    },
+    {
+      "id": "G37",
+      "keterangan": "panjang di bawah batas tabel",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 44.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "stop",
+        "alasan": "panjang_di_luar_tabel"
+      }
+    },
+    {
+      "id": "G38",
+      "keterangan": "panjang di atas batas tabel",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 111.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "stop",
+        "alasan": "panjang_di_luar_tabel"
+      }
+    },
+    {
+      "id": "G39",
+      "keterangan": "panjang bukan kelipatan 0,5: dibulatkan ke 0,5 cm (D-6)",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.6,
+      "pb_cm": 75.7,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 75.7,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:0"
+        },
+        "panjang_tabel_cm": 75.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G40",
+      "keterangan": "panjang 72,3 cm: dibulatkan ke 0,5 cm (D-6)",
+      "jk": "P",
+      "umur": {
+        "bulan": 14,
+        "hari": 0
+      },
+      "bb_kg": 9.4,
+      "pb_cm": 72.3,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 14,
+        "panjang_dipakai_cm": 72.3,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-2..-1"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "0..+1"
+        }
+      }
+    },
+    {
+      "id": "G41",
+      "keterangan": "BB/PB tepat -3 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 5.9,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G42",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 5.8,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G43",
+      "keterangan": "BB/PB tepat -2 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 6.4,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G44",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 6.3,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G45",
+      "keterangan": "BB/PB tepat +1 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 8.2,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "0..+1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G46",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 8.3,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "0..+1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G47",
+      "keterangan": "BB/PB tepat +2 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G48",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G49",
+      "keterangan": "BB/PB tepat +3 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 9.7,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G50",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 66.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 9.8,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "tepat:+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-1..0"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G51",
+      "keterangan": "BB/PB tepat -3 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 5.6,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G52",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 5.5,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G53",
+      "keterangan": "BB/PB tepat -2 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 6.1,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G54",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 6.0,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G55",
+      "keterangan": "BB/PB tepat +1 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 8.0,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "0..+1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G56",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 8.1,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "0..+1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G57",
+      "keterangan": "BB/PB tepat +2 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 8.8,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G58",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G59",
+      "keterangan": "BB/PB tepat +3 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 9.8,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G60",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 66.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 9.9,
+      "pb_cm": 66.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 66.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "0..+1"
+        },
+        "panjang_tabel_cm": 66.0,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G61",
+      "keterangan": "BB/PB tepat -3 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 7.1,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G62",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 7.0,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G63",
+      "keterangan": "BB/PB tepat -2 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 7.6,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G64",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 7.5,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G65",
+      "keterangan": "BB/PB tepat +1 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 9.8,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G66",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 9.9,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G67",
+      "keterangan": "BB/PB tepat +2 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 10.6,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G68",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 10.7,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G69",
+      "keterangan": "BB/PB tepat +3 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 11.6,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G70",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 72.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 7,
+        "hari": 0
+      },
+      "bb_kg": 11.7,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 7,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G71",
+      "keterangan": "BB/PB tepat -3 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 6.7,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G72",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 6.6,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G73",
+      "keterangan": "BB/PB tepat -2 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 7.3,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G74",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 7.2,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G75",
+      "keterangan": "BB/PB tepat +1 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 9.5,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G76",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 9.6,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G77",
+      "keterangan": "BB/PB tepat +2 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 10.5,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G78",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 10.6,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G79",
+      "keterangan": "BB/PB tepat +3 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 11.5,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G80",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 72.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 8,
+        "hari": 0
+      },
+      "bb_kg": 11.6,
+      "pb_cm": 72.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 8,
+        "panjang_dipakai_cm": 72.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "tepat:+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G81",
+      "keterangan": "BB/PB tepat -3 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 8.1,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G82",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 8.0,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G83",
+      "keterangan": "BB/PB tepat -2 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 8.7,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G84",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 8.6,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G85",
+      "keterangan": "BB/PB tepat +1 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 11.2,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G86",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 11.3,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G87",
+      "keterangan": "BB/PB tepat +2 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 12.2,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G88",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 12.3,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G89",
+      "keterangan": "BB/PB tepat +3 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 13.3,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G90",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 79.0 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 11,
+        "hari": 0
+      },
+      "bb_kg": 13.4,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 11,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G91",
+      "keterangan": "BB/PB tepat -3 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 7.7,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G92",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 7.6,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G93",
+      "keterangan": "BB/PB tepat -2 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 8.3,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G94",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 8.2,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G95",
+      "keterangan": "BB/PB tepat +1 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 10.8,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G96",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 10.9,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G97",
+      "keterangan": "BB/PB tepat +2 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 11.9,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G98",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 12.0,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G99",
+      "keterangan": "BB/PB tepat +3 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 13.1,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "tepat:+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G100",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 79.0 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 13.2,
+      "pb_cm": 79.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 79.0,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "+1..+2"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G101",
+      "keterangan": "BB/PB tepat -3 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 9.4,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G102",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 9.3,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G103",
+      "keterangan": "BB/PB tepat -2 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 10.1,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G104",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 10.0,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G105",
+      "keterangan": "BB/PB tepat +1 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 12.9,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G106",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 13.0,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G107",
+      "keterangan": "BB/PB tepat +2 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 14.0,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G108",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 14.1,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G109",
+      "keterangan": "BB/PB tepat +3 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 15.3,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G110",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 86.5 cm, L",
+      "jk": "L",
+      "umur": {
+        "bulan": 17,
+        "hari": 0
+      },
+      "bb_kg": 15.4,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 17,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G111",
+      "keterangan": "BB/PB tepat -3 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "tepat:-3"
+        }
+      }
+    },
+    {
+      "id": "G112",
+      "keterangan": "BB/PB 0,1 kg di bawah -3 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-2..-1"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_buruk",
+          "posisi": "<-3"
+        }
+      }
+    },
+    {
+      "id": "G113",
+      "keterangan": "BB/PB tepat -2 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 9.8,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:-2"
+        }
+      }
+    },
+    {
+      "id": "G114",
+      "keterangan": "BB/PB 0,1 kg di bawah -2 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 9.7,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G115",
+      "keterangan": "BB/PB tepat +1 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 12.7,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:+1"
+        }
+      }
+    },
+    {
+      "id": "G116",
+      "keterangan": "BB/PB 0,1 kg di atas +1 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 12.8,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+1..+2"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "+1..+2"
+        }
+      }
+    },
+    {
+      "id": "G117",
+      "keterangan": "BB/PB tepat +2 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 13.9,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G118",
+      "keterangan": "BB/PB 0,1 kg di atas +2 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 14.0,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": "+2..+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "+2..+3"
+        }
+      }
+    },
+    {
+      "id": "G119",
+      "keterangan": "BB/PB tepat +3 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 15.4,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "gizi_lebih",
+          "posisi": "tepat:+3"
+        }
+      }
+    },
+    {
+      "id": "G120",
+      "keterangan": "BB/PB 0,1 kg di atas +3 SD, 86.5 cm, P",
+      "jk": "P",
+      "umur": {
+        "bulan": 18,
+        "hari": 0
+      },
+      "bb_kg": 15.5,
+      "pb_cm": 86.5,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 18,
+        "panjang_dipakai_cm": 86.5,
+        "bbu": {
+          "kategori": "risiko_bb_lebih",
+          "posisi": ">+3"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "tepat:+2"
+        },
+        "panjang_tabel_cm": 86.5,
+        "bbpb": {
+          "kategori": "obesitas",
+          "posisi": ">+3"
+        }
+      }
+    },
+    {
+      "id": "G121",
+      "keterangan": "PB di atas +3 SD (tinggi), L 9 bulan",
+      "jk": "L",
+      "umur": {
+        "bulan": 9,
+        "hari": 0
+      },
+      "bb_kg": 8.9,
+      "pb_cm": 78.8,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 9,
+        "panjang_dipakai_cm": 78.8,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "tinggi",
+          "posisi": ">+3"
+        },
+        "panjang_tabel_cm": 79.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "-2..-1"
+        }
+      }
+    },
+    {
+      "id": "G122",
+      "keterangan": "PB di atas +3 SD (tinggi), P 21 bulan",
+      "jk": "P",
+      "umur": {
+        "bulan": 21,
+        "hari": 0
+      },
+      "bb_kg": 10.9,
+      "pb_cm": 93.0,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 21,
+        "panjang_dipakai_cm": 93.0,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "tepat:0"
+        },
+        "pbu": {
+          "kategori": "tinggi",
+          "posisi": ">+3"
+        },
+        "panjang_tabel_cm": 93.0,
+        "bbpb": {
+          "kategori": "gizi_kurang",
+          "posisi": "-3..-2"
+        }
+      }
+    },
+    {
+      "id": "G123",
+      "keterangan": "pembulatan panjang: 72,24 dibulatkan ke 72,0",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 72.24,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 72.24,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-2..-1"
+        },
+        "panjang_tabel_cm": 72.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "0..+1"
+        }
+      }
+    },
+    {
+      "id": "G124",
+      "keterangan": "pembulatan panjang: 72,25 dibulatkan ke 72,5",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 72.25,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 72.25,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-2..-1"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G125",
+      "keterangan": "pembulatan panjang: 72,74 dibulatkan ke 72,5",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 72.74,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 72.74,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-2..-1"
+        },
+        "panjang_tabel_cm": 72.5,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "tepat:0"
+        }
+      }
+    },
+    {
+      "id": "G126",
+      "keterangan": "pembulatan panjang: 72,75 dibulatkan ke 73,0",
+      "jk": "L",
+      "umur": {
+        "bulan": 12,
+        "hari": 0
+      },
+      "bb_kg": 9.0,
+      "pb_cm": 72.75,
+      "cara_ukur": "terlentang",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 12,
+        "panjang_dipakai_cm": 72.75,
+        "bbu": {
+          "kategori": "bb_normal",
+          "posisi": "-1..0"
+        },
+        "pbu": {
+          "kategori": "normal",
+          "posisi": "-2..-1"
+        },
+        "panjang_tabel_cm": 73.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "-1..0"
+        }
+      }
+    },
+    {
+      "id": "G127",
+      "keterangan": "berdiri 22 bulan 71,5 cm jadi 72,2 lalu 72,0",
+      "jk": "P",
+      "umur": {
+        "bulan": 22,
+        "hari": 0
+      },
+      "bb_kg": 8.5,
+      "pb_cm": 71.5,
+      "cara_ukur": "berdiri",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 22,
+        "panjang_dipakai_cm": 72.2,
+        "bbu": {
+          "kategori": "bb_kurang",
+          "posisi": "-3..-2"
+        },
+        "pbu": {
+          "kategori": "sangat_pendek",
+          "posisi": "<-3"
+        },
+        "panjang_tabel_cm": 72.0,
+        "bbpb": {
+          "kategori": "gizi_baik",
+          "posisi": "-1..0"
+        }
+      }
+    },
+    {
+      "id": "G128",
+      "keterangan": "berdiri 6 bulan 44,4 cm jadi 45,1 (di dalam tabel)",
+      "jk": "L",
+      "umur": {
+        "bulan": 6,
+        "hari": 0
+      },
+      "bb_kg": 3.0,
+      "pb_cm": 44.4,
+      "cara_ukur": "berdiri",
+      "harapan": {
+        "hasil": "ok",
+        "usia_bulan_penuh": 6,
+        "panjang_dipakai_cm": 45.1,
+        "bbu": {
+          "kategori": "bb_sangat_kurang",
+          "posisi": "<-3"
+        },
+        "pbu": {
+          "kategori": "sangat_pendek",
+          "posisi": "<-3"
+        },
+        "panjang_tabel_cm": 45.0,
+        "bbpb": {
+          "kategori": "risiko_gizi_lebih",
+          "posisi": "tepat:+2"
+        }
+      }
+    },
+    {
+      "id": "G129",
+      "keterangan": "berdiri 23 bulan 109,5 cm jadi 110,2 (di luar tabel)",
+      "jk": "L",
+      "umur": {
+        "bulan": 23,
+        "hari": 0
+      },
+      "bb_kg": 15.0,
+      "pb_cm": 109.5,
+      "cara_ukur": "berdiri",
+      "harapan": {
+        "hasil": "stop",
+        "alasan": "panjang_di_luar_tabel"
+      }
+    }
+  ]
+}

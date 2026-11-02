@@ -1,4 +1,32 @@
-# Keputusan Pemilik dan Jalur Rilis — v3 (setelah RPT-0005; **v3 mengalahkan v2 bila berbeda**)
+# Keputusan Pemilik dan Jalur Rilis — v4 (2026-11-02; **v4 mengalahkan v3 bila berbeda**; v3 mengalahkan v2)
+
+## 00. Keputusan v4 (2026-11-02): rencana 5 hari V-PJBL, disetujui pemilik
+
+**Kata pemilik (dikutip, ringkas):** menyetujui seluruh rancangan blueprint 5 hari; menambahkan kembali asisten AI dengan peringatan "hasil ini dibuat AI, periksa kembali"; AI hanya menerjemahkan dan menjelaskan hasil mesin deterministik kepada ibu; boleh tidak sepenuhnya offline; menambah fitur daftar belanja; Rona dipakai sebagai cangkang antarmuka.
+
+| ID | Keputusan | Menggantikan |
+|---|---|---|
+| K-08 | **Penjelas AI opsional** kembali ada. AI hanya menjelaskan/menerjemahkan hasil mesin dalam bahasa sederhana; **tidak pernah memutuskan angka atau keselamatan**. Peringatan "dibuat oleh AI" selalu tampak. Masukan ke AI = ringkasan berkode tertutup (layar, pita usia, kode status, persen AKG bulat, kode celah, kode menu, versi). Keluaran divalidasi (angka asing, kata terlarang, tautan, panjang) dan jatuh ke templat deterministik bila gagal. **Tidak pernah tampil di layar Rujukan.** Akses lewat satu Worker proksi (kunci di server, daftar putih muatan, batas laju, tanpa log isi, sakelar `FITUR_AI`, batas 10 detik) | T-09 ("AI mati") |
+| K-09 | **Boleh daring.** Inti (hitung status, pola makan, rujukan) tetap berjalan tanpa jaringan lewat cache; hanya penjelas AI yang butuh jaringan | prinsip "offline-first" ketat |
+| K-10 | **Gerbang audit manusia diganti**: uji golden, pemeriksaan silang oleh AI lain (`docs/periksa/`), dan label "belum diverifikasi dosen" pada angka yang belum diverifikasi manusia. Pemeriksaan visual PDF Permenkes dicatat per tabel di `docs/verifikasi_eksekutor/` | gerbang vonis auditor per tahap (§7), untuk V-PJBL saja |
+| K-11 | **Daftar belanja** dari pola makan yang dipilih (bahan, takaran rumah tangga, kelas harga kasar), berlabel "contoh" | — |
+| K-12 | **Rona dipakai sebagai cangkang UI**; logika dan preset keras di dalamnya diganti seluruhnya oleh `src/engine/`. Teks klaim "100% tanpa kirim data" dan "Local Storage" wajib diganti dengan pernyataan privasi jujur (lihat K-08: ringkasan berkode dikirim lewat proksi ke penyedia AI; tanpa akun, tanpa basis data developer, tidak ada yang disimpan) | — |
+| K-13 | **Blok fisika/pameran Rona dikeluarkan dari bundel produk** (`rona-physics`, `rona-exhibition`) (diusulkan eksekutor; berlaku kecuali pemilik membatalkan) | — |
+| D-1 | **Diputuskan eksekutor (2026-11-02, atas perintah pemilik "buatkan keputusan terbaik"):** build publik/`demo` hanya preset; input angka bebas hanya pada profil `lapangan` yang terkunci | — |
+
+### Keputusan eksekutor 2026-11-02 (mandat pemilik: keputusan paling menguntungkan yang tetap aman, tanpa kekhawatiran berlebih)
+| ID | Keputusan | Alasan singkat |
+|---|---|---|
+| D-6 | Panjang untuk BB/PB dibulatkan ke 0,5 cm terdekat, setengah naik. Dicatat sebagai asumsi tingkat D (`KL-ASUMSI-PEMBULATAN-PANJANG`), berlabel; selisih paling banyak satu baris tabel | Tabel hanya per 0,5 cm; tanpa aturan ini mesin menolak input yang wajar |
+| D-lisensi | Data tabel SD bersumber utama Permenkes 2/2020 (peraturan publik, tingkat A). Tabel WHO dipakai sebagai alat pemeriksa saja; mesin tidak mendistribusikan berkas WHO/pygrowup. Klaim tetap mencatat kedua sumber | Menghindari masalah redistribusi tanpa menurunkan mutu |
+| D-AI | Penyedia AI: Claude Haiku 5.5 lewat Worker proksi Cloudflare, kunci milik pemilik disimpan sebagai rahasia Worker; fitur dimatikan lewat `FITUR_AI` bila ada masalah | Murah, cepat, cukup untuk penjelasan sederhana |
+| D-OR | Rute panggilan AI lewat OpenRouter (kunci milik pemilik), model `anthropic/claude-haiku-5.5` (diatur variabel `AI_MODEL`, tanpa ubah kode). Setiap permintaan membawa `provider.data_collection=deny`. Worker bebas-penyedia: mengganti rute ke API Anthropic langsung hanya mengubah satu URL dan satu kunci. Pernyataan privasi wajib menyebut perantara (Cloudflare, OpenRouter, penyedia model) | Kunci OpenRouter sudah dimiliki pemilik; D-AI tetap berlaku untuk modelnya |
+| D-hosting | Cloudflare Pages (gratis) untuk situs; domain bawaan `*.pages.dev` | Tanpa biaya, tanpa server sendiri |
+| D-kader | Umpan balik kader hanya dengan kasus sintetis dan tanpa identitas; izin pembimbing diminta secara informal, tidak memblokir pembangunan | Risiko rendah, tetap sopan pada pembimbing |
+| D-kelas-harga | Kelas harga bahan: murah/sedang/mahal berdasar asumsi kasar, berlabel "perkiraan" | Cukup untuk daftar belanja contoh |
+| D-berat | Daftar kondisi "berat" untuk rujukan memakai tanda bahaya yang sudah ada di registri; tanda tangan dosen diperlukan hanya sebelum `lapangan` | Sesuai jalur rilis v3 |
+
+Catatan: profil `demo`/`lapangan`, aturan `otorisasi.ts`, dan seluruh isi §0–§9 di bawah tetap berlaku kecuali tertimpa tabel di atas. Pernyataan privasi tidak boleh mengatakan "tidak ada data keluar" selama K-08 aktif.
 
 ## 0. Keputusan v3 (2026-10-28)
 

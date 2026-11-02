@@ -29,3 +29,7 @@ audit/evidence/legacy_v8/
 # Berkas sistem
 .DS_Store
 Thumbs.db
+
+# Cloudflare Worker (rahasia lokal)
+.dev.vars
+.wrangler/

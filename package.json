@@ -5,18 +5,23 @@
     "type": "module",
     "description": "NUTRIVA: mesin gizi 1000 HPK yang deterministik dan dapat diperiksa (fondasi M0)",
     "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
         "typecheck": "tsc --noEmit",
         "test": "vitest run",
         "verify:claims": "tsx src/tools/cli-verify-claims.ts",
         "lint:fixtures": "tsx src/tools/cli-lint-fixtures.ts",
         "check": "npm run typecheck && npm run test && npm run verify:claims && npm run lint:fixtures",
         "cek:otorisasi": "tsx src/tools/cli-cek-otorisasi.ts",
-        "gate:m1a": "tsx src/tools/cli-gate-m1a.ts"
+        "gate:m1a": "tsx src/tools/cli-gate-m1a.ts",
+        "cek:bundel": "tsx src/tools/cli-cek-bundel.ts"
     },
     "devDependencies": {
         "@types/node": "26.6.5",
         "tsx": "4.23.15",
         "typescript": "7.0.2",
+        "vite": "8.3.5",
         "vitest": "5.0.4"
     },
     "dependencies": {

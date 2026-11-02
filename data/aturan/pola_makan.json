@@ -1,0 +1,83 @@
+{
+ "klaim_ids": [
+  "KL-ENERGI-MPASI",
+  "KL-ASUMSI-POLA-MAKAN",
+  "KL-ASUMSI-BATAS-VITA",
+  "KL-MDD-8-KELOMPOK"
+ ],
+ "label_belum_diverifikasi": true,
+ "_meta": {
+  "catatan": [
+   "energi_mpasi_kkal: kebutuhan energi dari makanan pendamping bagi anak yang masih mendapat ASI rata-rata (konsep WHO/PAHO; bacaan sekunder)",
+   "Pembagian energi per slot, batas gram per porsi, dan batas vitamin A hewani adalah asumsi pengembang",
+   "Daftar kelompok MDD: delapan kelompok WHO (ASI, serealia/umbi, kacang/biji, susu olahan, daging/ikan, telur, sayur-buah kaya vitamin A, sayur-buah lain); MDD tercapai bila >= 5 dari 8"
+  ]
+ },
+ "pita": {
+  "6-8": {
+   "bulan_min": 6,
+   "bulan_maks": 8,
+   "energi_mpasi_kkal": 200,
+   "makan_utama": 2,
+   "selingan": 1,
+   "porsi_maks_g": {
+    "staple": 70,
+    "protein": 35,
+    "sayur": 50,
+    "lemak": 5,
+    "buah": 60,
+    "susu": 60
+   }
+  },
+  "9-11": {
+   "bulan_min": 9,
+   "bulan_maks": 11,
+   "energi_mpasi_kkal": 300,
+   "makan_utama": 3,
+   "selingan": 1,
+   "porsi_maks_g": {
+    "staple": 90,
+    "protein": 40,
+    "sayur": 60,
+    "lemak": 6,
+    "buah": 70,
+    "susu": 80
+   }
+  },
+  "12-23": {
+   "bulan_min": 12,
+   "bulan_maks": 23,
+   "energi_mpasi_kkal": 550,
+   "makan_utama": 3,
+   "selingan": 2,
+   "porsi_maks_g": {
+    "staple": 130,
+    "protein": 60,
+    "sayur": 80,
+    "lemak": 8,
+    "buah": 90,
+    "susu": 100
+   }
+  }
+ },
+ "porsi_energi": {
+  "makan_utama_dari_total": 0.85,
+  "staple": 0.4,
+  "protein": 0.3,
+  "sayur": 0.1,
+  "lemak": 0.2,
+  "selingan_buah": 0.6,
+  "selingan_susu": 0.4
+ },
+ "batas": {
+  "vit_a_hewani_rae_mcg_per_hari": 600,
+  "hati_maks_g_per_porsi": 10,
+  "hati_maks_per_minggu": 1,
+  "mdd_minimal_kelompok": 5,
+  "kelompok_mdd_total": 8
+ },
+ "tampilan": {
+  "ambang_persen_rendah": 40,
+  "ambang_persen_cukup": 80
+ }
+}

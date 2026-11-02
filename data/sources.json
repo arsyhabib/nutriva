@@ -1,4 +1,87 @@
 {
-  "versi": "0.0.1",
-  "sumber": []
+  "versi": "0.1.0",
+  "sumber": [
+    {
+      "id": "S-PMK-2-2020",
+      "jenis": "regulasi",
+      "penerbit": "Kementerian Kesehatan RI",
+      "judul": "Peraturan Menteri Kesehatan Nomor 2 Tahun 2020 tentang Standar Antropometri Anak (Berita Negara 2020 No. 7)",
+      "edisi": "BN 2020 No. 7",
+      "url": "https://www.peraturan.go.id/files/bn7-2020.pdf",
+      "tanggal_akses": "2026-11-02",
+      "lisensi": "Peraturan perundang-undangan (bukan objek hak cipta, UU 28/2014 Pasal 42)",
+      "boleh_redistribusi": true,
+      "berkas_lokal": null,
+      "sha256": null,
+      "tingkat": "A"
+    },
+    {
+      "id": "S-PMK-28-2019",
+      "jenis": "regulasi",
+      "penerbit": "Kementerian Kesehatan RI",
+      "judul": "Peraturan Menteri Kesehatan Nomor 28 Tahun 2019 tentang Angka Kecukupan Gizi yang Dianjurkan untuk Masyarakat Indonesia (Berita Negara 2019 No. 956)",
+      "edisi": "BN 2019 No. 956",
+      "url": "https://peraturan.bpk.go.id/Details/138621",
+      "tanggal_akses": "2026-11-02",
+      "lisensi": "Peraturan perundang-undangan (bukan objek hak cipta, UU 28/2014 Pasal 42)",
+      "boleh_redistribusi": true,
+      "berkas_lokal": null,
+      "sha256": null,
+      "tingkat": "A"
+    },
+    {
+      "id": "S-WHO-CGS-2006-PYGROWUP",
+      "jenis": "basis-data",
+      "penerbit": "WHO (tabel standar pertumbuhan anak 2006), dikemas paket pygrowup 0.8.2",
+      "judul": "WHO Child Growth Standards 2006, tabel SD dan LMS (salinan dalam paket pygrowup)",
+      "edisi": "pygrowup 0.8.2",
+      "url": "https://pypi.org/project/pygrowup/0.8.2/",
+      "tanggal_akses": "2026-11-02",
+      "lisensi": "Standar WHO; paket pygrowup (lisensi paket menurut PyPI)",
+      "boleh_redistribusi": false,
+      "berkas_lokal": null,
+      "sha256": null,
+      "tingkat": "B"
+    },
+    {
+      "id": "S-USDA-SR-LEGACY-2018",
+      "jenis": "basis-data",
+      "penerbit": "USDA Agricultural Research Service",
+      "judul": "FoodData Central, SR Legacy (April 2018), CSV",
+      "edisi": "2018-04",
+      "url": "https://fdc.nal.usda.gov/download-datasets",
+      "tanggal_akses": "2026-11-02",
+      "lisensi": "CC0 1.0 (domain publik); atribusi dianjurkan",
+      "boleh_redistribusi": true,
+      "berkas_lokal": null,
+      "sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0",
+      "tingkat": "C"
+    },
+    {
+      "id": "S-WHO-PAHO-MPASI-2003",
+      "jenis": "pedoman",
+      "penerbit": "PAHO/WHO",
+      "judul": "Guiding principles for complementary feeding of the breastfed child",
+      "edisi": "2003",
+      "tanggal_akses": "2026-11-02",
+      "lisensi": "Pedoman WHO/PAHO; hanya rujukan, tidak disalin",
+      "boleh_redistribusi": false,
+      "berkas_lokal": null,
+      "sha256": null,
+      "tingkat": "B"
+    },
+    {
+      "id": "S-WHO-GHO-MDD",
+      "jenis": "basis-data",
+      "penerbit": "WHO Global Health Observatory",
+      "judul": "Minimum dietary diversity 6-23 months (metadata indikator)",
+      "edisi": "2026",
+      "tanggal_akses": "2026-11-02",
+      "lisensi": "Metadata indikator WHO",
+      "boleh_redistribusi": false,
+      "berkas_lokal": null,
+      "sha256": null,
+      "tingkat": "B"
+    }
+  ]
 }

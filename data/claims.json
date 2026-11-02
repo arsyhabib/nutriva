@@ -1,5 +1,5 @@
 {
-  "versi": "0.0.1",
+  "versi": "0.1.0",
   "klaim": [
     {
       "id": "KL-TTD-DOSIS",
@@ -15,6 +15,279 @@
       "pernyataan": "Jumlah minimal tablet tambah darah selama kehamilan. DIKARANTINA: belum terbaca dari sumber primer (AUD-0003-02).",
       "status": "dikarantina",
       "tingkat": "A",
+      "sumber": []
+    },
+    {
+      "id": "KL-SD-BBU-L",
+      "tipe": "nilai",
+      "pernyataan": "Tabel standar BB/U laki-laki 6-23 bulan, usia/panjang sesuai cakupan berkas data. Dibaca visual dari PDF (hlm. 16-17), cocok dengan tabel WHO; kolom -2/+2 SD ditopang hitung ulang LMS. Seluruh kolom -2 dan +2 SD (36 sel) juga dibaca visual terpisah oleh pemeriksa kedua: 0 selisih.",
+      "status": "teks-ditemukan-mesin",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 16,
+            "tabel": "BB/U laki-laki 6-23 bulan"
+          }
+        },
+        {
+          "sumber_id": "S-WHO-CGS-2006-PYGROWUP",
+          "locator": {
+            "tabel": "BB/U laki-laki 6-23 bulan"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-SD-BBU-P",
+      "tipe": "nilai",
+      "pernyataan": "Tabel standar BB/U perempuan 6-23 bulan, usia/panjang sesuai cakupan berkas data. Dibaca visual dari PDF (hlm. 34-35), cocok dengan tabel WHO. Kolom -2 dan +2 SD belum dibaca visual; ditopang hitung ulang LMS.",
+      "status": "teks-ditemukan-mesin",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 34,
+            "tabel": "BB/U perempuan 6-23 bulan"
+          }
+        },
+        {
+          "sumber_id": "S-WHO-CGS-2006-PYGROWUP",
+          "locator": {
+            "tabel": "BB/U perempuan 6-23 bulan"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-SD-PBU-L",
+      "tipe": "nilai",
+      "pernyataan": "Tabel standar PB/U laki-laki 6-23 bulan, usia/panjang sesuai cakupan berkas data. Dibaca visual dari PDF (hlm. 19), cocok pada kolom terbaca. Kolom -2 dan +2 SD belum dibaca visual; ditopang hitung ulang LMS.",
+      "status": "teks-ditemukan-mesin",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 19,
+            "tabel": "PB/U laki-laki 6-23 bulan"
+          }
+        },
+        {
+          "sumber_id": "S-WHO-CGS-2006-PYGROWUP",
+          "locator": {
+            "tabel": "PB/U laki-laki 6-23 bulan"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-SD-PBU-P",
+      "tipe": "nilai",
+      "pernyataan": "Tabel standar PB/U perempuan 6-23 bulan, usia/panjang sesuai cakupan berkas data. Dibaca visual dari PDF (hlm. 37), cocok pada kolom terbaca. Kolom -2 dan +2 SD belum dibaca visual; ditopang hitung ulang LMS.",
+      "status": "teks-ditemukan-mesin",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 37,
+            "tabel": "PB/U perempuan 6-23 bulan"
+          }
+        },
+        {
+          "sumber_id": "S-WHO-CGS-2006-PYGROWUP",
+          "locator": {
+            "tabel": "PB/U perempuan 6-23 bulan"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-SD-BBPB-L",
+      "tipe": "nilai",
+      "pernyataan": "Tabel standar BB/PB laki-laki 45-110 cm, usia/panjang sesuai cakupan berkas data. Hanya sampel 48,5-61,0 cm yang dicek visual (hlm. 22); sisanya konsisten dengan WHO.",
+      "status": "belum",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 22,
+            "tabel": "BB/PB laki-laki 45-110 cm"
+          }
+        },
+        {
+          "sumber_id": "S-WHO-CGS-2006-PYGROWUP",
+          "locator": {
+            "tabel": "BB/PB laki-laki 45-110 cm"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-SD-BBPB-P",
+      "tipe": "nilai",
+      "pernyataan": "Tabel standar BB/PB perempuan 45-110 cm, usia/panjang sesuai cakupan berkas data. Hanya sampel 61,5-74,0 cm yang dicek visual (hlm. 41); sisanya konsisten dengan WHO.",
+      "status": "belum",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 41,
+            "tabel": "BB/PB perempuan 45-110 cm"
+          }
+        },
+        {
+          "sumber_id": "S-WHO-CGS-2006-PYGROWUP",
+          "locator": {
+            "tabel": "BB/PB perempuan 45-110 cm"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-AKG-ANAK",
+      "tipe": "nilai",
+      "pernyataan": "Angka Kecukupan Gizi anak 6-11 bulan dan 1-3 tahun (energi, makro, vitamin, mineral). Energi 6-11 bulan sudah termasuk ASI.",
+      "status": "belum",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-28-2019",
+          "locator": {
+            "halaman": 6,
+            "tabel": "Tabel 1, 2, 3 (Lampiran I)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-ASUMSI-PEMBULATAN-PANJANG",
+      "tipe": "asumsi",
+      "pernyataan": "Panjang badan untuk BB/PB dibulatkan ke kelipatan 0,5 cm terdekat (setengah naik) sebelum membaca tabel. Asumsi pengembang karena Permenkes 2/2020 mencetak tabel per 0,5 cm tanpa aturan pembulatan yang terbaca; dampaknya paling banyak satu baris tabel (0,5 cm).",
+      "status": "belum",
+      "tingkat": "D",
+      "sumber": []
+    },
+    {
+      "id": "KL-ATURAN-USIA-BULAN-PENUH",
+      "tipe": "rumus",
+      "pernyataan": "Usia untuk tabel antropometri dihitung dalam bulan penuh (mis. 2 bulan 29 hari dihitung 2 bulan). Cakupan aplikasi 6 sampai 23 bulan adalah batasan produk; usia 24 bulan tepat berada di luar cakupan karena rentang tabel '0-24' dan 'di atas 24' bersinggungan.",
+      "status": "belum",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 12,
+            "tabel": "Lampiran, cara pengukuran dan usia"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-KOREKSI-BERDIRI",
+      "tipe": "rumus",
+      "pernyataan": "Anak usia di bawah 24 bulan yang diukur berdiri: panjang badan ditambah 0,7 cm; usia 24 bulan ke atas yang diukur terlentang: dikurangi 0,7 cm (aplikasi hanya memakai yang pertama).",
+      "status": "belum",
+      "tingkat": "A",
+      "sumber": [
+        {
+          "sumber_id": "S-PMK-2-2020",
+          "locator": {
+            "halaman": 12,
+            "tabel": "Lampiran, cara pengukuran panjang/tinggi badan"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-BAHAN-USDA-SRLEGACY",
+      "tipe": "nilai",
+      "pernyataan": "Kandungan gizi per 100 g untuk 30 pangan, disalin dari USDA SR Legacy dan dipetakan ke padanan pangan Indonesia. Belum diverifikasi manusia; padanan pangan belum disetujui dosen.",
+      "status": "belum",
+      "tingkat": "C",
+      "sumber": [
+        {
+          "sumber_id": "S-USDA-SR-LEGACY-2018",
+          "locator": {
+            "tabel": "food_nutrient.csv, fdc_id per entri"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-ENERGI-MPASI",
+      "tipe": "nilai",
+      "pernyataan": "Energi dari makanan pendamping per hari: 200 kkal (6-8 bulan), 300 kkal (9-11 bulan), 550 kkal (12-23 bulan) bagi anak yang masih mendapat ASI rata-rata.",
+      "status": "belum",
+      "tingkat": "B",
+      "sumber": [
+        {
+          "sumber_id": "S-WHO-PAHO-MPASI-2003",
+          "locator": {
+            "tabel": "Guiding principles, kebutuhan energi dari makanan pendamping"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-MDD-8-KELOMPOK",
+      "tipe": "ambang",
+      "pernyataan": "Keragaman makanan minimum (MDD) 6-23 bulan: paling sedikit 5 dari 8 kelompok makanan; delapan kelompok adalah ASI, serealia/umbi, kacang/biji, susu olahan, daging/ikan, telur, sayur-buah kaya vitamin A, sayur-buah lain.",
+      "status": "belum",
+      "tingkat": "B",
+      "sumber": [
+        {
+          "sumber_id": "S-WHO-GHO-MDD",
+          "locator": {
+            "tabel": "Indikator MDD 6-23 bulan"
+          }
+        }
+      ]
+    },
+    {
+      "id": "KL-ASUMSI-POLA-MAKAN",
+      "tipe": "asumsi",
+      "pernyataan": "Pembagian energi per slot makan, urutan peran bahan, dan batas gram per porsi pada pembangkit contoh pola makan adalah asumsi pengembang untuk peragaan PjBL; bukan anjuran resmi.",
+      "status": "belum",
+      "tingkat": "D",
+      "sumber": []
+    },
+    {
+      "id": "KL-ASUMSI-BATAS-VITA",
+      "tipe": "asumsi",
+      "pernyataan": "Batas asumsi pengembang untuk vitamin A dari sumber hewani 600 mcg/hari, hati maksimal 10 g per porsi dan sekali seminggu. Angka batas atas resmi untuk bayi/balita belum dibaca dari sumber primer.",
+      "status": "belum",
+      "tingkat": "D",
+      "sumber": []
+    },
+    {
+      "id": "KL-ASUMSI-BAHAN-ATRIBUT",
+      "tipe": "asumsi",
+      "pernyataan": "Peran, kelompok MDD, usia minimal, alergen umum, dan kelas harga tiap bahan adalah penetapan pengembang, bukan data resmi.",
+      "status": "belum",
+      "tingkat": "D",
+      "sumber": []
+    },
+    {
+      "id": "KL-ASUMSI-RASIO-BELI",
+      "tipe": "asumsi",
+      "pernyataan": "Rasio gram dibeli per gram disajikan (untuk daftar belanja) adalah perkiraan kasar pengembang.",
+      "status": "belum",
+      "tingkat": "D",
+      "sumber": []
+    },
+    {
+      "id": "KL-ASUMSI-RUJUKAN",
+      "tipe": "asumsi",
+      "pernyataan": "Daftar tanda bahaya dan pemetaan kategori status ke tingkat tindak lanjut (normal, perhatian, rujuk) adalah asumsi pengembang yang konservatif dan belum ditinjau tenaga kesehatan.",
+      "status": "belum",
+      "tingkat": "D",
       "sumber": []
     }
   ]

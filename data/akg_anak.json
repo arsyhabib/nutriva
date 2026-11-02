@@ -1,0 +1,324 @@
+{
+  "klaim_id": "KL-AKG-ANAK",
+  "label_belum_diverifikasi": true,
+  "_meta": {
+    "sumber": "S-PMK-28-2019",
+    "judul": "Permenkes 28/2019 Angka Kecukupan Gizi yang Dianjurkan untuk Masyarakat Indonesia, Lampiran I Tabel 1-3 (BN 2019 No. 956)",
+    "halaman_berkas": {
+      "tabel1": "6-7",
+      "tabel2": "9-10",
+      "tabel3": "12-14"
+    },
+    "metode": "dua kali baca visual berkas (halaman diputar): pembacaan awal (HASIL_VERIFIKASI 4) dan pembacaan ulang 2026-11-02; selaras untuk energi, protein, lemak, karbohidrat, serat, air, vit A, besi, seng, kalsium, folat, vit C",
+    "status_yang_disarankan": "belum (butuh pembacaan ulang manusia/AI lain) sampai docs/periksa terisi",
+    "catatan": [
+      "Energi 6-11 bulan sudah termasuk ASI (AKG bukan target menu MP-ASI)",
+      "Vitamin A dalam RE, folat dalam mcg tanpa DFE (tidak ada pengali bioavailabilitas di aplikasi)",
+      "Catatan kaki Tabel 3: besi diasumsikan dengan proporsi sumber heme/non-heme tertentu dan seng dari sumber bioavailabilitas tinggi-sedang (IOM 2001, 2006); teks catatan kaki besi terpotong pada pembacaan, baca ulang penuh sebelum dikutip",
+      "Energi 1-3 tahun: faktor aktivitas fisik 1,14 (catatan kaki 2 Tabel 1, terpotong pada pembacaan)",
+      "Nilai tembaga tertulis mcg; kromium mcg; mangan 0,7 mg (6-11 bln) dan 1,2 mg (1-3 th)"
+    ]
+  },
+  "kelompok": {
+    "6-11_bulan": {
+      "berat_badan_kg": 9,
+      "tinggi_badan_cm": 72,
+      "nilai": {
+        "energi": {
+          "nilai": 800,
+          "satuan": "kkal"
+        },
+        "protein": {
+          "nilai": 15,
+          "satuan": "g"
+        },
+        "lemak_total": {
+          "nilai": 35,
+          "satuan": "g"
+        },
+        "omega3": {
+          "nilai": 0.5,
+          "satuan": "g"
+        },
+        "omega6": {
+          "nilai": 4.4,
+          "satuan": "g"
+        },
+        "karbohidrat": {
+          "nilai": 105,
+          "satuan": "g"
+        },
+        "serat": {
+          "nilai": 11,
+          "satuan": "g"
+        },
+        "air": {
+          "nilai": 900,
+          "satuan": "ml"
+        },
+        "vit_a_re": {
+          "nilai": 400,
+          "satuan": "RE"
+        },
+        "vit_d": {
+          "nilai": 10,
+          "satuan": "mcg"
+        },
+        "vit_e": {
+          "nilai": 5,
+          "satuan": "mcg"
+        },
+        "vit_k": {
+          "nilai": 10,
+          "satuan": "mcg"
+        },
+        "vit_b1": {
+          "nilai": 0.3,
+          "satuan": "mg"
+        },
+        "vit_b2": {
+          "nilai": 0.4,
+          "satuan": "mg"
+        },
+        "vit_b3": {
+          "nilai": 4,
+          "satuan": "mg"
+        },
+        "vit_b5": {
+          "nilai": 1.8,
+          "satuan": "mg"
+        },
+        "vit_b6": {
+          "nilai": 0.3,
+          "satuan": "mg"
+        },
+        "folat": {
+          "nilai": 80,
+          "satuan": "mcg"
+        },
+        "vit_b12": {
+          "nilai": 1.5,
+          "satuan": "mcg"
+        },
+        "biotin": {
+          "nilai": 6,
+          "satuan": "mcg"
+        },
+        "kolin": {
+          "nilai": 150,
+          "satuan": "mg"
+        },
+        "vit_c": {
+          "nilai": 50,
+          "satuan": "mg"
+        },
+        "kalsium": {
+          "nilai": 270,
+          "satuan": "mg"
+        },
+        "fosfor": {
+          "nilai": 275,
+          "satuan": "mg"
+        },
+        "magnesium": {
+          "nilai": 55,
+          "satuan": "mg"
+        },
+        "besi": {
+          "nilai": 11,
+          "satuan": "mg"
+        },
+        "iodium": {
+          "nilai": 120,
+          "satuan": "mcg"
+        },
+        "seng": {
+          "nilai": 3,
+          "satuan": "mg"
+        },
+        "selenium": {
+          "nilai": 10,
+          "satuan": "mcg"
+        },
+        "mangan": {
+          "nilai": 0.7,
+          "satuan": "mg"
+        },
+        "fluor": {
+          "nilai": 0.5,
+          "satuan": "mg"
+        },
+        "kromium": {
+          "nilai": 6,
+          "satuan": "mcg"
+        },
+        "kalium": {
+          "nilai": 700,
+          "satuan": "mg"
+        },
+        "natrium": {
+          "nilai": 370,
+          "satuan": "mg"
+        },
+        "klor": {
+          "nilai": 570,
+          "satuan": "mg"
+        },
+        "tembaga": {
+          "nilai": 220,
+          "satuan": "mcg"
+        }
+      }
+    },
+    "1-3_tahun": {
+      "berat_badan_kg": 13,
+      "tinggi_badan_cm": 92,
+      "nilai": {
+        "energi": {
+          "nilai": 1350,
+          "satuan": "kkal"
+        },
+        "protein": {
+          "nilai": 20,
+          "satuan": "g"
+        },
+        "lemak_total": {
+          "nilai": 45,
+          "satuan": "g"
+        },
+        "omega3": {
+          "nilai": 0.7,
+          "satuan": "g"
+        },
+        "omega6": {
+          "nilai": 7,
+          "satuan": "g"
+        },
+        "karbohidrat": {
+          "nilai": 215,
+          "satuan": "g"
+        },
+        "serat": {
+          "nilai": 19,
+          "satuan": "g"
+        },
+        "air": {
+          "nilai": 1150,
+          "satuan": "ml"
+        },
+        "vit_a_re": {
+          "nilai": 400,
+          "satuan": "RE"
+        },
+        "vit_d": {
+          "nilai": 15,
+          "satuan": "mcg"
+        },
+        "vit_e": {
+          "nilai": 6,
+          "satuan": "mcg"
+        },
+        "vit_k": {
+          "nilai": 15,
+          "satuan": "mcg"
+        },
+        "vit_b1": {
+          "nilai": 0.5,
+          "satuan": "mg"
+        },
+        "vit_b2": {
+          "nilai": 0.5,
+          "satuan": "mg"
+        },
+        "vit_b3": {
+          "nilai": 6,
+          "satuan": "mg"
+        },
+        "vit_b5": {
+          "nilai": 2.0,
+          "satuan": "mg"
+        },
+        "vit_b6": {
+          "nilai": 0.5,
+          "satuan": "mg"
+        },
+        "folat": {
+          "nilai": 160,
+          "satuan": "mcg"
+        },
+        "vit_b12": {
+          "nilai": 1.5,
+          "satuan": "mcg"
+        },
+        "biotin": {
+          "nilai": 8,
+          "satuan": "mcg"
+        },
+        "kolin": {
+          "nilai": 200,
+          "satuan": "mg"
+        },
+        "vit_c": {
+          "nilai": 40,
+          "satuan": "mg"
+        },
+        "kalsium": {
+          "nilai": 650,
+          "satuan": "mg"
+        },
+        "fosfor": {
+          "nilai": 460,
+          "satuan": "mg"
+        },
+        "magnesium": {
+          "nilai": 65,
+          "satuan": "mg"
+        },
+        "besi": {
+          "nilai": 7,
+          "satuan": "mg"
+        },
+        "iodium": {
+          "nilai": 90,
+          "satuan": "mcg"
+        },
+        "seng": {
+          "nilai": 3,
+          "satuan": "mg"
+        },
+        "selenium": {
+          "nilai": 18,
+          "satuan": "mcg"
+        },
+        "mangan": {
+          "nilai": 1.2,
+          "satuan": "mg"
+        },
+        "fluor": {
+          "nilai": 0.7,
+          "satuan": "mg"
+        },
+        "kromium": {
+          "nilai": 14,
+          "satuan": "mcg"
+        },
+        "kalium": {
+          "nilai": 2600,
+          "satuan": "mg"
+        },
+        "natrium": {
+          "nilai": 800,
+          "satuan": "mg"
+        },
+        "klor": {
+          "nilai": 1200,
+          "satuan": "mg"
+        },
+        "tembaga": {
+          "nilai": 340,
+          "satuan": "mcg"
+        }
+      }
+    }
+  }
+}

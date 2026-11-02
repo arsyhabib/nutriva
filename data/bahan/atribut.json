@@ -1,0 +1,358 @@
+{
+  "klaim_ids": [
+    "KL-ASUMSI-BAHAN-ATRIBUT",
+    "KL-ASUMSI-RASIO-BELI"
+  ],
+  "label_belum_diverifikasi": true,
+  "_meta": {
+    "catatan": "Atribut produk (peran, kelompok, kelas harga, rasio beli) adalah asumsi pengembang tingkat D. rasio_beli = gram bahan dibeli (mentah, dengan bagian terbuang) per gram disajikan. kelas_harga adalah perkiraan kasar, bukan harga pasar."
+  },
+  "bahan": [
+    {
+      "id": "nasi",
+      "nama": "Nasi putih",
+      "peran": "staple",
+      "kelompok_mdd": "serealia",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 0.4,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "kentang",
+      "nama": "Kentang rebus",
+      "peran": "staple",
+      "kelompok_mdd": "serealia",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.25,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "ubi",
+      "nama": "Ubi jalar rebus",
+      "peran": "staple",
+      "kelompok_mdd": "serealia",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.2,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "jagung",
+      "nama": "Jagung manis rebus",
+      "peran": "staple",
+      "kelompok_mdd": "serealia",
+      "hewani": false,
+      "usia_min_bulan": 9,
+      "alergen": [],
+      "rasio_beli": 2.0,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "oat",
+      "nama": "Bubur oat",
+      "peran": "staple",
+      "kelompok_mdd": "serealia",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [
+        "gluten"
+      ],
+      "rasio_beli": 0.15,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "telur",
+      "nama": "Telur ayam rebus",
+      "peran": "protein_hewani",
+      "kelompok_mdd": "telur",
+      "hewani": true,
+      "usia_min_bulan": 6,
+      "alergen": [
+        "telur"
+      ],
+      "rasio_beli": 1.1,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "hati",
+      "nama": "Hati ayam rebus",
+      "peran": "protein_hewani",
+      "kelompok_mdd": "daging_ikan",
+      "hewani": true,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.3,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "ayam",
+      "nama": "Dada ayam panggang",
+      "peran": "protein_hewani",
+      "kelompok_mdd": "daging_ikan",
+      "hewani": true,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.35,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "sapi",
+      "nama": "Daging sapi cincang",
+      "peran": "protein_hewani",
+      "kelompok_mdd": "daging_ikan",
+      "hewani": true,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.35,
+      "kelas_harga": "mahal"
+    },
+    {
+      "id": "lele",
+      "nama": "Ikan lele",
+      "peran": "protein_hewani",
+      "kelompok_mdd": "daging_ikan",
+      "hewani": true,
+      "usia_min_bulan": 6,
+      "alergen": [
+        "ikan"
+      ],
+      "rasio_beli": 1.8,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "kembung",
+      "nama": "Ikan kembung",
+      "peran": "protein_hewani",
+      "kelompok_mdd": "daging_ikan",
+      "hewani": true,
+      "usia_min_bulan": 9,
+      "alergen": [
+        "ikan"
+      ],
+      "rasio_beli": 1.8,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "nila",
+      "nama": "Ikan nila",
+      "peran": "protein_hewani",
+      "kelompok_mdd": "daging_ikan",
+      "hewani": true,
+      "usia_min_bulan": 6,
+      "alergen": [
+        "ikan"
+      ],
+      "rasio_beli": 1.9,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "tempe",
+      "nama": "Tempe",
+      "peran": "protein_nabati",
+      "kelompok_mdd": "kacang_biji",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [
+        "kedelai"
+      ],
+      "rasio_beli": 1.0,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "tahu",
+      "nama": "Tahu",
+      "peran": "protein_nabati",
+      "kelompok_mdd": "kacang_biji",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [
+        "kedelai"
+      ],
+      "rasio_beli": 1.0,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "kacang_hijau",
+      "nama": "Kacang hijau rebus",
+      "peran": "protein_nabati",
+      "kelompok_mdd": "kacang_biji",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 0.4,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "kacang_merah",
+      "nama": "Kacang merah rebus",
+      "peran": "protein_nabati",
+      "kelompok_mdd": "kacang_biji",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 0.4,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "bayam",
+      "nama": "Bayam rebus",
+      "peran": "sayur",
+      "kelompok_mdd": "sayur_buah_vit_a",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.3,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "pakchoy",
+      "nama": "Sawi pakcoy rebus",
+      "peran": "sayur",
+      "kelompok_mdd": "sayur_buah_lain",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.3,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "wortel",
+      "nama": "Wortel rebus",
+      "peran": "sayur",
+      "kelompok_mdd": "sayur_buah_vit_a",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.2,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "labu",
+      "nama": "Labu kuning rebus",
+      "peran": "sayur",
+      "kelompok_mdd": "sayur_buah_vit_a",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.3,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "brokoli",
+      "nama": "Brokoli rebus",
+      "peran": "sayur",
+      "kelompok_mdd": "sayur_buah_lain",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.25,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "tomat",
+      "nama": "Tomat segar",
+      "peran": "sayur",
+      "kelompok_mdd": "sayur_buah_lain",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.1,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "pisang",
+      "nama": "Pisang",
+      "peran": "buah",
+      "kelompok_mdd": "sayur_buah_lain",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.5,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "pepaya",
+      "nama": "Pepaya",
+      "peran": "buah",
+      "kelompok_mdd": "sayur_buah_vit_a",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.4,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "alpukat",
+      "nama": "Alpukat",
+      "peran": "buah",
+      "kelompok_mdd": "sayur_buah_lain",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.5,
+      "kelas_harga": "mahal"
+    },
+    {
+      "id": "jeruk",
+      "nama": "Jeruk",
+      "peran": "buah",
+      "kelompok_mdd": "sayur_buah_lain",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.6,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "mangga",
+      "nama": "Mangga",
+      "peran": "buah",
+      "kelompok_mdd": "sayur_buah_vit_a",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.7,
+      "kelas_harga": "mahal"
+    },
+    {
+      "id": "minyak_sawit",
+      "nama": "Minyak (sawit)",
+      "peran": "lemak",
+      "kelompok_mdd": "lemak",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.0,
+      "kelas_harga": "murah"
+    },
+    {
+      "id": "santan",
+      "nama": "Santan",
+      "peran": "lemak",
+      "kelompok_mdd": "lemak",
+      "hewani": false,
+      "usia_min_bulan": 6,
+      "alergen": [],
+      "rasio_beli": 1.0,
+      "kelas_harga": "sedang"
+    },
+    {
+      "id": "yogurt",
+      "nama": "Yogurt plain",
+      "peran": "susu",
+      "kelompok_mdd": "susu_olahan",
+      "hewani": true,
+      "usia_min_bulan": 6,
+      "alergen": [
+        "susu"
+      ],
+      "rasio_beli": 1.0,
+      "kelas_harga": "sedang"
+    }
+  ]
+}

@@ -1,0 +1,887 @@
+{
+  "sintetis": true,
+  "asal": "dibuat-pengembang",
+  "contoh": [
+    {
+      "id": "S0",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "bb_normal",
+          "pbu": "normal",
+          "bbpb": "gizi_baik"
+        },
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 24
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 19
+          },
+          {
+            "zat": "vit_a_rae_mcg",
+            "persen": 150
+          }
+        ],
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 6 sampai 8 bulan, berat badan anak normal menurut umurnya. Panjang badannya juga normal menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nPersen kecukupan gizi yang tercatat adalah zat besi 24%, kalsium 19%, dan vitamin A 150%. Lanjutkan pemantauan rutin di posyandu setiap bulan."
+    },
+    {
+      "id": "S1",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "bb_normal",
+          "pbu": "normal",
+          "bbpb": "gizi_baik"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 9 sampai 11 bulan, berat badan anak normal menurut umurnya. Panjang badannya juga normal menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nHasil ini menunjukkan pertumbuhan yang baik. Tetap rutin memantau pertumbuhan anak di posyandu setiap bulan."
+    },
+    {
+      "id": "S2",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "12-23",
+        "status": {
+          "bbu": "bb_normal",
+          "pbu": "normal",
+          "bbpb": "gizi_baik"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 12 sampai 23 bulan, berat badan anak normal menurut umurnya. Panjang badannya juga normal menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nHasil ini menunjukkan pertumbuhan yang baik. Tetap rutin memantau pertumbuhan anak di posyandu setiap bulan."
+    },
+    {
+      "id": "S3",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "bb_kurang",
+          "pbu": "normal",
+          "bbpb": "gizi_baik"
+        },
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 27
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 19
+          },
+          {
+            "zat": "vit_a_rae_mcg",
+            "persen": 150
+          }
+        ],
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 6 sampai 8 bulan, berat badan anak kurang menurut umurnya. Panjang badannya normal menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nKarena berat badan anak masih kurang menurut umur, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan. Persen kecukupan gizi tercatat zat besi 27%, kalsium 19%, dan vitamin A 150%."
+    },
+    {
+      "id": "S4",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "bb_kurang",
+          "pbu": "normal",
+          "bbpb": "gizi_baik"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 9 sampai 11 bulan, berat badan anak kurang menurut umurnya. Panjang badannya normal menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nKarena berat badan anak masih kurang menurut umur, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan."
+    },
+    {
+      "id": "S5",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "bb_normal",
+          "pbu": "pendek",
+          "bbpb": "gizi_baik"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 6 sampai 8 bulan, berat badan anak normal menurut umurnya. Panjang badannya pendek menurut umurnya, sedangkan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nKarena panjang badan anak tergolong pendek menurut umur, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan."
+    },
+    {
+      "id": "S6",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "bb_normal",
+          "pbu": "pendek",
+          "bbpb": "gizi_baik"
+        },
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 30
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 19
+          },
+          {
+            "zat": "vit_a_rae_mcg",
+            "persen": 150
+          }
+        ],
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 9 sampai 11 bulan, berat badan anak normal menurut umurnya. Panjang badannya pendek menurut umurnya, sedangkan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nKarena panjang badan anak tergolong pendek menurut umur, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan. Persen kecukupan gizi tercatat zat besi 30%, kalsium 19%, dan vitamin A 150%."
+    },
+    {
+      "id": "S7",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "bb_kurang",
+          "pbu": "pendek",
+          "bbpb": "gizi_kurang"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 6 sampai 8 bulan, berat badan anak kurang menurut umurnya. Panjang badannya pendek menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi kurang.\n\nHasil ini perlu diperiksa lebih lanjut. Mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan."
+    },
+    {
+      "id": "S8",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "bb_kurang",
+          "pbu": "pendek",
+          "bbpb": "gizi_kurang"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 9 sampai 11 bulan, berat badan anak kurang menurut umurnya. Panjang badannya pendek menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi kurang.\n\nHasil ini perlu diperiksa lebih lanjut. Mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan."
+    },
+    {
+      "id": "S9",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "bb_sangat_kurang",
+          "pbu": "sangat_pendek",
+          "bbpb": "gizi_buruk"
+        },
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 33
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 19
+          },
+          {
+            "zat": "vit_a_rae_mcg",
+            "persen": 150
+          }
+        ],
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 6 sampai 8 bulan, berat badan anak sangat kurang menurut umurnya. Panjang badannya sangat pendek menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi buruk.\n\nHasil ini perlu segera diperiksa petugas kesehatan, jadi mohon segera datang ke posyandu atau puskesmas. Persen kecukupan gizi tercatat zat besi 33%, kalsium 19%, dan vitamin A 150%."
+    },
+    {
+      "id": "S10",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "bb_sangat_kurang",
+          "pbu": "sangat_pendek",
+          "bbpb": "gizi_buruk"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 9 sampai 11 bulan, berat badan anak sangat kurang menurut umurnya. Panjang badannya sangat pendek menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi buruk.\n\nHasil ini perlu segera diperiksa petugas kesehatan, jadi mohon segera datang ke posyandu atau puskesmas."
+    },
+    {
+      "id": "S11",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "risiko_bb_lebih",
+          "pbu": "normal",
+          "bbpb": "risiko_gizi_lebih"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 6 sampai 8 bulan, berat badan anak berisiko lebih menurut umurnya. Panjang badannya normal menurut umurnya, dan berat badan menurut panjang badannya berisiko gizi lebih.\n\nKarena ada hasil yang perlu dipantau, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan."
+    },
+    {
+      "id": "S12",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "risiko_bb_lebih",
+          "pbu": "normal",
+          "bbpb": "risiko_gizi_lebih"
+        },
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 36
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 19
+          },
+          {
+            "zat": "vit_a_rae_mcg",
+            "persen": 150
+          }
+        ],
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 9 sampai 11 bulan, berat badan anak berisiko lebih menurut umurnya. Panjang badannya normal menurut umurnya, dan berat badan menurut panjang badannya berisiko gizi lebih.\n\nKarena ada hasil yang perlu dipantau, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan. Persen kecukupan gizi tercatat zat besi 36%, kalsium 19%, dan vitamin A 150%."
+    },
+    {
+      "id": "S13",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "bb_normal",
+          "pbu": "tinggi",
+          "bbpb": "gizi_baik"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 6 sampai 8 bulan, berat badan anak normal menurut umurnya. Panjang badannya tergolong tinggi menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nKarena panjang badan anak tidak normal menurut umur, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan."
+    },
+    {
+      "id": "S14",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "bb_normal",
+          "pbu": "tinggi",
+          "bbpb": "gizi_baik"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pada usia 9 sampai 11 bulan, berat badan anak normal menurut umurnya. Panjang badannya tergolong tinggi menurut umurnya, dan berat badan menurut panjang badannya masuk kategori gizi baik.\n\nKarena panjang badan anak tidak normal menurut umur, mohon datang ke posyandu atau puskesmas agar diperiksa petugas kesehatan."
+    },
+    {
+      "id": "S15",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "6-8",
+        "status": {
+          "bbu": "risiko_bb_lebih",
+          "pbu": "normal",
+          "bbpb": "obesitas"
+        },
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 39
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 19
+          },
+          {
+            "zat": "vit_a_rae_mcg",
+            "persen": 150
+          }
+        ],
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Hasil status anak usia 6 sampai 8 bulan belum seluruhnya normal. Berat badan menurut umur masuk kategori berisiko lebih, dan berat badan menurut panjang badan belum masuk kategori normal. Panjang badan menurut umur sudah normal.\n\nPersen kecukupan gizi: zat besi 39%, kalsium 19%, dan vitamin A 150%. Silakan datang ke posyandu atau puskesmas agar petugas kesehatan dapat memeriksa hasil ini."
+    },
+    {
+      "id": "S16",
+      "muatan": {
+        "skema": 1,
+        "layar": "status",
+        "pita_usia": "9-11",
+        "status": {
+          "bbu": "risiko_bb_lebih",
+          "pbu": "normal",
+          "bbpb": "obesitas"
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Hasil status anak usia 9 sampai 11 bulan belum seluruhnya normal. Berat badan menurut umur masuk kategori berisiko lebih, dan berat badan menurut panjang badan belum masuk kategori normal. Panjang badan menurut umur sudah normal.\n\nSilakan datang ke posyandu atau puskesmas agar petugas kesehatan dapat memeriksa hasil ini."
+    },
+    {
+      "id": "M17",
+      "muatan": {
+        "skema": 1,
+        "layar": "pola_makan",
+        "pita_usia": "9-11",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 20
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "mdd_belum_tercapai"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 80
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pola makan anak usia 9 sampai 11 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu baru 80% dari target. Persen kecukupan gizi: zat besi 20%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: keragaman makanan harian belum mencapai 5 dari 8 kelompok. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M18",
+      "muatan": {
+        "skema": 1,
+        "layar": "pola_makan",
+        "pita_usia": "6-8",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 30
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "tidak_ada_pilihan_sayur"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 88
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pola makan anak usia 6 sampai 8 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu 88% dari target. Persen kecukupan gizi: zat besi 30%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: belum ada pilihan sayur yang cocok untuk menu ini. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M19",
+      "muatan": {
+        "skema": 1,
+        "layar": "pola_makan",
+        "pita_usia": "12-23",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 30
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "tidak_ada_pilihan_sayur"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 88
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pola makan anak usia 12 sampai 23 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu 88% dari target. Persen kecukupan gizi: zat besi 30%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: belum ada pilihan sayur yang cocok untuk menu ini. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M20",
+      "muatan": {
+        "skema": 1,
+        "layar": "pola_makan",
+        "pita_usia": "9-11",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 40
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "tidak_ada_pilihan_protein",
+          "mdd_belum_tercapai"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 96
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pola makan anak usia 9 sampai 11 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu 96% dari target. Persen kecukupan gizi: zat besi 40%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: belum ada pilihan lauk yang cocok, dan keragaman makanan harian belum mencapai 5 dari 8 kelompok. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M21",
+      "muatan": {
+        "skema": 1,
+        "layar": "pola_makan",
+        "pita_usia": "6-8",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 50
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [],
+        "menu": {
+          "mdd_tercapai": true,
+          "jumlah_kelompok_mdd": 7,
+          "energi_persen_target": 104
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pola makan anak usia 6 sampai 8 bulan sudah mencakup 7 dari 8 kelompok makanan, melewati minimal 5 kelompok. Energi menu 104% dari target. Persen kecukupan gizi: zat besi 50%, seng 55%, vitamin C 210%, dan kalsium 38%."
+    },
+    {
+      "id": "M22",
+      "muatan": {
+        "skema": 1,
+        "layar": "pola_makan",
+        "pita_usia": "12-23",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 50
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [],
+        "menu": {
+          "mdd_tercapai": true,
+          "jumlah_kelompok_mdd": 7,
+          "energi_persen_target": 104
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Pola makan anak usia 12 sampai 23 bulan sudah mencakup 7 dari 8 kelompok makanan, melewati minimal 5 kelompok. Energi menu 104% dari target. Persen kecukupan gizi: zat besi 50%, seng 55%, vitamin C 210%, dan kalsium 38%."
+    },
+    {
+      "id": "M23",
+      "muatan": {
+        "skema": 1,
+        "layar": "belanja",
+        "pita_usia": "9-11",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 20
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "mdd_belum_tercapai"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 80
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Belanja untuk anak usia 9 sampai 11 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu 80% dari target. Persen kecukupan gizi: zat besi 20%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: keragaman makanan harian belum mencapai 5 dari 8 kelompok. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M24",
+      "muatan": {
+        "skema": 1,
+        "layar": "belanja",
+        "pita_usia": "6-8",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 30
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "tidak_ada_pilihan_sayur"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 88
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Belanja untuk anak usia 6 sampai 8 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu 88% dari target. Persen kecukupan gizi: zat besi 30%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: belum ada pilihan sayur yang cocok untuk menu ini. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M25",
+      "muatan": {
+        "skema": 1,
+        "layar": "belanja",
+        "pita_usia": "12-23",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 30
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "tidak_ada_pilihan_sayur"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 88
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Belanja untuk anak usia 12 sampai 23 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu 88% dari target. Persen kecukupan gizi: zat besi 30%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: belum ada pilihan sayur yang cocok untuk menu ini. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M26",
+      "muatan": {
+        "skema": 1,
+        "layar": "belanja",
+        "pita_usia": "9-11",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 40
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [
+          "tidak_ada_pilihan_protein",
+          "mdd_belum_tercapai"
+        ],
+        "menu": {
+          "mdd_tercapai": false,
+          "jumlah_kelompok_mdd": 4,
+          "energi_persen_target": 96
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Belanja untuk anak usia 9 sampai 11 bulan baru mencakup 4 dari 8 kelompok makanan, belum mencapai minimal 5 kelompok. Energi menu 96% dari target. Persen kecukupan gizi: zat besi 40%, seng 55%, vitamin C 210%, dan kalsium 38%.\n\nCatatan dari aplikasi: belum ada pilihan lauk yang cocok, dan keragaman makanan harian belum mencapai 5 dari 8 kelompok. Silakan datang ke posyandu atau puskesmas untuk diperiksa petugas kesehatan."
+    },
+    {
+      "id": "M27",
+      "muatan": {
+        "skema": 1,
+        "layar": "belanja",
+        "pita_usia": "6-8",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 50
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [],
+        "menu": {
+          "mdd_tercapai": true,
+          "jumlah_kelompok_mdd": 7,
+          "energi_persen_target": 104
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Belanja untuk anak usia 6 sampai 8 bulan sudah mencakup 7 dari 8 kelompok makanan, melewati minimal 5 kelompok. Energi menu 104% dari target. Persen kecukupan gizi: zat besi 50%, seng 55%, vitamin C 210%, dan kalsium 38%."
+    },
+    {
+      "id": "M28",
+      "muatan": {
+        "skema": 1,
+        "layar": "belanja",
+        "pita_usia": "12-23",
+        "akg": [
+          {
+            "zat": "besi_mg",
+            "persen": 50
+          },
+          {
+            "zat": "seng_mg",
+            "persen": 55
+          },
+          {
+            "zat": "vit_c_mg",
+            "persen": 210
+          },
+          {
+            "zat": "kalsium_mg",
+            "persen": 38
+          }
+        ],
+        "celah": [],
+        "menu": {
+          "mdd_tercapai": true,
+          "jumlah_kelompok_mdd": 7,
+          "energi_persen_target": 104
+        },
+        "versi": {
+          "engine": "0.2.0",
+          "data": "2026-11-02",
+          "rules": "0.1.0"
+        }
+      },
+      "teks": "Belanja untuk anak usia 12 sampai 23 bulan sudah mencakup 7 dari 8 kelompok makanan, melewati minimal 5 kelompok. Energi menu 104% dari target. Persen kecukupan gizi: zat besi 50%, seng 55%, vitamin C 210%, dan kalsium 38%."
+    }
+  ]
+}

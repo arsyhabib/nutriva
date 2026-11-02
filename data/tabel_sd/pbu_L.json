@@ -1,0 +1,243 @@
+{
+ "klaim_id": "KL-SD-PBU-L",
+ "_meta": {
+  "indikator": "PBU",
+  "nama": "Panjang Badan menurut Umur (PB/U)",
+  "jenis_kelamin": "L",
+  "satuan": "cm",
+  "kolom_sd": [
+   "-3",
+   "-2",
+   "-1",
+   "0",
+   "+1",
+   "+2",
+   "+3"
+  ],
+  "kunci_baris": "bulan",
+  "cakupan": "usia bulan penuh 6 sampai 23",
+  "sumber_rujukan": "S-PMK-2-2020 (Lampiran, Tabel Standar Antropometri Penilaian Status Gizi Anak)",
+  "sumber_mesin": "S-WHO-CGS-2006-PYGROWUP (tabel SD WHO Child Growth Standards, paket pygrowup 0.8.2)",
+  "sha256_berkas_sumber_mesin": "2ac076e14b2fee60076b28d8775f89a754a3931ba92ae22e63107a968793f95b",
+  "pembulatan": "satu desimal, seperti tercetak",
+  "catatan": "Nilai disalin mesin dari tabel WHO; kesesuaian dengan halaman Permenkes dicatat di docs/periksa/ dan pada status klaim."
+ },
+ "baris": [
+  {
+   "bulan": 6,
+   "sd": [
+    61.2,
+    63.3,
+    65.5,
+    67.6,
+    69.8,
+    71.9,
+    74.0
+   ]
+  },
+  {
+   "bulan": 7,
+   "sd": [
+    62.7,
+    64.8,
+    67.0,
+    69.2,
+    71.3,
+    73.5,
+    75.7
+   ]
+  },
+  {
+   "bulan": 8,
+   "sd": [
+    64.0,
+    66.2,
+    68.4,
+    70.6,
+    72.8,
+    75.0,
+    77.2
+   ]
+  },
+  {
+   "bulan": 9,
+   "sd": [
+    65.2,
+    67.5,
+    69.7,
+    72.0,
+    74.2,
+    76.5,
+    78.7
+   ]
+  },
+  {
+   "bulan": 10,
+   "sd": [
+    66.4,
+    68.7,
+    71.0,
+    73.3,
+    75.6,
+    77.9,
+    80.1
+   ]
+  },
+  {
+   "bulan": 11,
+   "sd": [
+    67.6,
+    69.9,
+    72.2,
+    74.5,
+    76.9,
+    79.2,
+    81.5
+   ]
+  },
+  {
+   "bulan": 12,
+   "sd": [
+    68.6,
+    71.0,
+    73.4,
+    75.7,
+    78.1,
+    80.5,
+    82.9
+   ]
+  },
+  {
+   "bulan": 13,
+   "sd": [
+    69.6,
+    72.1,
+    74.5,
+    76.9,
+    79.3,
+    81.8,
+    84.2
+   ]
+  },
+  {
+   "bulan": 14,
+   "sd": [
+    70.6,
+    73.1,
+    75.6,
+    78.0,
+    80.5,
+    83.0,
+    85.5
+   ]
+  },
+  {
+   "bulan": 15,
+   "sd": [
+    71.6,
+    74.1,
+    76.6,
+    79.1,
+    81.7,
+    84.2,
+    86.7
+   ]
+  },
+  {
+   "bulan": 16,
+   "sd": [
+    72.5,
+    75.0,
+    77.6,
+    80.2,
+    82.8,
+    85.4,
+    88.0
+   ]
+  },
+  {
+   "bulan": 17,
+   "sd": [
+    73.3,
+    76.0,
+    78.6,
+    81.2,
+    83.9,
+    86.5,
+    89.2
+   ]
+  },
+  {
+   "bulan": 18,
+   "sd": [
+    74.2,
+    76.9,
+    79.6,
+    82.3,
+    85.0,
+    87.7,
+    90.4
+   ]
+  },
+  {
+   "bulan": 19,
+   "sd": [
+    75.0,
+    77.7,
+    80.5,
+    83.2,
+    86.0,
+    88.8,
+    91.5
+   ]
+  },
+  {
+   "bulan": 20,
+   "sd": [
+    75.8,
+    78.6,
+    81.4,
+    84.2,
+    87.0,
+    89.8,
+    92.6
+   ]
+  },
+  {
+   "bulan": 21,
+   "sd": [
+    76.5,
+    79.4,
+    82.3,
+    85.1,
+    88.0,
+    90.9,
+    93.8
+   ]
+  },
+  {
+   "bulan": 22,
+   "sd": [
+    77.2,
+    80.2,
+    83.1,
+    86.0,
+    89.0,
+    91.9,
+    94.9
+   ]
+  },
+  {
+   "bulan": 23,
+   "sd": [
+    78.0,
+    81.0,
+    83.9,
+    86.9,
+    89.9,
+    92.9,
+    95.9
+   ]
+  }
+ ]
+}

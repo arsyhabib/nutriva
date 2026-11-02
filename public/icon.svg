@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ikon NUTRIVA">
+  <rect width="512" height="512" rx="112" fill="#FAF4EE"/>
+  <rect x="24" y="24" width="464" height="464" rx="92" fill="none" stroke="#E8DEC8" stroke-width="6"/>
+  <circle cx="256" cy="256" r="168" fill="#F2EAE0" stroke="#B83B28" stroke-width="10"/>
+  <path d="M128 268 C176 248, 224 288, 256 268 C288 248, 336 288, 384 268 L384 300 A128 128 0 0 1 128 300 Z" fill="#C47B2B" opacity="0.88"/>
+  <path d="M142 316 L370 316 A128 128 0 0 1 142 316 Z" fill="#2E6B47"/>
+  <circle cx="206" cy="212" r="24" fill="#B83B28"/>
+  <circle cx="272" cy="196" r="18" fill="#2E6B47"/>
+  <circle cx="312" cy="224" r="14" fill="#C47B2B"/>
+</svg>

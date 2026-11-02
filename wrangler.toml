@@ -1,0 +1,16 @@
+# Worker proksi AI NUTRIVA. Jangan menaruh kunci di berkas ini.
+# Pasang kunci:  npx wrangler secret put OPENROUTER_API_KEY
+name = "nutriva-ai"
+main = "worker/index.ts"
+compatibility_date = "2026-10-01"
+
+[vars]
+AI_MODEL = "anthropic/claude-haiku-5.5"
+FITUR_AI = "1"
+# Isi dengan alamat Pages/situs sebenarnya, dipisah koma. Tanpa tanda miring di akhir.
+IZIN_ORIGIN = "http://localhost:5173,http://localhost:4173"
+BATAS_PER_MENIT = "12"
+BATAS_GLOBAL_PER_MENIT = "120"
+
+[observability]
+enabled = false

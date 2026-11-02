@@ -1,0 +1,637 @@
+[
+ {
+  "usia": 7,
+  "item": [
+   [
+    "nasi",
+    60
+   ],
+   [
+    "telur",
+    35
+   ],
+   [
+    "bayam",
+    40
+   ],
+   [
+    "minyak_sawit",
+    5
+   ],
+   [
+    "pepaya",
+    50
+   ],
+   [
+    "yogurt",
+    60
+   ]
+  ],
+  "energi_kkal": 243.74999999999997,
+  "zat": {
+   "protein_g": {
+    "nilai": 9.522,
+    "persen": 63,
+    "pita": "sedang"
+   },
+   "lemak_g": {
+    "nilai": 11.0655,
+    "persen": 32,
+    "pita": "rendah"
+   },
+   "karbohidrat_g": {
+    "nilai": 27.0,
+    "persen": 26,
+    "pita": "rendah"
+   },
+   "serat_g": {
+    "nilai": 2.05,
+    "persen": 19,
+    "pita": "rendah"
+   },
+   "kalsium_mg": {
+    "nilai": 160.5,
+    "persen": 59,
+    "pita": "sedang"
+   },
+   "fosfor_mg": {
+    "nilai": 170.4,
+    "persen": 62,
+    "pita": "sedang"
+   },
+   "magnesium_mg": {
+    "nilai": 63.2,
+    "persen": 115,
+    "pita": "cukup"
+   },
+   "besi_mg": {
+    "nilai": 2.7199999999999998,
+    "persen": 25,
+    "pita": "rendah"
+   },
+   "seng_mg": {
+    "nilai": 1.3595000000000002,
+    "persen": 45,
+    "pita": "sedang"
+   },
+   "natrium_mg": {
+    "nilai": 103.6,
+    "persen": 28,
+    "pita": "rendah"
+   },
+   "kalium_mg": {
+    "nilai": 435.5,
+    "persen": 62,
+    "pita": "sedang"
+   },
+   "tembaga_mg": {
+    "nilai": 143.45,
+    "persen": 65,
+    "pita": "sedang"
+   },
+   "selenium_mcg": {
+    "nilai": 17.5,
+    "persen": 175,
+    "pita": "cukup"
+   },
+   "vit_a_rae_mcg": {
+    "nilai": 301.45,
+    "persen": 75,
+    "pita": "sedang"
+   },
+   "vit_d_mcg": {
+    "nilai": 0.8300000000000001,
+    "persen": 8,
+    "pita": "rendah"
+   },
+   "vit_c_mg": {
+    "nilai": 34.669999999999995,
+    "persen": 69,
+    "pita": "sedang"
+   },
+   "vit_b1_mg": {
+    "nilai": 0.18780000000000002,
+    "persen": 63,
+    "pita": "sedang"
+   },
+   "vit_b2_mg": {
+    "nilai": 0.38045,
+    "persen": 95,
+    "pita": "cukup"
+   },
+   "vit_b3_mg": {
+    "nilai": 1.3275000000000001,
+    "persen": 33,
+    "pita": "rendah"
+   },
+   "vit_b6_mg": {
+    "nilai": 0.23314999999999997,
+    "persen": 78,
+    "pita": "sedang"
+   },
+   "folat_total_mcg": {
+    "nilai": 131.29999999999998,
+    "persen": 164,
+    "pita": "cukup"
+   },
+   "vit_b12_mcg": {
+    "nilai": 0.6105,
+    "persen": 41,
+    "pita": "sedang"
+   },
+   "kolin_mg": {
+    "nilai": 124.155,
+    "persen": 83,
+    "pita": "cukup"
+   }
+  },
+  "belanja_gram": {
+   "nasi": 25,
+   "telur": 40,
+   "bayam": 55,
+   "minyak_sawit": 5,
+   "pepaya": 70,
+   "yogurt": 60
+  }
+ },
+ {
+  "usia": 10,
+  "item": [
+   [
+    "kentang",
+    80
+   ],
+   [
+    "hati",
+    10
+   ],
+   [
+    "ayam",
+    30
+   ],
+   [
+    "wortel",
+    50
+   ],
+   [
+    "santan",
+    6
+   ],
+   [
+    "pisang",
+    60
+   ],
+   [
+    "tempe",
+    20
+   ]
+  ],
+  "energi_kkal": 256.72,
+  "zat": {
+   "protein_g": {
+    "nilai": 18.2572,
+    "persen": 122,
+    "pita": "cukup"
+   },
+   "lemak_g": {
+    "nilai": 5.6457999999999995,
+    "persen": 16,
+    "pita": "rendah"
+   },
+   "karbohidrat_g": {
+    "nilai": 35.601600000000005,
+    "persen": 34,
+    "pita": "rendah"
+   },
+   "serat_g": {
+    "nilai": 4.5,
+    "persen": 41,
+    "pita": "sedang"
+   },
+   "kalsium_mg": {
+    "nilai": 50.28,
+    "persen": 19,
+    "pita": "rendah"
+   },
+   "fosfor_mg": {
+    "nilai": 225.45999999999998,
+    "persen": 82,
+    "pita": "cukup"
+   },
+   "magnesium_mg": {
+    "nilai": 66.56,
+    "persen": 121,
+    "pita": "cukup"
+   },
+   "besi_mg": {
+    "nilai": 2.673,
+    "persen": 24,
+    "pita": "rendah"
+   },
+   "seng_mg": {
+    "nilai": 1.4516000000000002,
+    "persen": 48,
+    "pita": "sedang"
+   },
+   "natrium_mg": {
+    "nilai": 66.97999999999999,
+    "persen": 18,
+    "pita": "rendah"
+   },
+   "kalium_mg": {
+    "nilai": 791.2,
+    "persen": 113,
+    "pita": "cukup"
+   },
+   "tembaga_mg": {
+    "nilai": 374.58000000000004,
+    "persen": 170,
+    "pita": "cukup"
+   },
+   "selenium_mcg": {
+    "nilai": 17.71,
+    "persen": 177,
+    "pita": "cukup"
+   },
+   "vit_a_rae_mcg": {
+    "nilai": 827.7,
+    "persen": 207,
+    "pita": "cukup"
+   },
+   "vit_d_mcg": {
+    "nilai": 0.03,
+    "persen": 0,
+    "pita": "rendah"
+   },
+   "vit_c_mg": {
+    "nilai": 15.790000000000003,
+    "persen": 32,
+    "pita": "rendah"
+   },
+   "vit_b1_mg": {
+    "nilai": 0.19222,
+    "persen": 64,
+    "pita": "sedang"
+   },
+   "vit_b2_mg": {
+    "nilai": 0.3859,
+    "persen": 96,
+    "pita": "cukup"
+   },
+   "vit_b3_mg": {
+    "nilai": 7.454419999999999,
+    "persen": 186,
+    "pita": "cukup"
+   },
+   "vit_b6_mg": {
+    "nilai": 0.80888,
+    "persen": 270,
+    "pita": "cukup"
+   },
+   "folat_total_mcg": {
+    "nilai": 90.24000000000001,
+    "persen": 113,
+    "pita": "cukup"
+   },
+   "vit_b12_mcg": {
+    "nilai": 1.8150000000000002,
+    "persen": 121,
+    "pita": "cukup"
+   },
+   "kolin_mg": {
+    "nilai": 75.94000000000001,
+    "persen": 51,
+    "pita": "sedang"
+   }
+  },
+  "belanja_gram": {
+   "kentang": 100,
+   "hati": 15,
+   "ayam": 45,
+   "wortel": 60,
+   "santan": 10,
+   "pisang": 90,
+   "tempe": 20
+  }
+ },
+ {
+  "usia": 18,
+  "item": [
+   [
+    "nasi",
+    130
+   ],
+   [
+    "lele",
+    60
+   ],
+   [
+    "brokoli",
+    80
+   ],
+   [
+    "minyak_sawit",
+    8
+   ],
+   [
+    "alpukat",
+    90
+   ],
+   [
+    "yogurt",
+    100
+   ],
+   [
+    "ubi",
+    100
+   ],
+   [
+    "kacang_hijau",
+    50
+   ]
+  ],
+  "energi_kkal": 687.62,
+  "zat": {
+   "protein_g": {
+    "nilai": 26.615000000000002,
+    "persen": 133,
+    "pita": "cukup"
+   },
+   "lemak_g": {
+    "nilai": 29.780000000000005,
+    "persen": 66,
+    "pita": "sedang"
+   },
+   "karbohidrat_g": {
+    "nilai": 81.997,
+    "persen": 38,
+    "pita": "rendah"
+   },
+   "serat_g": {
+    "nilai": 15.490000000000002,
+    "persen": 82,
+    "pita": "cukup"
+   },
+   "kalsium_mg": {
+    "nilai": 222.7,
+    "persen": 34,
+    "pita": "rendah"
+   },
+   "fosfor_mg": {
+    "nilai": 481.0,
+    "persen": 105,
+    "pita": "cukup"
+   },
+   "magnesium_mg": {
+    "nilai": 126.30000000000001,
+    "persen": 194,
+    "pita": "cukup"
+   },
+   "besi_mg": {
+    "nilai": 4.2298,
+    "persen": 60,
+    "pita": "sedang"
+   },
+   "seng_mg": {
+    "nilai": 3.1310000000000002,
+    "persen": 104,
+    "pita": "cukup"
+   },
+   "natrium_mg": {
+    "nilai": 185.8,
+    "persen": 23,
+    "pita": "rendah"
+   },
+   "kalium_mg": {
+    "nilai": 1454.0,
+    "persen": 56,
+    "pita": "sedang"
+   },
+   "tembaga_mg": {
+    "nilai": 513.8999999999999,
+    "persen": 151,
+    "pita": "cukup"
+   },
+   "selenium_mcg": {
+    "nilai": 20.98,
+    "persen": 117,
+    "pita": "cukup"
+   },
+   "vit_a_rae_mcg": {
+    "nilai": 883.0,
+    "persen": 221,
+    "pita": "cukup"
+   },
+   "vit_d_mcg": {
+    "nilai": 0.28,
+    "persen": 2,
+    "pita": "rendah"
+   },
+   "vit_c_mg": {
+    "nilai": 74.72,
+    "persen": 187,
+    "pita": "cukup"
+   },
+   "vit_b1_mg": {
+    "nilai": 0.504,
+    "persen": 101,
+    "pita": "cukup"
+   },
+   "vit_b2_mg": {
+    "nilai": 0.5118,
+    "persen": 102,
+    "pita": "cukup"
+   },
+   "vit_b3_mg": {
+    "nilai": 6.355700000000001,
+    "persen": 106,
+    "pita": "cukup"
+   },
+   "vit_b6_mg": {
+    "nilai": 0.8489,
+    "persen": 170,
+    "pita": "cukup"
+   },
+   "folat_total_mcg": {
+    "nilai": 334.4,
+    "persen": 209,
+    "pita": "cukup"
+   },
+   "vit_b12_mcg": {
+    "nilai": 2.038,
+    "persen": 136,
+    "pita": "cukup"
+   },
+   "kolin_mg": {
+    "nilai": 135.534,
+    "persen": 68,
+    "pita": "sedang"
+   }
+  },
+  "belanja_gram": {
+   "nasi": 55,
+   "lele": 110,
+   "brokoli": 100,
+   "minyak_sawit": 10,
+   "alpukat": 135,
+   "yogurt": 100,
+   "ubi": 120,
+   "kacang_hijau": 20
+  }
+ },
+ {
+  "usia": 23,
+  "item": [
+   [
+    "oat",
+    100
+   ],
+   [
+    "sapi",
+    60
+   ],
+   [
+    "labu",
+    80
+   ],
+   [
+    "tahu",
+    50
+   ],
+   [
+    "mangga",
+    90
+   ],
+   [
+    "jeruk",
+    40
+   ]
+  ],
+  "energi_kkal": 371.0,
+  "zat": {
+   "protein_g": {
+    "nilai": 27.637000000000004,
+    "persen": 138,
+    "pita": "cukup"
+   },
+   "lemak_g": {
+    "nilai": 14.738,
+    "persen": 33,
+    "pita": "rendah"
+   },
+   "karbohidrat_g": {
+    "nilai": 35.492000000000004,
+    "persen": 17,
+    "pita": "rendah"
+   },
+   "serat_g": {
+    "nilai": 6.13,
+    "persen": 32,
+    "pita": "rendah"
+   },
+   "kalsium_mg": {
+    "nilai": 400.4,
+    "persen": 62,
+    "pita": "sedang"
+   },
+   "fosfor_mg": {
+    "nilai": 340.80000000000007,
+    "persen": 74,
+    "pita": "sedang"
+   },
+   "magnesium_mg": {
+    "nilai": 89.4,
+    "persen": 138,
+    "pita": "cukup"
+   },
+   "besi_mg": {
+    "nilai": 4.478000000000001,
+    "persen": 64,
+    "pita": "sedang"
+   },
+   "seng_mg": {
+    "nilai": 5.798000000000001,
+    "persen": 193,
+    "pita": "cukup"
+   },
+   "natrium_mg": {
+    "nilai": 60.099999999999994,
+    "persen": 8,
+    "pita": "rendah"
+   },
+   "kalium_mg": {
+    "nilai": 805.4999999999999,
+    "persen": 31,
+    "pita": "rendah"
+   },
+   "tembaga_mg": {
+    "nilai": 502.29999999999995,
+    "persen": 148,
+    "pita": "cukup"
+   },
+   "selenium_mcg": {
+    "nilai": 27.179999999999996,
+    "persen": 151,
+    "pita": "cukup"
+   },
+   "vit_a_rae_mcg": {
+    "nilai": 285.2,
+    "persen": 71,
+    "pita": "sedang"
+   },
+   "vit_d_mcg": {
+    "nilai": 0.0,
+    "persen": 0,
+    "pita": "rendah"
+   },
+   "vit_c_mg": {
+    "nilai": 57.9,
+    "persen": 145,
+    "pita": "cukup"
+   },
+   "vit_b1_mg": {
+    "nilai": 0.2656,
+    "persen": 53,
+    "pita": "sedang"
+   },
+   "vit_b2_mg": {
+    "nilai": 0.2858,
+    "persen": 57,
+    "pita": "sedang"
+   },
+   "vit_b3_mg": {
+    "nilai": 4.9276,
+    "persen": 82,
+    "pita": "cukup"
+   },
+   "vit_b6_mg": {
+    "nilai": 0.4375,
+    "persen": 88,
+    "pita": "cukup"
+   },
+   "folat_total_mcg": {
+    "nilai": 83.2,
+    "persen": 52,
+    "pita": "sedang"
+   },
+   "vit_b12_mcg": {
+    "nilai": 1.6740000000000002,
+    "persen": 112,
+    "pita": "cukup"
+   },
+   "kolin_mg": {
+    "nilai": 71.22,
+    "persen": 36,
+    "pita": "rendah"
+   }
+  },
+  "belanja_gram": {
+   "oat": 15,
+   "sapi": 85,
+   "labu": 105,
+   "tahu": 50,
+   "mangga": 155,
+   "jeruk": 65
+  }
+ }
+]

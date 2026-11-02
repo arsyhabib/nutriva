@@ -1,0 +1,71 @@
+{
+  "klaim_ids": [
+    "KL-ASUMSI-RUJUKAN"
+  ],
+  "label_belum_diverifikasi": true,
+  "_meta": {
+    "catatan": [
+      "Daftar tanda bahaya dan pemetaan kategori status ke tingkat tindak lanjut adalah asumsi pengembang yang konservatif.",
+      "Harus ditinjau dan disetujui dosen/tenaga kesehatan sebelum profil lapangan. Aplikasi tidak mendiagnosis; tingkat 'rujuk' hanya berarti segera temui petugas kesehatan dan menu contoh tidak ditampilkan."
+    ]
+  },
+  "tanda_bahaya": [
+    {
+      "kode": "kejang",
+      "label": "Kejang"
+    },
+    {
+      "kode": "sangat_lemas_atau_tidak_sadar",
+      "label": "Sangat lemas, sulit dibangunkan, atau tidak sadar"
+    },
+    {
+      "kode": "tidak_mau_minum_atau_menyusu",
+      "label": "Tidak mau minum atau menyusu sama sekali"
+    },
+    {
+      "kode": "muntah_terus_menerus",
+      "label": "Muntah terus-menerus"
+    },
+    {
+      "kode": "sesak_napas",
+      "label": "Sesak napas atau napas sangat cepat"
+    },
+    {
+      "kode": "bengkak_kedua_kaki",
+      "label": "Bengkak pada kedua punggung kaki"
+    },
+    {
+      "kode": "demam_tinggi_menetap",
+      "label": "Demam tinggi yang tidak turun"
+    }
+  ],
+  "tingkat_dari_status": {
+    "rujuk": {
+      "bbu": [
+        "bb_sangat_kurang"
+      ],
+      "pbu": [
+        "sangat_pendek"
+      ],
+      "bbpb": [
+        "gizi_buruk",
+        "panjang_di_luar_tabel_setelah_pembulatan"
+      ]
+    },
+    "perhatian": {
+      "bbu": [
+        "bb_kurang",
+        "risiko_bb_lebih"
+      ],
+      "pbu": [
+        "pendek"
+      ],
+      "bbpb": [
+        "gizi_kurang",
+        "risiko_gizi_lebih",
+        "gizi_lebih",
+        "obesitas"
+      ]
+    }
+  }
+}
