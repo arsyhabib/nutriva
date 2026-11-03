@@ -84,6 +84,123 @@ export async function tataDokumen(blok: Blok[], opsi: OpsiEkspor, meta: MetaTata
     return Math.max(0, 1 - pakai / Math.max(1, badan.clientHeight));
   };
 
+
+  /** Pecah teks HTML satu paragraf menjadi kalimat tanpa memotong di dalam tag. */
+  const kalimatDari = (html: string): string[] => {
+    const bagian = html.split(/(?<=[.!?…])\s+(?![^<]*>)/);
+    return bagian.filter((x) => x.trim() !== "");
+  };
+
+  /**
+   * Bagi blok "alir" yang lebih besar dari satu halaman. Unit yang dibagi: anak langsung wadah `.md` (paragraf, daftar,
+   * judul), butir daftar, dan kalimat dalam paragraf. Bagian di depan wadah (judul, gambar) hanya di halaman pertama,
+   * bagian di belakangnya (catatan) menyusul sebagai unit terakhir. Halaman lanjutan diberi penanda "lanjutan".
+   */
+  const bagiBlokBesar = (b: Extract<Blok, { k: "alir" }>, halPertama: Pagina): void => {
+    const akar = el(b.html);
+    const md = akar.querySelector<HTMLElement>(".md");
+    const judulTeks = akar.querySelector(".dok-h3")?.childNodes[0]?.textContent?.trim() ?? "";
+    if (!md) {
+      // tidak ada wadah teks yang bisa dibagi: pasang apa adanya (terpotong aman)
+      for (const x of [...elemenKepala(), akar]) halPertama.badan.appendChild(x);
+      kepala.forEach(catatRef);
+      catatRef(b);
+      return;
+    }
+    // unit: anak md, lalu elemen setelah md (catatan) dari yang terdalam ke terluar
+    const unit: HTMLElement[] = Array.from(md.children) as HTMLElement[];
+    const belakang: HTMLElement[] = [];
+    for (let n: HTMLElement | null = md; n && n !== akar; n = n.parentElement) {
+      let sdr = n.nextElementSibling as HTMLElement | null;
+      while (sdr) { belakang.push(sdr); sdr = sdr.nextElementSibling as HTMLElement | null; }
+    }
+    const antrean: HTMLElement[] = [...unit.map((u) => u.cloneNode(true) as HTMLElement), ...belakang.map((u) => u.cloneNode(true) as HTMLElement)];
+
+    /** Klon kerangka: hapus isi md, depan hanya di halaman pertama, belakang selalu dihapus (jadi unit). */
+    const kerangka = (pertama: boolean): { klon: HTMLElement; wadahMd: HTMLElement } => {
+      const klon = akar.cloneNode(true) as HTMLElement;
+      const wadahMd = klon.querySelector<HTMLElement>(".md") as HTMLElement;
+      wadahMd.innerHTML = "";
+      for (let n: HTMLElement = wadahMd; n !== klon && n.parentElement; n = n.parentElement) {
+        let sdr = n.nextElementSibling;
+        while (sdr) { const nx = sdr.nextElementSibling; sdr.remove(); sdr = nx; }
+        if (!pertama) {
+          let sbl = n.previousElementSibling;
+          while (sbl) { const pv = sbl.previousElementSibling; sbl.remove(); sbl = pv; }
+        }
+      }
+      if (!pertama) klon.insertBefore(el(`<p class="dok-lanjut">${e(judulTeks)} (lanjutan)</p>`), klon.firstChild);
+      return { klon, wadahMd };
+    };
+
+    let pertama = true;
+    let pagina = halPertama;
+    while (antrean.length) {
+      if (!pertama) pagina = baru();
+      const { klon, wadahMd } = kerangka(pertama);
+      if (pertama) for (const x of elemenKepala()) pagina.badan.appendChild(x);
+      pagina.badan.appendChild(klon);
+      if (pertama) { kepala.forEach(catatRef); catatRef(b); }
+      let terpasang = 0;
+      while (antrean.length) {
+        const u = antrean[0] as HTMLElement;
+        wadahMd.appendChild(u);
+        if (!meluap(pagina.badan)) { antrean.shift(); terpasang++; continue; }
+        wadahMd.removeChild(u);
+        // unit tidak muat di sisa halaman: coba bagi unit itu
+        const tag = u.tagName;
+        if (tag === "UL" || tag === "OL") {
+          const butir = Array.from(u.children) as HTMLElement[];
+          const mulaiAsli = tag === "OL" ? Number(u.getAttribute("start") ?? "1") || 1 : 1;
+          const cangkang = u.cloneNode(false) as HTMLElement;
+          wadahMd.appendChild(cangkang);
+          let masuk = 0;
+          for (const li of butir) {
+            cangkang.appendChild(li.cloneNode(true));
+            if (meluap(pagina.badan)) { cangkang.lastElementChild?.remove(); break; }
+            masuk++;
+          }
+          if (masuk === 0) { cangkang.remove(); }
+          else if (masuk < butir.length) {
+            antrean.shift();
+            const sisaUl = u.cloneNode(false) as HTMLElement;
+            if (tag === "OL") sisaUl.setAttribute("start", String(mulaiAsli + masuk));
+            for (const li of butir.slice(masuk)) sisaUl.appendChild(li.cloneNode(true));
+            antrean.unshift(sisaUl);
+            terpasang++;
+          } else { antrean.shift(); terpasang++; }
+        } else if (tag === "P") {
+          const kal = kalimatDari(u.innerHTML);
+          if (kal.length > 1) {
+            const p1 = u.cloneNode(false) as HTMLElement;
+            wadahMd.appendChild(p1);
+            let masuk = 0;
+            for (const k of kal) {
+              const sebelum = p1.innerHTML;
+              p1.innerHTML = sebelum === "" ? k : `${sebelum} ${k}`;
+              if (meluap(pagina.badan)) { p1.innerHTML = sebelum; break; }
+              masuk++;
+            }
+            if (masuk === 0) { p1.remove(); }
+            else if (masuk < kal.length) {
+              antrean.shift();
+              const p2 = u.cloneNode(false) as HTMLElement;
+              p2.innerHTML = kal.slice(masuk).join(" ");
+              antrean.unshift(p2);
+              terpasang++;
+            } else { antrean.shift(); terpasang++; }
+          }
+        }
+        break;
+      }
+      // Halaman penuh tanpa kemajuan (unit tak terbagi lebih besar dari halaman): pasang paksa agar tidak berputar tanpa akhir.
+      if (terpasang === 0 && wadahMd.children.length === 0 && antrean.length) {
+        wadahMd.appendChild(antrean.shift() as HTMLElement);
+      }
+      pertama = false;
+    }
+  };
+
   for (const b of blok) {
     if (b.k === "halaman") {
       kepala = [];
@@ -104,13 +221,16 @@ export async function tataDokumen(blok: Blok[], opsi: OpsiEkspor, meta: MetaTata
     if (b.k === "alir") {
       const buat = (): HTMLElement[] => [...elemenKepala(), el(b.html)];
       let h = aktif();
+      let terbagi = false;
       if (!coba(h.badan, buat())) {
         h = baru();
-        // lebih besar dari satu halaman: tetap dipasang (terpotong aman) agar tidak berputar tanpa akhir
-        if (!coba(h.badan, buat())) for (const x of buat()) h.badan.appendChild(x);
+        // lebih besar dari satu halaman: dibagi per paragraf, butir daftar, dan kalimat agar tidak ada teks yang terpotong
+        if (!coba(h.badan, buat())) { bagiBlokBesar(b, h); terbagi = true; }
       }
-      kepala.forEach(catatRef);
-      catatRef(b);
+      if (!terbagi) {
+        kepala.forEach(catatRef);
+        catatRef(b);
+      }
       kepala = [];
       continue;
     }

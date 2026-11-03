@@ -11,7 +11,7 @@ import {
   PERNYATAAN_PRIVASI_AI,
 } from "../ai/glosarium";
 import { mintaPenjelasan, MODEL_AI_BAWAAN, pesanAlasan, ujiKunci, type HasilPenjelasan } from "../ai/klien";
-import { mintaGambarSaja, mintaResepBergambar, mintaResepSaja, MODEL_GAMBAR_BAWAAN, pesanGalatGambar, pesanGalatResep, type HasilGambar, type HasilResep, type MasukanResep } from "../ai/resep";
+import { mintaGambarSaja, mintaResepBergambar, mintaResepSaja, MODEL_GAMBAR_BAWAAN, resepTemplat, pesanGalatGambar, pesanGalatResep, type HasilGambar, type HasilResep, type MasukanResep } from "../ai/resep";
 import type { MuatanAi } from "../ai/kontrak";
 import { jelaskanTemplat } from "../ai/templat";
 import { DATA } from "../engine/data";
@@ -137,6 +137,8 @@ interface EntriResep {
   /** Resep dan gambar dimuat terpisah: resep tampil begitu siap tanpa menunggu gambar. */
   memuatResep: boolean;
   memuatGambar: boolean;
+  /** Waktu (ms) bagian terakhir mulai dimuat; dipakai penghitung detik di kartu. */
+  mulai: number;
   resep?: HasilResep;
   gambar?: HasilGambar;
   /** Data URL gambar yang sudah lolos pemeriksaan bentuk (dihitung sekali). */
@@ -451,6 +453,14 @@ export class LayarRona {
       const nilai = e.pointerType === "mouse" ? "kursor" : "sentuh";
       if (html.getAttribute("data-masukan") !== nilai) html.setAttribute("data-masukan", nilai);
     };
+    // Penghitung detik pada kartu yang sedang memuat: memperbarui teks saja, tanpa render ulang.
+    setInterval(() => {
+      document.querySelectorAll<HTMLElement>("[data-mulai]").forEach((el) => {
+        const d = Math.max(0, Math.floor((Date.now() - Number(el.getAttribute("data-mulai"))) / 1000));
+        const teks = `${d} dtk`;
+        if (el.textContent !== teks) el.textContent = teks;
+      });
+    }, 500);
     window.addEventListener("pointerdown", tandai, { passive: true });
     window.addEventListener("pointerdown", () => { this.penunjukBawah = true; }, { passive: true, capture: true });
     const lepas = (): void => {
@@ -587,7 +597,7 @@ export class LayarRona {
   private izinBawaan(bobot: number): boolean {
     if (!this.pakaiBawaan) return true;
     // klaim: n/a — batas rekayasa pemakaian AI bawaan per tab (poin), bukan konstanta ilmiah
-    const BATAS = 30;
+    const BATAS = 120;
     try {
       const sekarang = Number(sessionStorage.getItem("nutriva.pakai-bawaan") ?? "0") || 0;
       if (sekarang + bobot > BATAS) {
@@ -1255,7 +1265,8 @@ export class LayarRona {
   /** Satu klik: resep dan gambar diminta bersamaan; resep tampil begitu siap, gambar menyusul. */
   public async buatResep(hariIdx: number, slotKode: string): Promise<void> {
     const r = this.hitungRingkasan();
-    if (r.hasil !== "ok" || !r.pola || !this.kunciEfektif() || this.state.belumDiisi) return;
+    if (r.hasil !== "ok" || !r.pola || !this.kunciEfektif()) return;
+    if (this.state.belumDiisi) { this.render(); return; } // kartu menjelaskan bahwa ukuran anak perlu diisi dulu
     const id = this.idResep(r, hariIdx, slotKode);
     const m = this.masukanResep(r, hariIdx, slotKode);
     const lama = id ? this.resepSesi.get(id) : undefined;
@@ -1263,7 +1274,7 @@ export class LayarRona {
     if (!this.izinBawaan(8)) { this.render(); return; }
     this.resepSesi.delete(id);
     const generasi = this.generasiResep;
-    this.resepSesi.set(id, { id, hari: r.pola.hari[hariIdx]!.hari_ke, slotKode, masukan: m, generasi, memuatResep: true, memuatGambar: true });
+    this.resepSesi.set(id, { id, hari: r.pola.hari[hariIdx]!.hari_ke, slotKode, masukan: m, generasi, memuatResep: true, memuatGambar: true, mulai: Date.now() });
     for (const k of [...this.resepSesi.keys()]) {
       if (this.resepSesi.size <= BATAS_RESEP_SESI) break;
       const x = this.resepSesi.get(k);
@@ -1274,10 +1285,20 @@ export class LayarRona {
       const en = this.resepSesi.get(id);
       return en && en.generasi === generasi && generasi === this.generasiResep ? en : null; // sesi sudah direset: hasil lama dibuang
     };
-    await mintaResepBergambar(m, this.opsiResepAi(), {
-      resep: (h) => { const en = masihBerlaku(); if (!en) return; en.resep = h; en.memuatResep = false; this.render(); },
-      gambar: (g) => { const en = masihBerlaku(); if (!en) return; this.terapkanGambar(en, g); this.render(); },
-    });
+    try {
+      await mintaResepBergambar(m, this.opsiResepAi(), {
+        resep: (h) => { const en = masihBerlaku(); if (!en) return; en.resep = h; en.memuatResep = false; this.render(); },
+        gambar: (g) => { const en = masihBerlaku(); if (!en) return; this.terapkanGambar(en, g); this.render(); },
+      });
+    } catch {
+      // Jaring pengaman: kegagalan tak terduga tidak boleh meninggalkan kartu menggantung selamanya.
+    }
+    const sisa = masihBerlaku();
+    if (sisa && (sisa.memuatResep || sisa.memuatGambar)) {
+      if (sisa.memuatResep) { sisa.resep = { sumber: "templat", teks: resepTemplat(sisa.masukan), alasan: "galat_jaringan" }; sisa.memuatResep = false; }
+      if (sisa.memuatGambar) { sisa.gambar = { ok: false, alasan: "galat_jaringan" }; sisa.memuatGambar = false; delete sisa.gambarSah; }
+      this.render();
+    }
   }
 
   private opsiResepAi(): { kunciSendiri: { kunci: string; model: string }; modelGambar: string } {
@@ -1303,6 +1324,7 @@ export class LayarRona {
       return x === en && generasi === this.generasiResep ? x : null;
     };
     if (bagian === "resep") en.memuatResep = true; else en.memuatGambar = true;
+    en.mulai = Date.now();
     this.render();
     if (bagian === "resep") {
       const h = await mintaResepSaja(en.masukan, this.opsiResepAi());
@@ -1327,26 +1349,29 @@ export class LayarRona {
     if (!id) return "";
     const en = this.resepSesi.get(id);
     if (!en) {
+      if (this.kunciEfektif() && this.state.belumDiisi) {
+        return `<div class="resep-ajak resep-ajak--tegak" role="note"><span><strong>Isi ukuran anak dulu.</strong> Resep dibuat dari menu yang dihitung dari usia, berat, dan panjang badan anak Anda, sedangkan yang tampil sekarang masih nilai awal.</span><span class="baris-aksi"><button type="button" class="chip" data-go="profil">${ikon("spark")}<span>Isi ukuran anak</span></button><button type="button" class="chip" data-ukuran-sesuai="true"><span>Nilai ini sudah sesuai anak saya</span></button></span></div>`;
+      }
       if (!this.kunciEfektif()) {
         return `<div class="resep-ajak"><span>Resep masakan + gambar dari AI</span><button type="button" class="chip" data-open-kontrol="true">${ikon("kunci")}<span>Isi kunci OpenRouter</span></button></div>`;
       }
       return `${this.pesanBatasBawaan ? `<p class="ai-status ai-status--ditolak" role="status">${escHtml(this.pesanBatasBawaan)}</p>` : ""}<button type="button" class="btn btn--sekunder btn--penuh resep-buat" data-resep-buat="${escHtml(slotKode)}" data-hari-idx="${hariIdx}">${ikon("spark")}<span>Buat resep + gambar (AI)</span></button>`;
     }
     if (en.memuatResep && en.memuatGambar) {
-      return `<div class="resep-kartu resep-kartu--memuat" role="status" aria-live="polite"><div class="resep-kartu__gambar resep-skeleton" aria-hidden="true"></div><p class="resep-kartu__tunggu"><strong>Menulis resep dan menggambar hidangan…</strong><br />Biasanya 15 sampai 60 detik. Resep muncul begitu siap, gambar menyusul.</p></div>`;
+      return `<div class="resep-kartu resep-kartu--memuat" role="status" aria-live="polite"><div class="resep-kartu__gambar resep-skeleton" aria-hidden="true"></div><p class="resep-kartu__tunggu"><strong>Menulis resep dan menggambar hidangan…</strong> <span class="resep-detik" data-mulai="${en.mulai}">0 dtk</span><br />Biasanya 15 sampai 60 detik. Resep muncul begitu siap, gambar menyusul. Jika penyedia sedang sibuk, aplikasi mencoba lagi sendiri.</p></div>`;
     }
     const g = en.gambar;
     const gambarAman = en.gambarSah !== undefined;
     const adaKunci = !!this.kunciEfektif();
     const galat = [this.pesanBatasBawaan || null, en.resep && !en.memuatResep ? pesanGalatResep({ resep: en.resep }) : null, g && !en.memuatGambar ? pesanGalatGambar(g) : null].filter(Boolean) as string[];
     const gambarHtml = en.memuatGambar
-      ? `<div class="resep-kartu__gambar resep-skeleton" role="status" aria-live="polite"><span class="resep-skeleton__teks">Gambar sedang dibuat…</span></div>`
+      ? `<div class="resep-kartu__gambar resep-skeleton" role="status" aria-live="polite"><span class="resep-skeleton__teks">Gambar sedang dibuat… <span class="resep-detik" data-mulai="${en.mulai}">0 dtk</span></span></div>`
       : `<figure class="resep-kartu__gambar">
         ${gambarAman ? `<img src="${en.gambarSah}" alt="Ilustrasi AI untuk ${escHtml(en.masukan.judulSlot)}" decoding="async" />` : `<div class="resep-kartu__tanpa">Gambar tidak tersedia</div>`}
         <figcaption>${gambarAman ? "Ilustrasi dibuat AI dari daftar bahan, bukan foto hasil masak." : "Resep tetap bisa dipakai tanpa gambar."}</figcaption>
       </figure>`;
     const resepHtml = en.memuatResep || !en.resep
-      ? `<div class="resep-kartu__isi resep-kartu__isi--memuat" role="status" aria-live="polite"><strong>Resep sedang ditulis…</strong><span class="resep-skeleton resep-skeleton--baris"></span><span class="resep-skeleton resep-skeleton--baris"></span><span class="resep-skeleton resep-skeleton--baris resep-skeleton--pendek"></span></div>`
+      ? `<div class="resep-kartu__isi resep-kartu__isi--memuat" role="status" aria-live="polite"><strong>Resep sedang ditulis… <span class="resep-detik" data-mulai="${en.mulai}">0 dtk</span></strong><span class="resep-skeleton resep-skeleton--baris"></span><span class="resep-skeleton resep-skeleton--baris"></span><span class="resep-skeleton resep-skeleton--baris resep-skeleton--pendek"></span></div>`
       : `<div class="resep-kartu__isi md">${renderMarkdown(en.resep.teks)}</div>
       ${en.resep.sumber === "ai" ? `<div class="kartu-ai__peringatan" role="note">Resep ditulis AI dan bisa keliru. Bahan dan gram dihitung mesin NUTRIVA. Periksa kebersihan dan kematangan makanan sebelum disajikan.</div>` : `<div class="kartu-ai__peringatan" role="note">Resep cadangan disusun otomatis tanpa AI.</div>`}`;
     const sibuk = sedangMemuatResep(en);

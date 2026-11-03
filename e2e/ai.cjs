@@ -132,6 +132,73 @@ const keResep = async (p) => { await p.evaluate(() => { location.hash = "#piring
     await t.ctx.close();
   }
 
+  // S5: data sendiri belum diisi -> kartu menjelaskan (bukan tombol bisu); setelah dikonfirmasi tombol bekerja; penghitung detik berjalan
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const p = await ctx.newPage();
+    await p.route("https://openrouter.ai/**", async (route) => {
+      const u = route.request().url();
+      if (u.endsWith("/chat/completions")) { await tidur(2600); return js(route, 200, { choices: [{ message: { content: resepDari(JSON.parse(route.request().postData()).messages[1].content) }, finish_reason: "stop" }] }); }
+      if (u.endsWith("/images")) { await tidur(3200); return js(route, 200, { data: [{ b64_json: PNG, media_type: "image/png" }] }); }
+      return js(route, 200, {});
+    });
+    await p.addInitScript(() => { sessionStorage.setItem("nutriva.kunci-ai", "kunci-palsu-uji"); });
+    await p.goto(URL); await p.waitForSelector(".hp__isi"); await p.waitForTimeout(500);
+    await p.evaluate(() => document.querySelector("[data-mulai-sendiri]").click()); await p.waitForTimeout(500);
+    await p.evaluate(() => { location.hash = "#piring"; }); await p.waitForTimeout(1200);
+    cek("S5 belum diisi: tidak ada tombol bisu", (await p.locator("[data-resep-buat]").count()) === 0);
+    cek("S5 belum diisi: ada penjelasan dan jalan keluar", (await p.locator(".resep-ajak--tegak [data-ukuran-sesuai]").count()) > 0);
+    await p.locator(".resep-ajak--tegak [data-ukuran-sesuai]").first().tap(); await p.waitForTimeout(500);
+    await p.evaluate(() => { location.hash = "#piring"; }); await p.waitForSelector("[data-resep-buat]", { timeout: 8000 });
+    await p.locator("[data-resep-buat]").first().scrollIntoViewIfNeeded();
+    await p.locator("[data-resep-buat]").first().tap();
+    await p.waitForSelector(".resep-detik", { timeout: 4000 });
+    await p.waitForTimeout(2300);
+    const detik = await p.locator(".resep-detik").first().innerText();
+    cek("S5 penghitung detik berjalan", /^[1-9]\d* dtk$/.test(detik.trim()), detik);
+    await p.waitForSelector(".resep-kartu img", { timeout: 15000 });
+    cek("S5 setelah dikonfirmasi: resep dan gambar tampil", (await p.locator(".resep-kartu__isi.md").count()) === 1);
+    await ctx.close();
+  }
+
+  // S6: teks AI sangat panjang tidak terpotong di PDF (dibagi antarhalaman dengan penanda lanjutan)
+  {
+    const LONG = (n) => Array.from({ length: n }, (_, i) => `Kalimat panjang nomor ${i + 1} tentang pertumbuhan anak dan pola makan beragam yang perlu dipantau setiap bulan di posyandu terdekat.`).join(" ");
+    const PENJ = "### Ringkasan\n" + LONG(14) + "\n\n### Yang sudah baik\n" + Array.from({ length: 8 }, (_, i) => `- Poin ${i + 1} yang cukup panjang untuk membungkus ke beberapa baris pada halaman kertas.`).join("\n") + "\n\n### Langkah berikutnya\n" + LONG(10) + " AKHIRPENJELASAN";
+    const RES = (u) => { const b = [...u.matchAll(/^- (.+): ([\d,]+) g$/gm)].map((m) => `- ${m[1]}: ${m[2]} g`).join("\n"); return `### Bubur\nEnak sekali.\n\n**Bahan**\n${b}\n\n**Langkah**\n` + Array.from({ length: 14 }, (_, i) => `${i + 1}. Langkah panjang nomor ${i + 1}: cuci, kukus, aduk perlahan, haluskan, lalu sajikan hangat.`).join("\n") + "\n\n**Tekstur dan penyajian**\n" + LONG(12) + " AKHIRRESEP"; };
+    const t = await mulai(browser, async (route) => {
+      const u = route.request().url();
+      if (u.endsWith("/chat/completions")) {
+        const sys = JSON.parse(route.request().postData()).messages[0].content;
+        const isRes = /resep/i.test(sys.slice(0, 200));
+        return js(route, 200, { choices: [{ message: { content: isRes ? RES(JSON.parse(route.request().postData()).messages[1].content) : PENJ }, finish_reason: "stop" }] });
+      }
+      if (u.endsWith("/images")) return js(route, 200, { data: [{ b64_json: PNG, media_type: "image/png" }] });
+      return js(route, 200, {});
+    });
+    await t.p.evaluate(() => { location.hash = "#status"; }); await t.p.waitForSelector("[data-refresh-ai]");
+    await t.p.locator("[data-refresh-ai]").first().click();
+    await t.p.waitForFunction(() => /AKHIRPENJELASAN/.test(document.querySelector("[data-ai-teks]")?.innerText || ""), null, { timeout: 15000 });
+    await t.p.evaluate(() => { location.hash = "#piring"; }); await t.p.waitForSelector("[data-resep-buat]");
+    await t.p.locator("[data-resep-buat]").first().click();
+    await t.p.waitForFunction(() => /AKHIRRESEP/.test(document.querySelector(".resep-kartu__isi")?.innerText || "") && document.querySelector(".resep-kartu img"), null, { timeout: 15000 });
+    await t.p.evaluate(() => document.querySelector("[data-buka-ekspor]").click()); await t.p.waitForTimeout(600);
+    await t.p.evaluate(() => document.querySelector("[data-eks-ultimate]").click());
+    await t.p.waitForSelector("#pratinjau-ekspor .dok-hal", { timeout: 15000 }); await t.p.waitForTimeout(2000);
+    const r = await t.p.evaluate(() => {
+      const hal = [...document.querySelectorAll(".dok-hal")];
+      const ov = hal.map((h) => { const bd = h.querySelector(".dok-hal__badan"); return bd ? bd.scrollHeight - bd.clientHeight : 0; }).filter((x) => x > 1);
+      const semua = hal.map((h) => h.innerText).join("\n");
+      const nomor = (pre) => new Set([...semua.matchAll(new RegExp(pre + " (\\d+)", "g"))].map((m) => m[1])).size;
+      return { ov, penj: /AKHIRPENJELASAN/.test(semua), res: /AKHIRRESEP/.test(semua), lanjut: hal.filter((h) => h.querySelector(".dok-lanjut")).length, kal: nomor("Kalimat panjang nomor"), lng: nomor("Langkah panjang nomor") };
+    });
+    cek("S6 PDF: tidak ada halaman meluap", r.ov.length === 0, JSON.stringify(r.ov));
+    cek("S6 PDF: akhir penjelasan dan resep AI ada", r.penj && r.res);
+    cek("S6 PDF: semua 14 langkah dan 14 kalimat ada", r.lng === 14 && r.kal === 14, JSON.stringify(r));
+    cek("S6 PDF: halaman lanjutan bertanda", r.lanjut >= 2, String(r.lanjut));
+    await t.ctx.close();
+  }
+
   await browser.close();
   console.log(`AI E2E: ${lulus} lulus, ${gagal} gagal`); cat.forEach((c) => console.log(c)); process.exit(gagal ? 1 : 0);
 })();

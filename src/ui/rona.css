@@ -3218,3 +3218,8 @@ html[data-mendatar="ya"] body { overflow: hidden; }
 @container app (min-width: 640px) and (max-width: 1023px) {
   .cap-penulis--nav { flex-direction: column; gap: 0; letter-spacing: 0.02em; font-size: 0.72rem; line-height: 1.35; }
 }
+
+.resep-detik { font-variant-numeric: tabular-nums; color: var(--t-3); font-weight: 500; }
+.resep-ajak--tegak { display: grid; gap: 8px; }
+
+.dok-lanjut { margin: 0 0 3mm; font-size: 9pt; font-style: italic; color: var(--dk-redam); border-bottom: 1px dotted var(--dk-garis); padding-bottom: 1.5mm; }
