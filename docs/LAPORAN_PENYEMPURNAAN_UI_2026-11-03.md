@@ -30,3 +30,12 @@ Ringkasan perubahan dan hasil uji. Pemilik yang melakukan commit.
 
 ## Kunci bawaan tersamar
 Jalankan di komputer Anda: `npm run kunci:pasang` (ketik kunci, tidak tampil), lalu `npm run check && npm run build`, commit dan push. Ganti harian: ulangi perintah yang sama. Cabut: `npm run kunci:pasang -- --hapus`. Penyamaran hanya menghindarkan pemindai teks; keamanan sebenarnya ada pada batas kredit kunci di OpenRouter.
+
+## Tambahan malam: ketahanan AI, kunci tegak, perbaikan hasil audit
+
+- **AI konsisten dan stabil.** Penyebab "tidak merespons" adalah batas waktu 12 detik tanpa percobaan ulang (gangguan sesaat langsung jatuh ke teks cadangan), galat penyedia yang datang bersama status 200 yang tidak dibaca, dan jawaban kosong. Penyebab "terpotong" adalah ruang keluaran sempit (800 dan 1400 token) dan penalaran model yang ikut memakan jatah, sementara penyaring yang dimatikan tidak lagi membuang jawaban terpotong. Penyebab "hanya gambar" adalah resep yang gagal sementara jatuh ke resep cadangan sedangkan gambar lolos. Semuanya ditangani di `src/ai/transport.ts` (lihat CLAUDE.md).
+- **Resep tampil lebih dulu**, gambar menyusul; tombol ulang resep dan ulang gambar berdiri sendiri.
+- **Kunci tegak ponsel** (`src/ui/orientasi.ts`) dan manifest `portrait`.
+- **Watermark** "Developed by E.13.1 Feat H.A?128".
+- **Hasil audit independen yang diperbaiki:** fokus hilang antarkolom data anak (render kini menunggu penunjuk dilepas), penolakan angka tidak murni (`9abc`, `1e1`) dengan pesan, pengingat "Periksa kembali ukuran" untuk indikator ekstrem, kartu poster A4 yang terpotong, kontras tombol reset di tema Dekap, watermark pecah di nav sempit, hasil permintaan AI basi yang menahan tombol, jatah AI bawaan yang tidak menghitung percobaan ulang.
+- **Belum teruji:** panggilan nyata ke OpenRouter (semua jaringan dalam uji ditiru), kunci orientasi di perangkat fisik (iPhone dan Android), pembaca layar.

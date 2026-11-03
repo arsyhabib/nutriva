@@ -4,7 +4,7 @@
  * dapat berjalan secara luring (offline-capable). Permintaan ke proxy AI
  * (/v1/jelaskan) tidak pernah disimpan di cache (ADR-0003 & K-08).
  */
-const NAMA_CACHE = "nutriva-inti-v0.4.0";
+const NAMA_CACHE = "nutriva-inti-v0.4.1";
 const ASET_INTI = [
   "./",
   "./index.html",

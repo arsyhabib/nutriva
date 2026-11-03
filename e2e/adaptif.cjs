@@ -106,6 +106,25 @@ const geo = (p) => p.evaluate(() => {
     await ctx.close();
   }
 
+  // C2. Kunci tegak: ponsel mendatar tidak berputar (penutup), tegak normal, tablet/laptop tak terpengaruh
+  {
+    const ls = await buka(browser, [844, 390], { isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+    cek("ponsel mendatar: penutup putar-tegak tampil", await ls.p.evaluate(() => { const e = document.querySelector(".putar-tegak"); return !!e && !e.hidden && getComputedStyle(e).display !== "none"; }));
+    cek("ponsel mendatar: penutup menutup layar penuh", await ls.p.evaluate(() => { const r = document.querySelector(".putar-tegak").getBoundingClientRect(); return r.width >= innerWidth - 1 && r.height >= innerHeight - 1; }));
+    await ls.p.setViewportSize({ width: 390, height: 844 }); await ls.p.waitForTimeout(300);
+    cek("ponsel kembali tegak: penutup hilang", await ls.p.evaluate(() => { const e = document.querySelector(".putar-tegak"); return !e || e.hidden || getComputedStyle(e).display === "none"; }));
+    await ls.ctx.close();
+    const tg = await buka(browser, [390, 844], { isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+    cek("ponsel tegak: tanpa penutup", await tg.p.evaluate(() => { const e = document.querySelector(".putar-tegak"); return !e || e.hidden; }));
+    await tg.ctx.close();
+    const tb = await buka(browser, [1024, 768], { isMobile: true, hasTouch: true });
+    cek("tablet mendatar tidak dikunci", await tb.p.evaluate(() => { const e = document.querySelector(".putar-tegak"); return !e || e.hidden; }));
+    await tb.ctx.close();
+    const lp = await buka(browser, [844, 390]);
+    cek("laptop/kursor jendela pendek tidak dikunci", await lp.p.evaluate(() => { const e = document.querySelector(".putar-tegak"); return !e || e.hidden; }));
+    await lp.ctx.close();
+  }
+
   // D. Masukan sentuh vs kursor, terdeteksi dari perangkat nyata dan berpindah saat dipakai
   {
     const t = await buka(browser, [390, 844], { isMobile: true, hasTouch: true, deviceScaleFactor: 3 });

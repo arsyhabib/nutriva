@@ -17,7 +17,8 @@
         "gate:m1a": "tsx src/tools/cli-gate-m1a.ts",
         "cek:bundel": "tsx src/tools/cli-cek-bundel.ts",
         "kunci:pasang": "tsx src/tools/cli-pasang-kunci.ts",
-        "e2e": "node e2e/smoke.cjs"
+        "e2e": "node e2e/smoke.cjs",
+        "e2e:ai": "node e2e/ai.cjs"
     },
     "devDependencies": {
         "@types/node": "26.6.5",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validasiResep } from "../src/ai/validator";
-import { mintaResepBergambar, resepTemplat, susunPerintahGambar, susunPesanResep, URL_OPENROUTER_GAMBAR, type MasukanResep } from "../src/ai/resep";
+import { mintaGambarSaja, mintaResepBergambar, resepTemplat, susunPerintahGambar, susunPesanResep, URL_OPENROUTER_GAMBAR, type MasukanResep } from "../src/ai/resep";
 import { URL_OPENROUTER } from "../src/ai/klien";
 
 const M: MasukanResep = {
@@ -75,7 +75,7 @@ const KUNCI = { kunci: "kunci-palsu-uji", model: "anthropic/claude-haiku-5.5" };
 describe("mintaResepBergambar", () => {
   it("satu panggilan menghasilkan resep dan gambar bersamaan", async () => {
     const { f, panggilan } = pasangan({});
-    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
+    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f, jedaMs: 0 });
     expect(h.resep.sumber).toBe("ai");
     expect(h.gambar.ok).toBe(true);
     if (h.gambar.ok) expect(h.gambar.src.startsWith("data:image/png;base64,")).toBe(true);
@@ -88,34 +88,44 @@ describe("mintaResepBergambar", () => {
   it("tanpa penyaring: teks AI tampil apa adanya, gambar tetap ada", async () => {
     const aneh = BAIK + "\nBoleh ditambah bawang putih sedikit.";
     const { f } = pasangan({ teks: () => new Response(JSON.stringify({ choices: [{ message: { content: aneh }, finish_reason: "stop" }] })) });
-    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
+    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f, jedaMs: 0 });
     expect(h.resep.sumber).toBe("ai");
     expect(h.resep.teks).toContain("bawang putih");
     expect(h.gambar.ok).toBe(true);
   });
   it("keluaran kosong dari model jatuh ke resep cadangan", async () => {
     const { f } = pasangan({ teks: () => new Response(JSON.stringify({ choices: [{ message: { content: "" }, finish_reason: "stop" }] })) });
-    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
+    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f, jedaMs: 0 });
     expect(h.resep.sumber).toBe("templat");
     expect(h.resep.alasan).toBe("keluaran_kosong");
   });
   it("gambar gagal: resep AI tetap tampil", async () => {
     const { f } = pasangan({ gambar: () => new Response("{}", { status: 402 }) });
-    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
+    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f, jedaMs: 0 });
     expect(h.resep.sumber).toBe("ai");
     expect(h.gambar).toEqual({ ok: false, alasan: "status_402" });
   });
   it("menolak gambar dengan isi tak sah atau tipe aneh", async () => {
     for (const body of [{ data: [{ b64_json: "<script>" + "A".repeat(200) }] }, { data: [{ b64_json: PNG, media_type: "image/svg+xml" }] }, { data: [] }]) {
       const { f } = pasangan({ gambar: () => new Response(JSON.stringify(body)) });
-      const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
+      const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f, jedaMs: 0 });
       expect(h.gambar.ok).toBe(false);
     }
   });
   it("jaringan putus tidak melempar", async () => {
     const f = (async () => { throw new Error("putus"); }) as unknown as typeof fetch;
-    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f });
+    const h = await mintaResepBergambar(M, { kunciSendiri: KUNCI, fetchFn: f, jedaMs: 0 });
     expect(h.resep.sumber).toBe("templat");
     expect(h.gambar.ok).toBe(false);
+  });
+});
+
+describe("gambar: galat status 200", () => {
+  it("saldo habis dalam badan 200 dilaporkan sebagai status_402, tanpa diulang", async () => {
+    let n = 0;
+    const f = (async () => { n++; return new Response(JSON.stringify({ error: { code: 402 } }), { status: 200 }); }) as unknown as typeof fetch;
+    const g = await mintaGambarSaja(M, { kunciSendiri: KUNCI, fetchFn: f, jedaMs: 0 });
+    expect(g).toEqual({ ok: false, alasan: "status_402" });
+    expect(n).toBe(1);
   });
 });

@@ -18,10 +18,10 @@ export interface Lingkungan {
 
 // klaim: n/a — batas rekayasa Worker (K-08), bukan konstanta ilmiah
 const BATAS_BADAN_BYTE = 2048;
-// klaim: n/a — batas waktu panggilan ke penyedia AI, 10 detik menurut K-08
-const BATAS_HULU_MS = 10_000;
+// klaim: n/a — batas waktu panggilan ke penyedia AI, diperlonggar menjadi 25 detik atas permintaan pemilik (percobaan ulang ada di sisi klien)
+const BATAS_HULU_MS = 25_000;
 // klaim: n/a — batas token keluaran
-const TOKEN_MAKS = 350;
+const TOKEN_MAKS = 900;
 // klaim: n/a — bawaan batas laju per klien per menit bila variabel tidak diisi
 const BATAS_KLIEN_BAWAAN = 12;
 // klaim: n/a — bawaan batas laju global per isolat per menit

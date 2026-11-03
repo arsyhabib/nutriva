@@ -11,7 +11,7 @@ import {
   PERNYATAAN_PRIVASI_AI,
 } from "../ai/glosarium";
 import { mintaPenjelasan, MODEL_AI_BAWAAN, pesanAlasan, ujiKunci, type HasilPenjelasan } from "../ai/klien";
-import { mintaResepBergambar, MODEL_GAMBAR_BAWAAN, pesanGalatGambar, pesanGalatResep, type HasilResepBergambar, type MasukanResep } from "../ai/resep";
+import { mintaGambarSaja, mintaResepBergambar, mintaResepSaja, MODEL_GAMBAR_BAWAAN, pesanGalatGambar, pesanGalatResep, type HasilGambar, type HasilResep, type MasukanResep } from "../ai/resep";
 import type { MuatanAi } from "../ai/kontrak";
 import { jelaskanTemplat } from "../ai/templat";
 import { DATA } from "../engine/data";
@@ -133,12 +133,16 @@ interface EntriResep {
   hari: number;
   slotKode: string;
   masukan: MasukanResep;
-  memuat: boolean;
   generasi: number;
+  /** Resep dan gambar dimuat terpisah: resep tampil begitu siap tanpa menunggu gambar. */
+  memuatResep: boolean;
+  memuatGambar: boolean;
+  resep?: HasilResep;
+  gambar?: HasilGambar;
   /** Data URL gambar yang sudah lolos pemeriksaan bentuk (dihitung sekali). */
   gambarSah?: string;
-  hasil?: HasilResepBergambar;
 }
+const sedangMemuatResep = (e: EntriResep): boolean => e.memuatResep || e.memuatGambar;
 // klaim: n/a — batas rekayasa jumlah resep bergambar yang disimpan di memori sesi (gambar besar)
 const BATAS_RESEP_SESI = 8;
 
@@ -365,6 +369,15 @@ export class LayarRona {
   private modelGambar = MODEL_GAMBAR_BAWAAN;
   private resepSesi = new Map<string, EntriResep>();
   private generasiResep = 0;
+  /** Naik tiap kali penjelasan AI dibatalkan (data berubah/reset); hasil permintaan lama dibuang. */
+  private generasiAi = 0;
+  private aiBerjalan = 0;
+  /** Batalkan semua permintaan penjelasan yang sedang jalan: hasilnya dibuang dan tombol langsung bebas. */
+  private batalkanAi(): void {
+    this.generasiAi++;
+    this.aiBerjalan = 0;
+    this.state.sedangMemuatAi = false;
+  }
   private ingatKunci = false;
   private statusKunci: { jenis: "sah" | "ditolak" | "gagal" | "menguji" | "info"; teks: string } | null = null;
 
@@ -439,6 +452,13 @@ export class LayarRona {
       if (html.getAttribute("data-masukan") !== nilai) html.setAttribute("data-masukan", nilai);
     };
     window.addEventListener("pointerdown", tandai, { passive: true });
+    window.addEventListener("pointerdown", () => { this.penunjukBawah = true; }, { passive: true, capture: true });
+    const lepas = (): void => {
+      this.penunjukBawah = false;
+      if (this.renderMenunggu) { this.renderMenunggu = false; setTimeout(() => this.render(), 80); }
+    };
+    window.addEventListener("pointerup", lepas, { passive: true, capture: true });
+    window.addEventListener("pointercancel", lepas, { passive: true, capture: true });
     window.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") tandai(e); }, { passive: true });
 
     window.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -548,6 +568,7 @@ export class LayarRona {
     this.simpanKunci();
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
+    this.batalkanAi();
     this.render();
   }
 
@@ -622,6 +643,7 @@ export class LayarRona {
     this.state.hariMenuIdx = 0;
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
+    this.batalkanAi();
     // Lembar Pengaturan tetap terbuka agar penanda pilihan langsung terlihat berpindah.
     if (this.lembarTerbuka && !this.lembarTerbuka.bangun) this.tutupLembar();
     else this.render();
@@ -723,6 +745,7 @@ export class LayarRona {
     const nextVar = DAFTAR_BENIH_VARIASI[nextIdx] ?? DAFTAR_BENIH_VARIASI[0]!;
     this.state.masukan.pola.benih = nextVar.benih;
     this.state.aiMenuPerHari = {};
+    this.batalkanAi();
     this.render();
     this.picuTetesan(triggerEl ?? null, `Benih ${nextVar.kode} Diterapkan`);
   }
@@ -744,13 +767,14 @@ export class LayarRona {
     this.state.masukan.tanda_bahaya = [];
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
+    this.batalkanAi();
     this.state.hariMenuIdx = 0;
     this.bukaLayar("profil");
   }
 
   private ukuranDisentuh = new Set<string>();
 
-  aturMasukanKustom(pengubah: (m: MasukanRingkasan) => boolean | void, ukuran = ""): void {
+  aturMasukanKustom(pengubah: (m: MasukanRingkasan) => boolean | void, ukuran = "", tundaRender = false): void {
     // Mengubah apa pun pada sebuah contoh menjadikannya data sendiri; ukuran contoh baru lepas dari tanda
     // "belum diisi" setelah usia, berat, dan panjang masing-masing diganti dengan nilai yang sah.
     if (!this.state.sendiri) {
@@ -765,8 +789,24 @@ export class LayarRona {
     }
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
-    this.render();
+    this.batalkanAi();
+    if (tundaRender) this.renderAmanFokus();
+    else this.render();
   }
+
+  /**
+   * Render yang tidak merebut fokus: "change" pada kolom terjadi saat blur, sebelum kolom tujuan mendapat fokus, dan
+   * mengganti DOM di antara tekan dan lepas membuat ketukan hilang. Selama penunjuk masih ditekan render ditunda sampai
+   * dilepas; selain itu render dijalankan setelah fokus berpindah (Tab, ketukan sentuh).
+   */
+  private renderAmanFokus(): void {
+    if (this.penunjukBawah) { this.renderMenunggu = true; return; }
+    setTimeout(() => this.render(), 0);
+  }
+  /** Pesan penolakan masukan per kolom (kosong bila sah). */
+  private galatMasukan: Record<string, string> = {};
+  private penunjukBawah = false;
+  private renderMenunggu = false;
 
   resetSesiKeAwal(): void {
     this.resepSesi.clear();
@@ -779,20 +819,33 @@ export class LayarRona {
     this.state.layar = "gerbang";
     this.state.aiStatus = null;
     this.state.aiMenuPerHari = {};
+    this.batalkanAi();
     this.lembarTerbuka = null;
     this.lembarDiRiwayat = false;
     try { window.history.replaceState({ nutriva: "gerbang" }, "", "#gerbang"); } catch { /* riwayat tak tersedia */ }
     this.render();
   }
 
+  /** Penjelasan AI dengan pagar pemakaian bawaan; bila jatah habis, templat dengan alasan yang dijelaskan ke pengguna. */
+  private async mintaPenjelasanBerizin(muatan: MuatanAi): Promise<HasilPenjelasan> {
+    if (this.izinBawaan(2)) return mintaPenjelasan(muatan, this.opsiAi());
+    const h = await mintaPenjelasan(muatan, { urlWorker: undefined });
+    return { ...h, alasan_templat: "batas_bawaan" };
+  }
+
   async segarkanPenjelasanAiStatus(): Promise<void> {
     const r = this.hitungRingkasan();
     if (r.hasil !== "ok" || !r.muatan_ai_status) return;
+    const gen = this.generasiAi;
+    this.aiBerjalan++;
     this.state.sedangMemuatAi = true;
     this.render();
-    const hasil = await mintaPenjelasan(r.muatan_ai_status, this.izinBawaan(1) ? this.opsiAi() : { urlWorker: undefined });
-    this.state.aiStatus = hasil;
-    this.state.sedangMemuatAi = false;
+    const hasil = await this.mintaPenjelasanBerizin(r.muatan_ai_status);
+    if (gen === this.generasiAi) {
+      this.aiBerjalan = Math.max(0, this.aiBerjalan - 1);
+      this.state.sedangMemuatAi = this.aiBerjalan > 0;
+      this.state.aiStatus = hasil; // data berubah selama menunggu: hasil lama dibuang dan tidak menahan tombol
+    }
     this.render();
   }
 
@@ -801,11 +854,16 @@ export class LayarRona {
     if (r.hasil !== "ok") return;
     const muatan = r.muatan_ai_menu[hariIdx];
     if (!muatan) return;
+    const gen = this.generasiAi;
+    this.aiBerjalan++;
     this.state.sedangMemuatAi = true;
     this.render();
-    const hasil = await mintaPenjelasan(muatan, this.izinBawaan(1) ? this.opsiAi() : { urlWorker: undefined });
-    this.state.aiMenuPerHari[hariIdx] = hasil;
-    this.state.sedangMemuatAi = false;
+    const hasil = await this.mintaPenjelasanBerizin(muatan);
+    if (gen === this.generasiAi) {
+      this.aiBerjalan = Math.max(0, this.aiBerjalan - 1);
+      this.state.sedangMemuatAi = this.aiBerjalan > 0;
+      this.state.aiMenuPerHari[hariIdx] = hasil;
+    }
     this.render();
   }
 
@@ -922,7 +980,7 @@ export class LayarRona {
     const isiLayar =
       this.bangunIsiLayar(r).replace(/(<div class="layar__kicker">)\s*[A-K]\d{1,2} · /g, "$1") +
       this.barisEksporLayar() +
-      `<footer class="cap-penulis cap-penulis--isi" aria-label="Karya E.13.1 feat H.A.te"><span class="cap-penulis__garis" aria-hidden="true"></span><span>E.13.1 feat H.A.te</span></footer>`;
+      `<footer class="cap-penulis cap-penulis--isi" aria-label="Developed by E.13.1 Feat H.A?128"><span class="cap-penulis__garis" aria-hidden="true"></span><span>Developed by E.13.1 Feat H.A?128</span></footer>`;
     if (typeof document !== "undefined" && document.title !== undefined) {
       const nama = NAMA_ARAH[this.state.layar] ?? DAFTAR_LAYAR.find((l) => l.id === this.state.layar)?.label;
       document.title = nama && this.state.layar !== "gerbang" ? `${nama} · NUTRIVA` : "NUTRIVA · Gizi 1000 HPK";
@@ -1170,7 +1228,7 @@ export class LayarRona {
       </div>
       <div class="nav__tombol">${tombol}</div>
       <p class="nav__pintasan" aria-hidden="true"><kbd>1</kbd>–<kbd>5</kbd> pindah layar<br><kbd>←</kbd> <kbd>→</kbd> berurutan<br><kbd>Esc</kbd> tutup panel</p>
-      <p class="cap-penulis cap-penulis--nav" aria-label="Karya E.13.1 feat H.A.te">E.13.1 feat H.A.te</p>
+      <p class="cap-penulis cap-penulis--nav"><span class="cap-penulis__bagian">Developed by</span> <span class="cap-penulis__bagian">E.13.1 Feat</span> <span class="cap-penulis__bagian">H.A?128</span></p>
     `;
   }
 
@@ -1194,33 +1252,73 @@ export class LayarRona {
     return { judulSlot: namaSlotWaktu(sl.kode).judul, pita: r.pola.pita, bahan: sl.item.map((it) => ({ nama: PETA_ATRIBUT.get(it.bahan_id)?.nama ?? it.bahan_id, gram: it.gram })) };
   }
 
-  /** Satu klik: resep dan gambar diminta bersamaan dan muncul bersamaan. */
+  /** Satu klik: resep dan gambar diminta bersamaan; resep tampil begitu siap, gambar menyusul. */
   public async buatResep(hariIdx: number, slotKode: string): Promise<void> {
     const r = this.hitungRingkasan();
     if (r.hasil !== "ok" || !r.pola || !this.kunciEfektif() || this.state.belumDiisi) return;
     const id = this.idResep(r, hariIdx, slotKode);
     const m = this.masukanResep(r, hariIdx, slotKode);
-    if (!id || !m || this.resepSesi.get(id)?.memuat) return;
-    if (!this.izinBawaan(5)) { this.render(); return; }
+    const lama = id ? this.resepSesi.get(id) : undefined;
+    if (!id || !m || (lama && sedangMemuatResep(lama))) return;
+    if (!this.izinBawaan(8)) { this.render(); return; }
     this.resepSesi.delete(id);
     const generasi = this.generasiResep;
-    this.resepSesi.set(id, { id, hari: r.pola.hari[hariIdx]!.hari_ke, slotKode, masukan: m, memuat: true, generasi });
+    this.resepSesi.set(id, { id, hari: r.pola.hari[hariIdx]!.hari_ke, slotKode, masukan: m, generasi, memuatResep: true, memuatGambar: true });
     for (const k of [...this.resepSesi.keys()]) {
       if (this.resepSesi.size <= BATAS_RESEP_SESI) break;
-      if (!this.resepSesi.get(k)?.memuat) this.resepSesi.delete(k);
+      const x = this.resepSesi.get(k);
+      if (x && !sedangMemuatResep(x)) this.resepSesi.delete(k);
     }
     this.render();
-    const hasil = await mintaResepBergambar(m, { kunciSendiri: { kunci: this.kunciEfektif(), model: this.modelAi }, modelGambar: this.modelGambar });
+    const masihBerlaku = (): EntriResep | null => {
+      const en = this.resepSesi.get(id);
+      return en && en.generasi === generasi && generasi === this.generasiResep ? en : null; // sesi sudah direset: hasil lama dibuang
+    };
+    await mintaResepBergambar(m, this.opsiResepAi(), {
+      resep: (h) => { const en = masihBerlaku(); if (!en) return; en.resep = h; en.memuatResep = false; this.render(); },
+      gambar: (g) => { const en = masihBerlaku(); if (!en) return; this.terapkanGambar(en, g); this.render(); },
+    });
+  }
+
+  private opsiResepAi(): { kunciSendiri: { kunci: string; model: string }; modelGambar: string } {
+    return { kunciSendiri: { kunci: this.kunciEfektif(), model: this.modelAi }, modelGambar: this.modelGambar };
+  }
+
+  private terapkanGambar(en: EntriResep, g: HasilGambar): void {
+    en.gambar = g;
+    en.memuatGambar = false;
+    if (g.ok && /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(g.src)) en.gambarSah = g.src;
+    else delete en.gambarSah;
+  }
+
+  /** Ulangi hanya resep atau hanya gambar tanpa mengganggu bagian lain yang sudah jadi. */
+  public async ulangiBagianResep(id: string, bagian: "resep" | "gambar"): Promise<void> {
     const en = this.resepSesi.get(id);
-    if (!en || en.generasi !== generasi || generasi !== this.generasiResep) return; // sesi sudah direset: hasil lama dibuang
-    en.memuat = false;
-    en.hasil = hasil;
-    if (hasil.gambar.ok && /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(hasil.gambar.src)) en.gambarSah = hasil.gambar.src;
+    if (!en || !this.kunciEfektif() || this.state.belumDiisi) return;
+    if (bagian === "resep" ? en.memuatResep : en.memuatGambar) return;
+    if (!this.izinBawaan(bagian === "gambar" ? 5 : 3)) { this.render(); return; }
+    const generasi = en.generasi;
+    const masihBerlaku = (): EntriResep | null => {
+      const x = this.resepSesi.get(id);
+      return x === en && generasi === this.generasiResep ? x : null;
+    };
+    if (bagian === "resep") en.memuatResep = true; else en.memuatGambar = true;
+    this.render();
+    if (bagian === "resep") {
+      const h = await mintaResepSaja(en.masukan, this.opsiResepAi());
+      const x = masihBerlaku(); if (!x) return;
+      x.resep = h; x.memuatResep = false;
+    } else {
+      const g = await mintaGambarSaja(en.masukan, this.opsiResepAi());
+      const x = masihBerlaku(); if (!x) return;
+      this.terapkanGambar(x, g);
+    }
     this.render();
   }
 
   public unduhResepPdf(id: string): void {
-    if (!this.resepSesi.get(id)?.hasil) return;
+    const en = this.resepSesi.get(id);
+    if (!en?.resep || sedangMemuatResep(en)) return;
     void this.bukaPratinjauEkspor({ ...this.eksporOpsi, bagian: ["resep"], resepIds: [id], sampul: false });
   }
 
@@ -1234,24 +1332,35 @@ export class LayarRona {
       }
       return `${this.pesanBatasBawaan ? `<p class="ai-status ai-status--ditolak" role="status">${escHtml(this.pesanBatasBawaan)}</p>` : ""}<button type="button" class="btn btn--sekunder btn--penuh resep-buat" data-resep-buat="${escHtml(slotKode)}" data-hari-idx="${hariIdx}">${ikon("spark")}<span>Buat resep + gambar (AI)</span></button>`;
     }
-    if (en.memuat) {
-      return `<div class="resep-kartu resep-kartu--memuat" role="status" aria-live="polite"><div class="resep-kartu__gambar resep-skeleton" aria-hidden="true"></div><p class="resep-kartu__tunggu"><strong>Menulis resep dan menggambar hidangan…</strong><br />Biasanya 15 sampai 60 detik. Resep dan gambar akan muncul bersamaan.</p></div>`;
+    if (en.memuatResep && en.memuatGambar) {
+      return `<div class="resep-kartu resep-kartu--memuat" role="status" aria-live="polite"><div class="resep-kartu__gambar resep-skeleton" aria-hidden="true"></div><p class="resep-kartu__tunggu"><strong>Menulis resep dan menggambar hidangan…</strong><br />Biasanya 15 sampai 60 detik. Resep muncul begitu siap, gambar menyusul.</p></div>`;
     }
-    const h = en.hasil!;
-    const g = h.gambar;
+    const g = en.gambar;
     const gambarAman = en.gambarSah !== undefined;
-    const galat = [pesanGalatResep(h), pesanGalatGambar(g)].filter(Boolean) as string[];
-    return `<div class="resep-kartu" data-resep-id="${escHtml(id)}">
-      <figure class="resep-kartu__gambar">
+    const adaKunci = !!this.kunciEfektif();
+    const galat = [this.pesanBatasBawaan || null, en.resep && !en.memuatResep ? pesanGalatResep({ resep: en.resep }) : null, g && !en.memuatGambar ? pesanGalatGambar(g) : null].filter(Boolean) as string[];
+    const gambarHtml = en.memuatGambar
+      ? `<div class="resep-kartu__gambar resep-skeleton" role="status" aria-live="polite"><span class="resep-skeleton__teks">Gambar sedang dibuat…</span></div>`
+      : `<figure class="resep-kartu__gambar">
         ${gambarAman ? `<img src="${en.gambarSah}" alt="Ilustrasi AI untuk ${escHtml(en.masukan.judulSlot)}" decoding="async" />` : `<div class="resep-kartu__tanpa">Gambar tidak tersedia</div>`}
         <figcaption>${gambarAman ? "Ilustrasi dibuat AI dari daftar bahan, bukan foto hasil masak." : "Resep tetap bisa dipakai tanpa gambar."}</figcaption>
-      </figure>
-      <div class="resep-kartu__isi md">${renderMarkdown(h.resep.teks)}</div>
-      ${h.resep.sumber === "ai" ? `<div class="kartu-ai__peringatan" role="note">Resep ditulis AI dan bisa keliru. Bahan dan gram dihitung mesin NUTRIVA. Periksa kebersihan dan kematangan makanan sebelum disajikan.</div>` : `<div class="kartu-ai__peringatan" role="note">Resep cadangan disusun otomatis tanpa AI.</div>`}
+      </figure>`;
+    const resepHtml = en.memuatResep || !en.resep
+      ? `<div class="resep-kartu__isi resep-kartu__isi--memuat" role="status" aria-live="polite"><strong>Resep sedang ditulis…</strong><span class="resep-skeleton resep-skeleton--baris"></span><span class="resep-skeleton resep-skeleton--baris"></span><span class="resep-skeleton resep-skeleton--baris resep-skeleton--pendek"></span></div>`
+      : `<div class="resep-kartu__isi md">${renderMarkdown(en.resep.teks)}</div>
+      ${en.resep.sumber === "ai" ? `<div class="kartu-ai__peringatan" role="note">Resep ditulis AI dan bisa keliru. Bahan dan gram dihitung mesin NUTRIVA. Periksa kebersihan dan kematangan makanan sebelum disajikan.</div>` : `<div class="kartu-ai__peringatan" role="note">Resep cadangan disusun otomatis tanpa AI.</div>`}`;
+    const sibuk = sedangMemuatResep(en);
+    const perluUlangResep = adaKunci && !!en.resep && en.resep.sumber === "templat" && !en.memuatResep;
+    const perluUlangGambar = adaKunci && !!g && !g.ok && !en.memuatGambar;
+    return `<div class="resep-kartu" data-resep-id="${escHtml(id)}">
+      ${gambarHtml}
+      ${resepHtml}
       ${galat.length ? `<p class="ai-status ai-status--ditolak" role="status">${escHtml(galat.join(" "))}</p>` : ""}
       <div class="baris-aksi">
-        <button type="button" class="btn btn--utama" data-resep-pdf="${escHtml(id)}">${ikon("pdf")}<span>Unduh PDF resep</span></button>
-        <button type="button" class="chip" data-resep-buat="${escHtml(en.slotKode)}" data-hari-idx="${hariIdx}">${ikon("spark")}<span>Buat ulang</span></button>
+        <button type="button" class="btn btn--utama" data-resep-pdf="${escHtml(id)}" ${sibuk ? 'disabled aria-disabled="true"' : ""}>${ikon("pdf")}<span>${sibuk ? "Menunggu hasil…" : "Unduh PDF resep"}</span></button>
+        ${perluUlangResep ? `<button type="button" class="chip" data-resep-ulang="resep" data-resep-id-ulang="${escHtml(id)}" ${en.memuatResep ? "disabled" : ""}>${ikon("spark")}<span>Buat ulang resep</span></button>` : ""}
+        ${perluUlangGambar ? `<button type="button" class="chip" data-resep-ulang="gambar" data-resep-id-ulang="${escHtml(id)}">${ikon("spark")}<span>Coba gambar lagi</span></button>` : ""}
+        ${adaKunci ? `<button type="button" class="chip" data-resep-buat="${escHtml(en.slotKode)}" data-hari-idx="${hariIdx}" ${sibuk ? "disabled" : ""}>${ikon("spark")}<span>Buat ulang semua</span></button>` : ""}
       </div>
     </div>`;
   }
@@ -1263,7 +1372,7 @@ export class LayarRona {
       for (const sl of h.slot) {
         const id = this.idResep(r, hi, sl.kode);
         const en = id ? this.resepSesi.get(id) : undefined;
-        if (!id || !en || en.memuat || !en.hasil) continue;
+        if (!id || !en || sedangMemuatResep(en) || !en.resep) continue;
         cocok.add(id);
         hasil.push({
           id,
@@ -1271,14 +1380,14 @@ export class LayarRona {
           slotJudul: en.masukan.judulSlot,
           pita: LABEL_PITA[r.pola!.pita].replace(" bulan", ""),
           bahan: sl.item.map((it) => ({ nama: PETA_ATRIBUT.get(it.bahan_id)?.nama ?? it.bahan_id, gram: it.gram, peran: it.peran })),
-          teks: en.hasil.resep.teks,
-          ai: en.hasil.resep.sumber === "ai",
+          teks: en.resep.teks,
+          ai: en.resep.sumber === "ai",
           gambar: en.gambarSah,
-          modelGambar: en.hasil.gambar.ok ? en.hasil.gambar.model : undefined,
+          modelGambar: en.gambar?.ok ? en.gambar.model : undefined,
         });
       }
     });
-    const lama = [...this.resepSesi.values()].filter((x) => !x.memuat && x.hasil && !cocok.has(x.id)).length;
+    const lama = [...this.resepSesi.values()].filter((x) => !sedangMemuatResep(x) && x.resep && !cocok.has(x.id)).length;
     return { resep: hasil, lama };
   }
 
@@ -1728,6 +1837,7 @@ export class LayarRona {
                 <span class="field__unit">${m.status.umur.bulan} bln</span>
               </label>
               <input id="inp-usia-bulan" class="field__input" type="number" min="0" max="36" step="1" value="${m.status.umur.bulan}" data-field="bulan" />
+              ${this.galatMasukan["bulan"] ? `<span class="field__galat" role="alert">${escHtml(this.galatMasukan["bulan"])}</span>` : ""}
             </div>
             <div class="field">
               <label class="field__label" for="inp-usia-hari">
@@ -1735,6 +1845,7 @@ export class LayarRona {
                 <span class="field__unit">${m.status.umur.hari} hr</span>
               </label>
               <input id="inp-usia-hari" class="field__input" type="number" min="0" max="30" step="1" value="${m.status.umur.hari}" data-field="hari_umur" />
+              ${this.galatMasukan["hari_umur"] ? `<span class="field__galat" role="alert">${escHtml(this.galatMasukan["hari_umur"])}</span>` : ""}
             </div>
             <div class="field">
               <label class="field__label" for="inp-jk">Jenis Kelamin</label>
@@ -1757,6 +1868,7 @@ export class LayarRona {
               </label>
               <input id="inp-bb" class="field__input" type="text" inputmode="decimal" autocomplete="off" aria-describedby="rentang-bb" value="${fmtId(m.status.bb_kg, 1)}" data-field="bb_kg" data-min="2" data-max="25" />
               <span id="rentang-bb" class="field__unit">Rentang masukan 2–25 kg</span>
+              ${this.galatMasukan["bb_kg"] ? `<span class="field__galat" role="alert">${escHtml(this.galatMasukan["bb_kg"])}</span>` : ""}
             </div>
             <div class="field">
               <label class="field__label" for="inp-pb">
@@ -1765,6 +1877,7 @@ export class LayarRona {
               </label>
               <input id="inp-pb" class="field__input" type="text" inputmode="decimal" autocomplete="off" aria-describedby="rentang-pb" value="${fmtId(m.status.pb_cm, 1)}" data-field="pb_cm" data-min="40" data-max="115" />
               <span id="rentang-pb" class="field__unit">Rentang masukan 40–115 cm</span>
+              ${this.galatMasukan["pb_cm"] ? `<span class="field__galat" role="alert">${escHtml(this.galatMasukan["pb_cm"])}</span>` : ""}
             </div>
           </div>
 
@@ -1958,6 +2071,7 @@ export class LayarRona {
           </p>
         </div>
 
+        ${this.kartuPeriksaUkuran(st)}
         ${this.state.belumDiisi ? `<div class="kartu kartu--sorot"><div class="kartu__baris">${lencanaStatus("perhatian", "Ukuran belum diisi")}</div><p class="kartu__isi">Hasil di halaman ini masih memakai nilai awal, bukan ukuran anak Anda.</p><div class="baris-aksi"><button type="button" class="btn btn--utama" data-go="profil">Isi ukuran anak →</button></div></div>` : ""}
 
         ${
@@ -2681,7 +2795,7 @@ export class LayarRona {
             }
           </p>
           <div class="kartu-bagi__cap">
-            ${logo("logo--mini", 18)}<span>NUTRIVA · Gizi 1000 HPK</span><span class="cap-penulis">E.13.1 feat H.A.te</span>
+            ${logo("logo--mini", 18)}<span>NUTRIVA · Gizi 1000 HPK</span><span class="cap-penulis">Developed by E.13.1 Feat H.A?128</span>
           </div>
         </div>
         <div class="baris-aksi">
@@ -2861,6 +2975,20 @@ export class LayarRona {
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Pengingat netral untuk data sendiri bila ada indikator di ujung ekstrem. Tidak mengklaim angka batas: hanya meminta
+   * pengguna memeriksa satuan dan angka, dan menegaskan bahwa hasil ekstrem perlu dinilai langsung oleh tenaga kesehatan.
+   */
+  private kartuPeriksaUkuran(st: { bbu: { kategori: string }; pbu: { kategori: string }; bbpb: { kategori: string } }): string {
+    if (!this.state.sendiri || this.state.belumDiisi) return "";
+    const ekstrem =
+      ["bb_sangat_kurang", "risiko_bb_lebih"].includes(st.bbu.kategori) ||
+      ["sangat_pendek", "tinggi"].includes(st.pbu.kategori) ||
+      ["gizi_buruk", "obesitas"].includes(st.bbpb.kategori);
+    if (!ekstrem) return "";
+    return `<div class="kartu kartu--sorot" role="note"><div class="kartu__baris">${lencanaStatus("perhatian", "Periksa kembali ukuran")}</div><p class="kartu__isi">Ada indikator yang berada di ujung ekstrem. Pastikan berat (kg), panjang atau tinggi (cm), dan usia sudah benar, dan bahwa anak diukur dengan cara yang tepat. Bila angkanya memang benar, anak perlu dinilai langsung oleh tenaga kesehatan.</p><div class="baris-aksi"><button type="button" class="chip" data-go="profil">Periksa ukuran</button></div></div>`;
   }
 
   private layarKondisiHapus(): string {
@@ -3273,6 +3401,14 @@ export class LayarRona {
 
     // Input Formulir Profil A2
     this.qa<HTMLInputElement | HTMLSelectElement>("[data-field]").forEach((inp) => {
+      // Pesan penolakan hilang begitu kolomnya disentuh lagi (tanpa render ulang agar fokus aman).
+      inp.addEventListener("focus", () => {
+        const f = inp.getAttribute("data-field");
+        if (f && this.galatMasukan[f]) {
+          delete this.galatMasukan[f];
+          inp.parentElement?.querySelector(".field__galat")?.remove();
+        }
+      });
       inp.addEventListener("change", () => {
         const f = inp.getAttribute("data-field");
         if (!f) return;
@@ -3285,22 +3421,32 @@ export class LayarRona {
           ) {
             m.status.cara_ukur = inp.value;
           } else if (f === "bulan") {
-            const v = parseInt(inp.value, 10);
-            if (Number.isNaN(v) || v < 0 || v > 36) return false;
+            const mentah = inp.value.trim();
+            const v = /^\d{1,2}$/.test(mentah) ? parseInt(mentah, 10) : NaN;
+            if (Number.isNaN(v) || v < 0 || v > 36) { this.galatMasukan[f] = "Isi usia dalam bulan dengan angka bulat, 0 sampai 36."; return false; }
+            delete this.galatMasukan[f];
             m.status.umur.bulan = v;
           } else if (f === "hari_umur") {
-            const v = parseInt(inp.value, 10);
-            if (!Number.isNaN(v)) m.status.umur.hari = Math.max(0, Math.min(30, v));
+            const mentah = inp.value.trim();
+            const v = /^\d{1,2}$/.test(mentah) ? parseInt(mentah, 10) : NaN;
+            if (Number.isNaN(v) || v > 30) { this.galatMasukan[f] = "Isi hari dengan angka bulat, 0 sampai 30."; return false; }
+            delete this.galatMasukan[f];
+            m.status.umur.hari = v;
           } else if (f === "bb_kg" || f === "pb_cm") {
-            const v = parseFloat(inp.value.trim().replace(",", "."));
+            const mentah = inp.value.trim();
             const lo = parseFloat(inp.getAttribute("data-min") || "0");
             const hi = parseFloat(inp.getAttribute("data-max") || "0");
-            // Nilai di luar rentang masukan ditolak (nilai lama dipertahankan), tidak dipaksa ke angka lain.
-            if (!(Number.isFinite(v) && v >= lo && v <= hi)) return false;
+            const v = /^\d{1,3}(?:[.,]\d{1,2})?$/.test(mentah) ? parseFloat(mentah.replace(",", ".")) : NaN;
+            // Nilai di luar rentang atau bukan angka murni ditolak (nilai lama dipertahankan) dengan pesan, tidak dipaksa.
+            if (!(Number.isFinite(v) && v >= lo && v <= hi)) {
+              this.galatMasukan[f] = `Isi angka saja antara ${fmtId(lo, 0)} dan ${fmtId(hi, 0)} ${f === "bb_kg" ? "kg" : "cm"}, mis. ${f === "bb_kg" ? "8,5" : "72,5"}.`;
+              return false;
+            }
+            delete this.galatMasukan[f];
             if (f === "bb_kg") m.status.bb_kg = v;
             else m.status.pb_cm = v;
           }
-        }, f === "bulan" || f === "hari_umur" || f === "bb_kg" || f === "pb_cm" ? f : "");
+        }, f === "bulan" || f === "hari_umur" || f === "bb_kg" || f === "pb_cm" ? f : "", true);
       });
     });
 
@@ -3508,6 +3654,13 @@ export class LayarRona {
         const slot = btn.getAttribute("data-resep-buat");
         const hari = Number(btn.getAttribute("data-hari-idx"));
         if (slot && Number.isInteger(hari)) void this.buatResep(hari, slot);
+      });
+    });
+    this.qa<HTMLElement>("[data-resep-ulang]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const bagian = btn.getAttribute("data-resep-ulang");
+        const id = btn.getAttribute("data-resep-id-ulang");
+        if (id && (bagian === "resep" || bagian === "gambar")) void this.ulangiBagianResep(id, bagian);
       });
     });
     this.qa<HTMLElement>("[data-resep-pdf]").forEach((btn) => {

@@ -2,6 +2,7 @@ import { MuatanAiSchema, type MuatanAi } from "./kontrak";
 import { jelaskanTemplat } from "./templat";
 import { validasiKeluaranAi } from "./validator";
 import { PROMPT_SISTEM, susunPesan } from "./prompt";
+import { kirimUlang, panggilChat, potongRapi } from "./transport";
 
 export interface HasilPenjelasan {
   sumber: "ai" | "templat";
@@ -33,14 +34,20 @@ export interface OpsiKlien {
   /** URL Worker, mis. https://nutriva-ai.<akun>.workers.dev. Kosong = AI mati, langsung templat. */
   urlWorker?: string | undefined;
   fetchFn?: typeof fetch;
-  /** Batas waktu klien (ms). Harus sedikit di atas batas Worker agar Worker yang memutus lebih dulu. */
+  /** Batas waktu tiap percobaan (ms). Gangguan sesaat diulang otomatis sampai 3 kali. */
   batasMs?: number;
+  /** Jeda dasar antarpercobaan (ms); 0 untuk uji. */
+  jedaMs?: number;
   /** Paksa menyaring keluaran (default: FILTER_KELUARAN_AI). */
   saring?: boolean;
 }
 
-// klaim: n/a — batas waktu jaringan klien (milidetik), keputusan rekayasa K-08, bukan konstanta ilmiah
-const BATAS_KLIEN_MS = 12_000;
+// klaim: n/a — batas waktu jaringan tiap percobaan (milidetik), keputusan rekayasa K-08, bukan konstanta ilmiah.
+// Cukup longgar agar model yang sedang sibuk tetap sempat menjawab; kegagalan sesaat diulang oleh transport.
+const BATAS_KLIEN_MS = 40_000;
+// klaim: n/a — ruang keluaran penjelasan (token); prompt meminta 120-220 kata, sisanya cadangan agar tidak terpotong
+const TOKEN_PENJELASAN = 2000;
+const PETUNJUK_RINGKAS = "CATATAN: jawaban sebelumnya terlalu panjang dan terpotong. Tulis lebih ringkas (maksimal 160 kata) dan selesaikan semua bagian.";
 
 /**
  * Minta penjelasan AI; apa pun yang gagal (jaringan, status, bentuk, validator) jatuh ke templat deterministik.
@@ -53,60 +60,51 @@ export async function mintaPenjelasan(muatan: MuatanAi, opsi: OpsiKlien = {}): P
   const kunci = opsi.kunciSendiri?.kunci.trim();
   if (!kunci && !opsi.urlWorker) return templat("ai_mati");
   const f = opsi.fetchFn ?? fetch;
-  const kendali = new AbortController();
-  const waktu = setTimeout(() => kendali.abort(), opsi.batasMs ?? BATAS_KLIEN_MS);
+  const saring = opsi.saring ?? FILTER_KELUARAN_AI;
+  const batas = opsi.batasMs ?? BATAS_KLIEN_MS;
   try {
-    let res: Response;
-    if (kunci) {
-      res = await f(URL_OPENROUTER, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${kunci}`, "Content-Type": "application/json", "X-Title": "NUTRIVA" },
-        body: JSON.stringify({
-          model: opsi.kunciSendiri?.model?.trim() || MODEL_AI_BAWAAN,
-          messages: [
-            { role: "system", content: PROMPT_SISTEM },
-            { role: "user", content: susunPesan(sah.data) },
-          ],
-          max_tokens: 800,
-          temperature: 0.3,
-          provider: { data_collection: "deny" },
-        }),
-        signal: kendali.signal,
-        credentials: "omit",
-        referrerPolicy: "no-referrer",
-      });
-    } else {
-      const url = (opsi.urlWorker as string).replace(/\/+$/, "") + "/v1/jelaskan";
-      res = await f(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sah.data),
-        signal: kendali.signal,
-        credentials: "omit",
-        referrerPolicy: "no-referrer",
-      });
-    }
-    if (!res.ok) return templat(`status_${res.status}`);
-    const badan: unknown = await res.json();
     let teks: unknown;
     if (kunci) {
-      const h = badan as { choices?: { message?: { content?: unknown }; finish_reason?: unknown }[] };
-      if (h?.choices?.[0]?.finish_reason === "length" && (opsi.saring ?? FILTER_KELUARAN_AI)) return templat("keluaran_terpotong");
-      teks = h?.choices?.[0]?.message?.content;
+      const h = await panggilChat({
+        kunci,
+        model: opsi.kunciSendiri?.model?.trim() || MODEL_AI_BAWAAN,
+        pesan: [
+          { role: "system", content: PROMPT_SISTEM },
+          { role: "user", content: susunPesan(sah.data) },
+        ],
+        maxTokens: TOKEN_PENJELASAN,
+        suhu: 0.3,
+        url: URL_OPENROUTER,
+        fetchFn: f,
+        batasMs: batas,
+        cobaMaks: 3,
+        ...(opsi.jedaMs !== undefined ? { jedaMs: opsi.jedaMs } : {}),
+        petunjukRingkas: PETUNJUK_RINGKAS,
+      });
+      if (!h.ok) return templat(h.alasan);
+      if (h.terpotong && saring) return templat("keluaran_terpotong");
+      teks = h.terpotong ? potongRapi(h.teks) : h.teks;
+      if (!saring) {
+        if (typeof teks !== "string" || teks.trim().length < 5) return templat("keluaran_kosong");
+        return { sumber: "ai", teks: teks.slice(0, 6000) };
+      }
     } else {
+      const url = (opsi.urlWorker as string).replace(/\/+$/, "") + "/v1/jelaskan";
+      const r = await kirimUlang(
+        url,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sah.data), credentials: "omit", referrerPolicy: "no-referrer" },
+        { fetchFn: f, batasMs: batas, cobaMaks: 2, ...(opsi.jedaMs !== undefined ? { jedaMs: opsi.jedaMs } : {}) },
+        async (res) => (await res.json()) as unknown,
+      );
+      if (!r.ok) return templat(r.alasan);
+      const badan = r.nilai;
       teks = typeof badan === "object" && badan !== null ? (badan as { teks?: unknown }).teks : undefined;
-    }
-    if (kunci && !(opsi.saring ?? FILTER_KELUARAN_AI)) {
-      if (typeof teks !== "string" || teks.trim().length < 5) return templat("keluaran_kosong");
-      return { sumber: "ai", teks: teks.replace(/\p{Cf}/gu, "").trim().slice(0, 6000) };
     }
     const v = validasiKeluaranAi(teks, sah.data);
     if (!v.ok) return templat("ditolak_" + v.alasan.join("+"));
     return { sumber: "ai", teks: v.teks };
   } catch {
     return templat("galat_jaringan");
-  } finally {
-    clearTimeout(waktu);
   }
 }
 
@@ -137,9 +135,13 @@ export function pesanAlasan(alasan: string | undefined): string | null {
   if (!alasan || alasan === "bawaan_deterministik" || alasan === "ai_mati") return null;
   if (alasan === "status_401" || alasan === "status_403") return "Kunci API ditolak OpenRouter. Periksa kembali kunci Anda.";
   if (alasan === "status_402") return "Saldo OpenRouter tidak cukup untuk permintaan ini.";
-  if (alasan === "status_404") return "Model tidak ditemukan di OpenRouter. Periksa nama model di Pengaturan.";
-  if (alasan === "status_429") return "Terlalu banyak permintaan. Coba lagi sebentar lagi.";
-  if (alasan === "galat_jaringan") return "Tidak dapat menghubungi penyedia AI. Teks cadangan ditampilkan.";
+  if (alasan === "status_404") return "Model tidak ditemukan atau tidak tersedia dengan pengaturan privasi akun OpenRouter Anda. Periksa nama model di Pengaturan.";
+  if (alasan === "status_429") return "Penyedia AI sedang membatasi permintaan. Tunggu sebentar lalu tekan tombol lagi.";
+  if (alasan === "batas_bawaan") return "Jatah AI bawaan untuk sesi ini sudah habis. Isi kunci OpenRouter Anda sendiri di Pengaturan untuk melanjutkan.";
+  if (alasan === "waktu_habis") return "Penyedia AI terlalu lama menjawab. Teks cadangan ditampilkan, coba lagi sebentar lagi.";
+  if (alasan === "galat_jaringan") return "Tidak dapat menghubungi penyedia AI. Periksa koneksi lalu coba lagi.";
+  if (alasan.startsWith("status_5") || alasan === "galat_penyedia") return "Penyedia AI sedang bermasalah. Teks cadangan ditampilkan, coba lagi sebentar lagi.";
+  if (alasan === "keluaran_kosong" || alasan === "ditolak_model") return "Model tidak memberi jawaban. Teks cadangan ditampilkan, coba lagi atau ganti model di Pengaturan.";
   if (alasan.startsWith("ditolak_") || alasan === "keluaran_terpotong") return "Jawaban AI tidak lolos pemeriksaan keamanan, teks cadangan ditampilkan.";
   return "Penjelasan AI belum tersedia, teks cadangan ditampilkan.";
 }

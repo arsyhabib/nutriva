@@ -571,7 +571,7 @@ function blokSampul(c: KonteksEkspor, judul: string, isi: { id: BagianId; nama: 
       <h1 class="dok-sampul__judul">${e(judul)}</h1>
       <div class="dok-sampul__info"><div><span>${c.labelContoh.startsWith("Data Anda") ? "Data" : "Contoh"}</span><strong>${e(c.labelContoh.split(" · ")[0] ?? "")}</strong></div><div><span>Usia</span><strong>${m.umur.bulan} bulan</strong></div><div><span>Dicetak</span><strong>${e(tgl)}</strong></div></div>
       <div class="dok-sampul__isi"><h2>Isi dokumen</h2><ol>${isi.map((x) => `<li data-toc="${x.id}"><span class="dok-toc__n">${e(x.nama)}</span><span class="dok-toc__titik"></span><span class="dok-toc__hal">–</span></li>`).join("")}</ol></div>
-      <div class="dok-sampul__kaki"><span>${e(UKURAN_KERTAS[opsi.kertas].nama)}</span><span class="dok-penulis">E.13.1 feat H.A.te</span></div>
+      <div class="dok-sampul__kaki"><span>${e(UKURAN_KERTAS[opsi.kertas].nama)}</span><span class="dok-penulis">Developed by E.13.1 Feat H.A?128</span></div>
     </section>`,
   };
 }

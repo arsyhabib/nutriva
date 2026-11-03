@@ -1,4 +1,5 @@
 import { validasiResep, type BahanResepValid } from "./validator";
+import { GalatBaca, kirimUlang, panggilChat, potongRapi } from "./transport";
 import { DATA } from "../engine/data";
 import { FILTER_KELUARAN_AI, MODEL_AI_BAWAAN, URL_OPENROUTER, type KunciSendiri } from "./klien";
 
@@ -36,8 +37,12 @@ export interface OpsiResep {
   kunciSendiri: KunciSendiri;
   modelGambar?: string | undefined;
   fetchFn?: typeof fetch;
+  /** Batas waktu tiap percobaan teks (ms). */
   batasTeksMs?: number;
+  /** Batas waktu tiap percobaan gambar (ms). */
   batasGambarMs?: number;
+  /** Jeda dasar antarpercobaan (ms); 0 untuk uji. */
+  jedaMs?: number;
 }
 
 /** Kata pangan dari seluruh basis bahan: bila muncul di resep tetapi bukan bahan resep ini, resep ditolak. */
@@ -102,100 +107,123 @@ export function resepTemplat(m: MasukanResep): string {
   ].join("\n");
 }
 
-function terpotong(h: unknown): boolean {
-  return (h as { choices?: { finish_reason?: unknown }[] })?.choices?.[0]?.finish_reason === "length";
+// klaim: n/a — ruang keluaran resep (token) dan batas waktu per percobaan; keputusan rekayasa agar resep tidak terpotong
+const TOKEN_RESEP = 3000;
+const BATAS_TEKS_MS = 50_000;
+const BATAS_GAMBAR_MS = 100_000;
+const PETUNJUK_RINGKAS_RESEP = "CATATAN: jawaban sebelumnya terlalu panjang dan terpotong. Tulis resep lebih ringkas (maksimal 5 langkah, 200 kata) dan selesaikan semua bagian.";
+
+/** Pemeriksaan BENTUK (bukan isi): resep yang sah punya bagian bahan dan langkah dan tidak sekadar kalimat penolakan. */
+export function resepBerbentuk(teks: string): boolean {
+  return teks.trim().length >= 100 && /langkah|cara membuat|cara memasak/i.test(teks) && /bahan/i.test(teks);
 }
 
-async function resepAi(m: MasukanResep, o: OpsiResep): Promise<HasilResep> {
+/** Resep AI saja (tanpa gambar). Tidak pernah melempar; gagal berarti resep cadangan dengan alasan. */
+export async function mintaResepSaja(m: MasukanResep, o: OpsiResep): Promise<HasilResep> {
   const templat = (alasan: string): HasilResep => ({ sumber: "templat", teks: resepTemplat(m), alasan });
-  const f = o.fetchFn ?? fetch;
-  const kendali = new AbortController();
-  const waktu = setTimeout(() => kendali.abort(), o.batasTeksMs ?? 30_000);
   try {
-    const res = await f(URL_OPENROUTER, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${o.kunciSendiri.kunci.trim()}`, "Content-Type": "application/json", "X-Title": "NUTRIVA" },
-      body: JSON.stringify({
+    let alasan = "keluaran_kosong";
+    // Satu percobaan ulang bila jawaban tidak berbentuk resep (mis. kalimat penolakan atau jawaban terlalu pendek).
+    for (let ronde = 0; ronde < 2; ronde++) {
+      const h = await panggilChat({
+        kunci: o.kunciSendiri.kunci.trim(),
         model: o.kunciSendiri.model?.trim() || MODEL_AI_BAWAAN,
-        messages: [
+        pesan: [
           { role: "system", content: PROMPT_RESEP },
           { role: "user", content: susunPesanResep(m) },
         ],
-        max_tokens: 1400,
-        temperature: 0.5,
-        provider: { data_collection: "deny" },
-      }),
-      signal: kendali.signal,
-      credentials: "omit",
-      cache: "no-store",
-      referrerPolicy: "no-referrer",
-    });
-    if (!res.ok) return templat(`status_${res.status}`);
-    const badan: unknown = await res.json();
-    if (terpotong(badan) && FILTER_KELUARAN_AI) return templat("keluaran_terpotong");
-    const teks = (badan as { choices?: { message?: { content?: unknown } }[] })?.choices?.[0]?.message?.content;
-    if (!FILTER_KELUARAN_AI) {
-      if (typeof teks !== "string" || teks.trim().length < 20) return templat("keluaran_kosong");
-      return { sumber: "ai", teks: teks.replace(/\p{Cf}/gu, "").trim().slice(0, 8000) };
+        maxTokens: TOKEN_RESEP,
+        suhu: ronde === 0 ? 0.5 : 0.3,
+        url: URL_OPENROUTER,
+        fetchFn: o.fetchFn,
+        batasMs: o.batasTeksMs ?? BATAS_TEKS_MS,
+        cobaMaks: 2,
+        ...(o.jedaMs !== undefined ? { jedaMs: o.jedaMs } : {}),
+        petunjukRingkas: PETUNJUK_RINGKAS_RESEP,
+      });
+      if (!h.ok) return templat(h.alasan);
+      if (h.terpotong && FILTER_KELUARAN_AI) return templat("keluaran_terpotong");
+      const teks = (h.terpotong ? potongRapi(h.teks) : h.teks).slice(0, 8000);
+      if (!resepBerbentuk(teks)) { alasan = "resep_tak_berbentuk"; continue; }
+      if (!FILTER_KELUARAN_AI) return { sumber: "ai", teks };
+      const v = validasiResep(teks, m.bahan, LEKSIKON_PANGAN);
+      if (!v.ok) return templat("ditolak_" + v.alasan.join("+"));
+      return { sumber: "ai", teks: v.teks };
     }
-    const v = validasiResep(teks, m.bahan, LEKSIKON_PANGAN);
-    if (!v.ok) return templat("ditolak_" + v.alasan.join("+"));
-    return { sumber: "ai", teks: v.teks };
+    return templat(alasan);
   } catch {
     return templat("galat_jaringan");
-  } finally {
-    clearTimeout(waktu);
   }
 }
 
 // klaim: n/a — batas rekayasa ukuran gambar yang diterima (byte base64), melindungi memori peramban
 const GAMBAR_MAKS = 5_000_000;
 
-async function gambarAi(m: MasukanResep, o: OpsiResep): Promise<HasilGambar> {
-  const f = o.fetchFn ?? fetch;
+/** Ilustrasi saja. Tidak pernah melempar. */
+export async function mintaGambarSaja(m: MasukanResep, o: OpsiResep): Promise<HasilGambar> {
   const model = o.modelGambar?.trim() || MODEL_GAMBAR_BAWAAN;
-  const kendali = new AbortController();
-  const waktu = setTimeout(() => kendali.abort(), o.batasGambarMs ?? 120_000);
   try {
-    const res = await f(URL_OPENROUTER_GAMBAR, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${o.kunciSendiri.kunci.trim()}`, "Content-Type": "application/json", "X-Title": "NUTRIVA" },
-      body: JSON.stringify({ model, prompt: susunPerintahGambar(m), n: 1, aspect_ratio: "3:2", quality: "medium", output_format: "jpeg" }),
-      signal: kendali.signal,
-      credentials: "omit",
-      cache: "no-store",
-      referrerPolicy: "no-referrer",
-    });
-    if (!res.ok) return { ok: false, alasan: `status_${res.status}` };
-    const badan = (await res.json()) as { data?: { b64_json?: unknown; media_type?: unknown }[] };
-    const d = badan?.data?.[0];
-    const b64 = d?.b64_json;
-    const tipe = typeof d?.media_type === "string" ? d.media_type : "image/jpeg";
-    if (typeof b64 !== "string" || b64.length < 100 || b64.length > GAMBAR_MAKS || !/^[A-Za-z0-9+/]+={0,2}$/.test(b64)) return { ok: false, alasan: "gambar_tak_sah" };
-    if (!/^image\/(?:png|jpeg|webp)$/.test(tipe)) return { ok: false, alasan: "tipe_tak_sah" };
-    return { ok: true, src: `data:${tipe};base64,${b64}`, model };
+    const r = await kirimUlang(
+      URL_OPENROUTER_GAMBAR,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${o.kunciSendiri.kunci.trim()}`, "Content-Type": "application/json", "X-Title": "NUTRIVA" },
+        body: JSON.stringify({ model, prompt: susunPerintahGambar(m), n: 1, aspect_ratio: "3:2", quality: "medium", output_format: "jpeg" }),
+        credentials: "omit",
+        cache: "no-store",
+        referrerPolicy: "no-referrer",
+      },
+      { fetchFn: o.fetchFn, batasMs: o.batasGambarMs ?? BATAS_GAMBAR_MS, cobaMaks: 2, ulangiWaktuHabis: false, ...(o.jedaMs !== undefined ? { jedaMs: o.jedaMs } : {}) },
+      async (res) => {
+        const badan = (await res.json()) as { data?: { b64_json?: unknown; media_type?: unknown }[]; error?: unknown };
+        if (badan?.error) {
+          // Galat bersama status 200: kode tetap dipertahankan agar pesan ke pengguna benar (saldo, kunci, model).
+          const kode = Number((badan.error as { code?: unknown }).code);
+          if (Number.isFinite(kode) && kode >= 400 && kode < 500 && kode !== 408 && kode !== 429) throw new GalatBaca(`status_${kode}`);
+          throw new Error("galat_jaringan"); // sementara: diulang
+        }
+        const d = badan?.data?.[0];
+        const b64 = d?.b64_json;
+        const tipe = typeof d?.media_type === "string" ? d.media_type : "image/jpeg";
+        if (typeof b64 !== "string" || b64.length < 100 || b64.length > GAMBAR_MAKS || !/^[A-Za-z0-9+/]+={0,2}$/.test(b64)) throw new GalatBaca("gambar_tak_sah");
+        if (!/^image\/(?:png|jpeg|webp)$/.test(tipe)) throw new GalatBaca("tipe_tak_sah");
+        return `data:${tipe};base64,${b64}`;
+      },
+    );
+    return r.ok ? { ok: true, src: r.nilai, model } : { ok: false, alasan: r.alasan };
   } catch {
     return { ok: false, alasan: "galat_jaringan" };
-  } finally {
-    clearTimeout(waktu);
   }
 }
 
-/** Satu klik: teks dan gambar diminta bersamaan, hasil diserahkan bersamaan. */
-export async function mintaResepBergambar(m: MasukanResep, o: OpsiResep): Promise<HasilResepBergambar> {
-  const [resep, gambar] = await Promise.all([resepAi(m, o), gambarAi(m, o)]);
+export interface PenangkapHasil {
+  /** Dipanggil begitu resep siap (tanpa menunggu gambar). */
+  resep?: (h: HasilResep) => void;
+  /** Dipanggil begitu gambar siap atau gagal. */
+  gambar?: (g: HasilGambar) => void;
+}
+
+/** Satu klik: teks dan gambar diminta bersamaan; masing-masing diserahkan segera lewat `tangkap` begitu siap. */
+export async function mintaResepBergambar(m: MasukanResep, o: OpsiResep, tangkap: PenangkapHasil = {}): Promise<HasilResepBergambar> {
+  const [resep, gambar] = await Promise.all([
+    mintaResepSaja(m, o).then((h) => { tangkap.resep?.(h); return h; }),
+    mintaGambarSaja(m, o).then((g) => { tangkap.gambar?.(g); return g; }),
+  ]);
   return { resep, gambar };
 }
 
-export function pesanGalatResep(h: HasilResepBergambar): string | null {
+export function pesanGalatResep(h: HasilResepBergambar | { resep: HasilResep }): string | null {
   const a = h.resep.alasan;
+  if (!a) return null;
   if (a === "status_401" || a === "status_403") return "Kunci API ditolak OpenRouter. Periksa kembali kunci Anda.";
   if (a === "status_402") return "Saldo OpenRouter tidak cukup untuk permintaan ini.";
-  if (a === "status_429") return "Terlalu banyak permintaan. Coba lagi sebentar lagi.";
-  if (a === "galat_jaringan") return "Tidak dapat menghubungi penyedia AI. Resep cadangan ditampilkan.";
-  if (a?.startsWith("ditolak_") || a === "keluaran_terpotong") return "Resep AI tidak lolos pemeriksaan keamanan, resep cadangan ditampilkan.";
-  if (a) return "Resep AI belum tersedia, resep cadangan ditampilkan.";
-  return null;
+  if (a === "status_404") return "Model tidak ditemukan atau tidak tersedia dengan pengaturan privasi akun OpenRouter Anda. Periksa nama model di Pengaturan.";
+  if (a === "status_429") return "Penyedia AI sedang membatasi permintaan. Resep cadangan ditampilkan, tekan Buat ulang resep sebentar lagi.";
+  if (a === "waktu_habis") return "Penyedia AI terlalu lama menjawab. Resep cadangan ditampilkan, tekan Buat ulang resep.";
+  if (a === "galat_jaringan") return "Tidak dapat menghubungi penyedia AI. Resep cadangan ditampilkan, tekan Buat ulang resep.";
+  if (a === "ditolak_model") return "Model menolak menulis resep ini. Resep cadangan ditampilkan, coba Buat ulang resep atau ganti model di Pengaturan.";
+  if (a.startsWith("ditolak_") || a === "keluaran_terpotong") return "Resep AI tidak lolos pemeriksaan keamanan, resep cadangan ditampilkan.";
+  return "Resep AI belum tersedia. Resep cadangan ditampilkan, tekan Buat ulang resep.";
 }
 
 export function pesanGalatGambar(g: HasilGambar): string | null {
@@ -203,6 +231,7 @@ export function pesanGalatGambar(g: HasilGambar): string | null {
   if (g.alasan === "status_401" || g.alasan === "status_403") return "Gambar tidak dibuat: kunci ditolak.";
   if (g.alasan === "status_402") return "Gambar tidak dibuat: saldo OpenRouter tidak cukup.";
   if (g.alasan === "status_404") return "Gambar tidak dibuat: model gambar tidak ditemukan. Periksa Pengaturan.";
-  if (g.alasan === "galat_jaringan") return "Gambar tidak dibuat: koneksi gagal atau terlalu lama.";
-  return "Gambar belum tersedia untuk resep ini.";
+  if (g.alasan === "status_429") return "Gambar tertunda: penyedia sedang membatasi permintaan. Tekan Coba gambar lagi sebentar lagi.";
+  if (g.alasan === "waktu_habis" || g.alasan === "galat_jaringan") return "Gambar tidak dibuat: koneksi gagal atau terlalu lama. Tekan Coba gambar lagi.";
+  return "Gambar belum tersedia untuk resep ini. Tekan Coba gambar lagi.";
 }

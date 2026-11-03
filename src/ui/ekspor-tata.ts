@@ -23,7 +23,7 @@ function buatHalaman(meta: MetaTata, kelas = "", polos = false): { hal: HTMLElem
     ? `<div class="dok-hal__badan"></div>`
     : `<header class="dok-hal__kepala"><span class="dok-hal__logo">${LOGO_DOK}</span><span class="dok-hal__merek">NUTRIVA</span><span class="dok-hal__judul">${e(meta.judul)} · ${e(meta.label)}</span><span class="dok-hal__tgl">${e(meta.tanggal)}</span></header>
        <div class="dok-hal__badan"></div>
-       <footer class="dok-hal__kaki"><span>Alat bantu edukasi, bukan diagnosis</span><span class="dok-penulis">E.13.1 feat H.A.te</span><span class="dok-hal__no"></span></footer>`;
+       <footer class="dok-hal__kaki"><span>Alat bantu edukasi, bukan diagnosis</span><span class="dok-penulis">Developed by E.13.1 Feat H.A?128</span><span class="dok-hal__no"></span></footer>`;
   return { hal, badan: hal.querySelector(".dok-hal__badan") as HTMLElement };
 }
 

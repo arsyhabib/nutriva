@@ -15,9 +15,9 @@ const res = (status: number, body: unknown = {}) => new Response(JSON.stringify(
 
 describe("AI dengan kunci sendiri", () => {
   it("model bawaan Haiku 5.5 lewat OpenRouter, kunci hanya ke OpenRouter", async () => {
-    const f = vi.fn().mockResolvedValue(res(500));
-    await mintaPenjelasan(m, { kunciSendiri: { kunci: KUNCI_UJI }, urlWorker: "https://w.example", fetchFn: f as unknown as typeof fetch });
-    expect(f).toHaveBeenCalledTimes(1);
+    const f = vi.fn().mockResolvedValue(res(401));
+    await mintaPenjelasan(m, { kunciSendiri: { kunci: KUNCI_UJI }, urlWorker: "https://w.example", fetchFn: f as unknown as typeof fetch, jedaMs: 0 });
+    expect(f).toHaveBeenCalledTimes(1); // 401 tidak diulang
     const [url, init] = f.mock.calls[0] as [string, RequestInit];
     expect(url).toBe(URL_OPENROUTER);
     expect(JSON.parse(String(init.body)).model).toBe(MODEL_AI_BAWAAN);
@@ -32,8 +32,9 @@ describe("AI dengan kunci sendiri", () => {
   });
   it("kegagalan apa pun jatuh ke templat dan tidak melempar", async () => {
     const f = vi.fn().mockRejectedValue(new Error("putus"));
-    const h = await mintaPenjelasan(m, { kunciSendiri: { kunci: KUNCI_UJI }, fetchFn: f as unknown as typeof fetch });
+    const h = await mintaPenjelasan(m, { kunciSendiri: { kunci: KUNCI_UJI }, fetchFn: f as unknown as typeof fetch, jedaMs: 0 });
     expect(h.sumber).toBe("templat");
+    expect(f).toHaveBeenCalledTimes(3); // gangguan jaringan diulang sampai 3 kali
   });
   it("ujiKunci memetakan status", async () => {
     expect(await ujiKunci(KUNCI_UJI, (async () => res(200)) as unknown as typeof fetch)).toBe("sah");
@@ -46,5 +47,42 @@ describe("AI dengan kunci sendiri", () => {
     expect(pesanAlasan("status_401")).toContain("ditolak");
     expect(pesanAlasan("ai_mati")).toBeNull();
     expect(pesanAlasan("apa_saja")).not.toBeNull();
+  });
+  describe("ketahanan", () => {
+    const ok = (content: string, finish = "stop") => res(200, { choices: [{ message: { content }, finish_reason: finish }] });
+    const TEKS = "### Ringkasan\nPertumbuhan anak sudah baik. Lanjutkan pola makan beragam dan pantau di posyandu setiap bulan.";
+    const opsi = (f: unknown) => ({ kunciSendiri: { kunci: KUNCI_UJI }, fetchFn: f as typeof fetch, jedaMs: 0 });
+    it("429 lalu sukses: pengguna tetap mendapat jawaban AI", async () => {
+      const f = vi.fn().mockResolvedValueOnce(res(429)).mockResolvedValueOnce(ok(TEKS));
+      const h = await mintaPenjelasan(m, opsi(f));
+      expect(h.sumber).toBe("ai");
+    });
+    it("galat status 200 lalu sukses", async () => {
+      const f = vi.fn().mockResolvedValueOnce(res(200, { error: { code: 502, message: "x" } })).mockResolvedValueOnce(ok(TEKS));
+      expect((await mintaPenjelasan(m, opsi(f))).sumber).toBe("ai");
+    });
+    it("terpotong: diminta ulang, hasil utuh tampil", async () => {
+      const f = vi.fn().mockResolvedValueOnce(ok("### Ringkasan\nPertumbuhan anak sudah ba", "length")).mockResolvedValueOnce(ok(TEKS));
+      const h = await mintaPenjelasan(m, opsi(f));
+      expect(h).toMatchObject({ sumber: "ai", teks: TEKS });
+    });
+    it("terpotong terus: dirapikan sampai kalimat utuh, tidak berhenti di tengah kata", async () => {
+      const f = vi.fn().mockImplementation(async () => ok("Anak Anda tumbuh baik dan asupan beragam. Teruskan pemantauan bulanan lalu perhat", "length"));
+      const h = await mintaPenjelasan(m, { ...opsi(f), batasMs: 2000 });
+      expect(h.sumber).toBe("ai");
+      expect(h.teks.endsWith("beragam.")).toBe(true);
+    });
+    it("kegagalan total: templat dengan alasan yang bisa dijelaskan", async () => {
+      const f = vi.fn().mockResolvedValue(res(503));
+      const h = await mintaPenjelasan(m, opsi(f));
+      expect(h.sumber).toBe("templat");
+      expect(h.alasan_templat).toBe("status_503");
+      expect(pesanAlasan(h.alasan_templat)).toMatch(/bermasalah/);
+    });
+    it("Worker: 502 diulang sekali", async () => {
+      const f = vi.fn().mockResolvedValueOnce(res(502)).mockResolvedValueOnce(res(200, { teks: "x" }));
+      await mintaPenjelasan(m, { urlWorker: "https://w.example", fetchFn: f as unknown as typeof fetch, jedaMs: 0 });
+      expect(f).toHaveBeenCalledTimes(2);
+    });
   });
 });

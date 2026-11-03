@@ -52,7 +52,7 @@ describe("Worker proksi AI", () => {
     expect(badan.provider).toEqual({ data_collection: "deny" });
     expect(badan.messages[0].role).toBe("system");
     expect(badan.messages[1].content).not.toContain("{");
-    expect(badan.max_tokens).toBeLessThanOrEqual(400);
+    expect(badan.max_tokens).toBeLessThanOrEqual(1000);
   });
   it("kunci tidak pernah muncul di jawaban ke klien", async () => {
     vi.stubGlobal("fetch", hulu());
@@ -138,7 +138,7 @@ describe("Worker proksi AI", () => {
     vi.useFakeTimers();
     vi.stubGlobal("fetch", (_u: unknown, init: RequestInit) => new Promise((_s, tolak) => init.signal?.addEventListener("abort", () => tolak(new DOMException("a", "AbortError")))));
     const p = worker.fetch(req(muatan), env);
-    await vi.advanceTimersByTimeAsync(10_500);
+    await vi.advanceTimersByTimeAsync(25_500);
     expect((await p).status).toBe(504);
     vi.useRealTimers();
   });

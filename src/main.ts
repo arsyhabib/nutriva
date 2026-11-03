@@ -1,4 +1,5 @@
 import { DAFTAR_LAYAR, LayarRona, type IdLayar, type OpsiLayarRona } from "./ui/layar";
+import { pasangKunciTegak } from "./ui/orientasi";
 
 export function pasangAplikasiRona(
   akar: HTMLElement,
@@ -35,6 +36,7 @@ if (typeof document !== "undefined") {
       const id = layarDariHash(window.location.hash);
       if (id) app.bukaLayar(id);
     });
+    pasangKunciTegak();
     daftarkanServiceWorker();
   }
 }

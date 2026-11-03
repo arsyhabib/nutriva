@@ -2795,7 +2795,7 @@ kbd { font: inherit; font-weight: 800; padding: 1px 7px; border-radius: 6px; bor
 /* Tanda penulis: tipis, serif miring, tidak pernah menutupi isi */
 .cap-penulis {
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  font-family: var(--f-heading); font-style: italic; font-weight: 400; font-size: 0.95rem; letter-spacing: 0.2em; text-align: center; flex-wrap: wrap;
+  font-family: var(--f-heading); font-style: italic; font-weight: 400; font-size: 0.9rem; letter-spacing: 0.1em; text-align: center; flex-wrap: wrap;
   color: var(--t-3); opacity: 0.8; user-select: none;
 }
 .cap-penulis--isi { margin: clamp(24px, 5cqi, 48px) auto calc(env(safe-area-inset-bottom, 0px) + 12px); padding-top: 6px; }
@@ -3036,13 +3036,13 @@ kbd { font: inherit; font-weight: 800; padding: 1px 7px; border-radius: 6px; bor
 .dok-poster__kepala .dok-logo { width: 18mm; flex: none; }
 .dok-poster__merek { font-weight: 800; font-size: 22pt; letter-spacing: 0.24em; color: var(--dk-aksen); }
 .dok-poster__sub { font-family: var(--f-heading, Georgia, serif); font-style: italic; font-size: 12pt; color: var(--dk-redam); }
-.dok-poster__hari { display: grid; gap: 4mm; align-content: start; flex: 1 1 auto; min-height: 0; }
-.dok-poster__kartu { display: grid; grid-template-columns: 22mm 1fr; border: 1px solid var(--dk-garis); border-radius: 4mm; overflow: hidden; background: #fff; }
+.dok-poster__hari { display: grid; gap: 3.5mm; align-content: start; grid-auto-rows: min-content; flex: 1 1 auto; min-height: 0; }
+.dok-poster__kartu { display: grid; grid-template-columns: 22mm 1fr; border: 1px solid var(--dk-garis); border-radius: 4mm; overflow: hidden; overflow: clip; background: #fff; flex: none; }
 .dok-poster__no { background: var(--dk-aksen); color: #fff; display: grid; place-content: center; text-align: center; padding: 3mm; }
 .dok-poster__no span { font-size: 8pt; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; }
 .dok-poster__no b { font-size: 28pt; line-height: 1; font-family: var(--f-heading, Georgia, serif); }
-.dok-poster__isi { padding: 3mm 4mm; display: grid; gap: 1.6mm; }
-.dok-poster__baris { display: grid; grid-template-columns: 23mm 1fr; gap: 3mm; align-items: baseline; padding-bottom: 1.4mm; border-bottom: 1px dotted var(--dk-garis); }
+.dok-poster__isi { padding: 2.6mm 4mm; display: grid; gap: 1.2mm; }
+.dok-poster__baris { display: grid; grid-template-columns: 23mm 1fr; gap: 3mm; align-items: baseline; padding-bottom: 1mm; border-bottom: 1px dotted var(--dk-garis); }
 .dok-poster__baris:last-child { border-bottom: 0; }
 .dok-poster__waktu { font-weight: 800; color: var(--dk-aksen); font-size: 11pt; }
 .dok-poster__menu { font-size: 12pt; line-height: 1.4; }
@@ -3156,6 +3156,10 @@ kbd { font: inherit; font-weight: 800; padding: 1px 7px; border-radius: 6px; bor
 .resep-kartu__tanpa { display: grid; place-items: center; color: var(--t-3); font-size: 0.9rem; }
 .resep-kartu__gambar figcaption { font-size: 0.78rem; color: var(--t-3); }
 .resep-skeleton { background: linear-gradient(100deg, color-mix(in srgb, var(--t-3) 12%, transparent) 30%, color-mix(in srgb, var(--t-3) 26%, transparent) 50%, color-mix(in srgb, var(--t-3) 12%, transparent) 70%); background-size: 220% 100%; animation: resep-kilau 2.4s ease-in-out infinite; }
+.resep-skeleton__teks { display: grid; place-items: center; height: 100%; font-size: 0.85rem; color: var(--t-2); }
+.resep-kartu__isi--memuat { display: grid; gap: 8px; }
+.resep-skeleton--baris { display: block; aspect-ratio: auto; height: 12px; border-radius: 6px; }
+.resep-skeleton--pendek { width: 60%; }
 .resep-kartu__tunggu { margin: 0; color: var(--t-2); font-size: 0.92rem; line-height: 1.5; }
 @keyframes resep-kilau { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
 html[data-motion="hemat"] .resep-skeleton, html[data-motion="hemat"] .resep-kartu { animation: none; }
@@ -3182,3 +3186,35 @@ html[data-motion="hemat"] .resep-skeleton, html[data-motion="hemat"] .resep-kart
 .dok-resep, .dok-resep__atas { break-inside: avoid; }
 .dok--hemat .dok-resep__img { filter: grayscale(1) contrast(1.05); }
 .dok-resep__img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+
+/* ==========================================================================
+   16. KUNCI TEGAK (ponsel)
+   Penutup hanya tampil bila JS menandai ponsel sedang mendatar dan peramban tidak bisa mengunci orientasi.
+   ========================================================================== */
+.putar-tegak {
+  position: fixed; inset: 0; z-index: 2147483000;
+  display: grid; place-items: center; padding: 24px;
+  background: var(--bg-0, #FAF4EE); color: var(--t-1, #2A1F1A);
+  text-align: center;
+}
+.putar-tegak[hidden] { display: none; }
+.putar-tegak__isi { display: grid; gap: 10px; justify-items: center; max-width: 34ch; }
+.putar-tegak__ikon { color: var(--aksen, #9E2A42); animation: putar-tegak-goyang 2.6s ease-in-out infinite; transform-origin: 50% 60%; }
+.putar-tegak__judul { margin: 0; font-family: var(--f-heading, "Instrument Serif", Georgia, serif); font-size: 1.35rem; }
+.putar-tegak__isi-teks { margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--t-2, #5b4a40); }
+@keyframes putar-tegak-goyang { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+html[data-motion="hemat"] .putar-tegak__ikon { animation: none; }
+@media (prefers-reduced-motion: reduce) { .putar-tegak__ikon { animation: none; } }
+html[data-mendatar="ya"] body { overflow: hidden; }
+@media print { .putar-tegak { display: none !important; } }
+
+
+/* --- Perbaikan kontras dan watermark (audit 2026-11-03) --- */
+[data-theme="dekap"] .btn--bahaya { color: #2B0A07; }
+.field__galat { display: block; margin-top: 4px; font-size: 0.82rem; line-height: 1.35; color: var(--s-bahaya-t, #B3261E); }
+.cap-penulis { color: var(--t-2); opacity: 1; }
+.cap-penulis__bagian { display: inline-block; white-space: nowrap; }
+@container app (min-width: 640px) and (max-width: 1023px) {
+  .cap-penulis--nav { flex-direction: column; gap: 0; letter-spacing: 0.02em; font-size: 0.72rem; line-height: 1.35; }
+}
